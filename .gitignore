@@ -1,0 +1,7 @@
+.env
+.DS_Store
+.idea
+diagram/dist
+ssl/*.pem
+ssl/*.csr
+venv
