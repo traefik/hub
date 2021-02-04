@@ -17,3 +17,4 @@ spec:
       containers:
       - name: neo
         image: gcr.io/traefiklabs/neo-agent:latest
+        imagePullPolicy: IfNotPresent
