@@ -93,7 +93,7 @@ X-Scheme: http
 
 - Traefik
 ```bash
-$ curl -H "Host: traefik.docker.localhost" http://127.0.0.1
+$ curl -H "Host: traefik.docker.localhost" http://127.0.0.1/
 Hostname: app-v1-9bb4bd54d-p6zxb
 IP: 127.0.0.1
 IP: ::1
