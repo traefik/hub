@@ -5,6 +5,7 @@ Create the kubernetes cluster with k3d
 ```bash
 k3d cluster create --k3s-server-arg "--no-deploy=traefik" \
 --agents="2" \
+--image="rancher/k3s:v1.20.2-k3s1" \
 --port 80:80@loadbalancer \
 --port 443:443@loadbalancer \
 --port 8000:8000@loadbalancer \
@@ -14,6 +15,13 @@ k3d cluster create --k3s-server-arg "--no-deploy=traefik" \
 
 k3d image import gcr.io/traefiklabs/neo-agent:latest
 ```
+
+Available docker images:
+- rancher/k3s:v1.20.2-k3s1
+- rancher/k3s:v1.19.7-k3s1
+- rancher/k3s:v1.18.15-k3s1
+- rancher/k3s:v1.17.17-k3s1
+- rancher/k3s:v1.16.15-k3s1
 
 ## Install ingress controllers
 
