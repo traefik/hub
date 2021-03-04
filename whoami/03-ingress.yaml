@@ -4,6 +4,8 @@ kind: Ingress
 metadata:
   name: app-traefik
   namespace: app
+#  annotations:
+#    neo.traefik.io/access-control-policy: "my-acp@app"
 spec:
   ingressClassName: traefik-lb
   rules:
@@ -24,6 +26,8 @@ kind: Ingress
 metadata:
   name: app-nginx
   namespace: app
+#  annotations:
+#    neo.traefik.io/access-control-policy: "my-acp@app"
 spec:
   ingressClassName: nginx-k8s
   rules:
@@ -44,6 +48,8 @@ kind: Ingress
 metadata:
   name: app-nginx-inc
   namespace: app
+#  annotations:
+#    neo.traefik.io/access-control-policy: "my-acp@app"
 spec:
   ingressClassName: nginx-inc
   rules:

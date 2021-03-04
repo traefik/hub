@@ -1,0 +1,11 @@
+apiVersion: neo.traefik.io/v1alpha1
+kind: AccessControlPolicy
+metadata:
+  name: my-acp
+  namespace: app
+spec:
+  jwt:
+    signingSecret: secret
+    stripAuthorizationHeader: true
+    forwardHeaders:
+      Name: name

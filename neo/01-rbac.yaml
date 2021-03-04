@@ -3,46 +3,50 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: neo-agent
+  namespace: neo
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: neo-agent
+  namespace: neo
 rules:
-  - verbs:
-      - list
-      - watch
+  # Access Control RBACs.
+  - resources:
+      - ingressclasses
     apiGroups:
       - networking.k8s.io
       - neo.traefik.io
-    resources:
-      - ingressclasses
-  - verbs:
+    verbs:
       - list
       - watch
-      - update
+  - resources:
+      - ingresses
     apiGroups:
       - networking.k8s.io
       - extensions
-    resources:
-      - ingresses
-  - verbs:
+    verbs:
       - list
       - watch
+      - update
+  - resources:
+      - accesscontrolpolicies
     apiGroups:
       - neo.traefik.io
-    resources:
-      - accesscontrolpolicies
-  - verbs:
+    verbs:
+      - list
+      - watch
+  - resources:
+      - middlewares
+    apiGroups:
+      - traefik.containo.us
+    verbs:
       - create
       - get
       - update
       - delete
-    apiGroups:
-      - traefik.containo.us
-    resources:
-      - middlewares
+  # Other RBACs.
   - verbs:
       - list
     apiGroups:
@@ -104,6 +108,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: neo-agent
+  namespace: neo
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -111,4 +116,4 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: neo-agent
-    namespace: default
+    namespace: neo
