@@ -1,0 +1,21 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-traefik
+  namespace: app
+#  annotations:
+#    neo.traefik.io/access-control-policy: "my-acp@app"
+spec:
+  ingressClassName: traefik-lb
+  rules:
+    - host: traefik.docker.localhost
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: app-v1
+                port:
+                  number: 80
