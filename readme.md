@@ -48,6 +48,90 @@ kubectl apply -f traefik/
 ```
 cf: https://doc.traefik.io/traefik/user-guides/crd-acme/
 
+### Install Neo
+
+We recommand to overwrite the values file with this values file if you don't need to run neo-services locally:
+
+```yaml
+# Default values for neo-helm-chart.
+image:
+  name: gcr.io/traefiklabs/neo-agent
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "2e63cbf"
+
+# User token to access to neo
+token: "4a585aab-f00e-4548-8528-222ef086bebb"
+
+deployment:
+  args:
+    - --log-level=debug
+    - --platform-url=https://platform.neo.traefiklabs.tech
+    - --scrape-ip=http://10.42.0.36:8080/metrics
+    - --scrape-name=traefik
+    - --scrape-kind=traefik
+```
+
+Add Neo's chart repository to Helm:
+
+```bash
+helm repo add neo https://helm.traefik.io/neo
+```
+
+You can update the chart repository by running:
+
+```bash
+helm repo update
+```
+
+#### Deploying Neo
+
+```bash
+helm install neo neo/neo
+```
+
+#### Deploying Neo by overwriting values.yaml
+
+```bash
+helm install neo neo/neo --values=./values.yaml
+```
+
+#### Deploying Neo in a specific namespace
+
+```bash
+helm install neo neo/neo --namespace neo
+```
+
+#### Deploying Neo with a full-yaml
+
+```bash
+kubectl apply -f https://traefik.github.io/neo-helm-chart/yaml/0.1.1.yaml
+```
+
+#### Launch unit tests
+
+You need to install the helm-plugin [unittest](https://github.com/rancher/unittest)
+
+Then:
+
+```bash
+helm unittest neo/
+```
+
+#### Uninstall
+
+We consider in this example the version install being <neo>:
+
+```bash
+helm uninstall neo
+```
+
+If neo-agent was install in a specific namespace
+
+```bash
+helm uninstall neo --namespace neo-namespace
+```
+
 ## Install demo application
 
 ```bash
