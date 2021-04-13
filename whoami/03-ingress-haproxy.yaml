@@ -1,0 +1,21 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-haproxy
+  namespace: app
+  annotations:
+    kubernetes.io/ingress.class: haproxy
+    neo.traefik.io/access-control-policy: "my-acp@app"
+spec:
+  rules:
+    - host: whoami.haproxy.localhost
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: app-v1
+                port:
+                  number: 80
