@@ -37,6 +37,7 @@ spec:
             - --providers.kubernetescrd
             - --providers.kubernetesingress.ingressclass=traefik-lb
             - --api.dashboard
+            - --api.insecure
             - --metrics.prometheus
             - --log.level=debug
           ports:
