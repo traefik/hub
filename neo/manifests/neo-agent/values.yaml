@@ -1,0 +1,20 @@
+# Default values for neo-helm-chart.
+image:
+  name: gcr.io/traefiklabs/neo-agent
+  pullSecrets:
+    - name: gcr-access-token
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+# User token to access to neo
+token: "4a585aab-f00e-4548-8528-222ef086bebb"
+
+deployment:
+  args:
+    - --log-level=debug
+    - --platform-url=http://platform.docker.localhost
+    - --scrape-name=traefik-controller
+    - --scrape-kind=traefik
+    - --scrape-ip=http://traefik-metrics.traefik.svc.cluster.local:8080/metrics
+    - --topology-info=traefik=whoami/whoami

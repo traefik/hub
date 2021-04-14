@@ -1,4 +1,4 @@
-# Neo
+# Neo with the classic installation
 
 Create the kubernetes cluster with k3d
 
@@ -28,35 +28,46 @@ Available docker images:
 ### Ingress Nginx
 
 ```bash
-kubectl apply -f ingress-nginx/
+kubectl apply -f neo/manifests/ingress-nginx/
 ```
 cf: https://kubernetes.github.io/ingress-nginx/deploy/#installation-guide
 
-### Ingress Nginx Inc
+### HaProxy
 
 ```bash
-kubectl apply -f ingress-nginx-inc/crds
-kubectl apply -f ingress-nginx-inc/
+kubectl apply -f neo/manifests/ingress-haproxy
 ```
 
-cf: https://docs.nginx.com/nginx-ingress-controller/installation/installation-with-manifests/
+cf: https://haproxy-ingress.github.io/docs/getting-started/
 
 ### Traefik
 
 ```bash
-kubectl apply -f traefik/
+kubectl apply -f neo/manifests/traefik/
 ```
 cf: https://doc.traefik.io/traefik/user-guides/crd-acme/
 
 ### Install Neo
 
+First you need to create a secret:
+```bash
+kubectl create secret -n $namespace docker-registry gcr-access-token \
+                --docker-server=gcr.io \
+                --docker-username=oauth2accesstoken \
+                --docker-password="$(gcloud auth print-access-token)" \
+                --docker-email=${GCLOUD_EMAIL}
+```
+
 We recommand to overwrite the values file with this values file if you don't need to run neo-services locally:
+
 
 ```yaml
 # Default values for neo-helm-chart.
 image:
   name: gcr.io/traefiklabs/neo-agent
   pullPolicy: IfNotPresent
+  pullSecrets:
+    - name: gcr-access-token
   # Overrides the image tag whose default is the chart appVersion.
   tag: "2e63cbf"
 
@@ -70,6 +81,7 @@ deployment:
     - --scrape-ip=http://10.42.0.36:8080/metrics
     - --scrape-name=traefik
     - --scrape-kind=traefik
+    - --topology-info=traefik=whoami/whoami
 ```
 
 Add Neo's chart repository to Helm:
@@ -135,14 +147,14 @@ helm uninstall neo --namespace neo-namespace
 ## Install demo application
 
 ```bash
-kubectl apply -f whoami/
+kubectl apply -f neo/manifests/whoami/
 ```
 
 ## Test application
 
-- Nginx inc
+- HaProxy
 ```bash
-$ curl -H "Host: nginx-inc.docker.localhost" http://127.0.0.1:8000
+$ curl -H "Host: haproxy.docker.localhost" http://127.0.0.1:8000
 Hostname: app-v1-9bb4bd54d-64gkk
 IP: 127.0.0.1
 IP: ::1
@@ -204,3 +216,70 @@ X-Forwarded-Proto: http
 X-Forwarded-Server: traefik-78b84dc55f-8f25x
 X-Real-Ip: 10.42.1.12
 ```
+
+# Neo with the local installation
+
+## Prerequisites
+
+You need to be logged in gcloud before running any script.
+
+```
+gcloud auth login
+gcloud auth configure-docker
+```
+
+## run
+
+The local installation can be done with `make run`. The script will create a k3d cluster and deploy the following objects:
+- IngressControllers
+    - Nginx
+    - Haproxy
+    - Traefik
+- whoami with 3 ingresses for each ingress controller
+
+- Neo platform
+    - MongoDB
+    - Neo services: metrics, organization, topology (+ an ingress to access to all of the services)
+
+- Neo-agent
+
+- Jaeger
+
+Before running the script, you need a `.env` file. Just copy the `.env.example` and fill it with your own credentials.
+
+```
+GCLOUD_EMAIL => Your email address to connect to gcr.
+GITHUB_ORG => The organization where the repository will be created by the topology service.
+GITHUB_TOPOLOGY_REPO => The name of the repository that will be created on the github organization by the topology service.
+GITHUB_TOKEN => A github token with 'repo:*' and 'admin:org:*' permissions.
+```
+
+## renew-gcr-token
+
+If your gcr credentials expire, you need to renew them. You can just run this command : 
+
+```
+make renew-gcr-token
+```
+
+## recreate-topology-token
+
+If you restart topology service, your token created with the `make run` command is no longer available.
+You need to recreate it. You can run this command: 
+
+```
+make recreate-topology-token
+```
+
+## clean
+
+`make clean` won't delete the k3d cluster but will delete every component created with the `make run` command.
+
+## delete
+
+`make delete` will delete the k3d cluster.
+
+## --adsl
+
+`make run-adsl` allows docker to pull the images before starting the cluster. 
+We recommand to run it instead of `make run` if your internet connection is a bit slow.

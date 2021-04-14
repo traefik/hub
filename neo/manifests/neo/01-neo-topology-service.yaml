@@ -1,0 +1,60 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: neo-topology
+  namespace: neo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: neo-topology
+  template:
+    metadata:
+      labels:
+        app: neo-topology
+        version: "v1"
+        k8s-app: neo-topology
+    spec:
+      imagePullSecrets:
+        - name: gcr-access-token
+      containers:
+        - name: neo-topology
+          image: gcr.io/traefiklabs/neo-topology:latest
+          imagePullPolicy: Always
+          env:
+            - name: GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: github
+                  key: token
+            - name: GITHUB_ORG
+              valueFrom:
+                secretKeyRef:
+                  name: github
+                  key: org
+            - name: TRACING_ENDPOINT
+              value: "http://jaeger.jaeger.svc.cluster.local:14268"
+            - name: TRACING_PROBABILITY
+              value: "1"
+          args:
+            - serve
+            - --listen-addr=:80
+            - --git-proxy-host=platform.docker.localhost
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: neo-topology
+  namespace: neo
+  labels:
+    app: neo-topology
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      name: neo-topology
+  selector:
+    app: neo-topology

@@ -1,0 +1,50 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: neo-metrics
+  namespace: neo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: neo-metrics
+  template:
+    metadata:
+      labels:
+        app: neo-metrics
+        version: "v1"
+        k8s-app: neo-metrics
+    spec:
+      imagePullSecrets:
+        - name: gcr-access-token
+      containers:
+        - name: neo-metrics
+          image: gcr.io/traefiklabs/neo-metrics:latest
+          imagePullPolicy: Always
+          env:
+            - name: TRACING_ENDPOINT
+              value: "http://jaeger.jaeger.svc.cluster.local:14268"
+            - name: TRACING_PROBABILITY
+              value: "1"
+          args:
+            - serve
+            - --listen-addr=:80
+            - --mongo-uri=mongodb://admin:admin@mongodb.mongo.svc.cluster.local:27017/metrics?authSource=admin
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: neo-metrics
+  namespace: neo
+  labels:
+    app: neo-metrics
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      name: neo-metrics
+  selector:
+    app: neo-metrics

@@ -1,0 +1,115 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: platform
+  namespace: neo
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && (Headers(`Neo-Path`, `/metrics`) || PathPrefix(`/metrics`))
+      services:
+        - name: neo-metrics
+          port: 80
+      middlewares:
+        - name: stripprefix
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && (Headers(`Neo-Path`, `/topology`) || PathPrefix(`/topology`))
+      services:
+        - name: neo-topology
+          port: 80
+      middlewares:
+        - name: stripprefix
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && (Headers(`Neo-Path`, `/organization`) || PathPrefix(`/organization`))
+      services:
+        - name: neo-organization
+          port: 80
+      middlewares:
+        - name: stripprefix
+    - kind: Rule
+      match: Host(`platform.docker.localhost`)
+      services:
+        - name: github
+          passHostHeader: false
+          port: 443
+      middlewares:
+        - name: auth
+        - name: github-token
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: platform-tls
+  namespace: neo
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && (Headers(`Neo-Path`, `/metrics`) || PathPrefix(`/metrics`))
+      services:
+        - name: neo-metrics
+          port: 80
+      middlewares:
+        - name: stripprefix
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && (Headers(`Neo-Path`, `/topology`) || PathPrefix(`/topology`))
+      services:
+        - name: neo-topology
+          port: 80
+      middlewares:
+        - name: stripprefix
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && (Headers(`Neo-Path`, `/organization`) || PathPrefix(`/organization`))
+      services:
+        - name: neo-organization
+          port: 80
+      middlewares:
+        - name: stripprefix
+    - kind: Rule
+      match: Host(`platform.docker.localhost`)
+      services:
+        - name: github
+          passHostHeader: false
+          port: 443
+      middlewares:
+        - name: auth
+        - name: github-token
+  tls:
+    certResolver: default
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: auth
+  namespace: neo
+spec:
+  forwardAuth:
+    address: http://neo-topology.neo.svc.cluster.local:80/auth
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: stripprefix
+  namespace: neo
+spec:
+  stripPrefix:
+    prefixes:
+      - /organization
+      - /metrics
+      - /topology
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: github
+  namespace: neo
+spec:
+  type: ExternalName
+  externalName: github.com

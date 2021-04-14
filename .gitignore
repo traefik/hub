@@ -5,3 +5,7 @@ diagram/dist
 ssl/*.pem
 ssl/*.csr
 venv
+
+## Generated templates
+01-neo-cluster.yaml
+02-github-token.yaml

@@ -1,0 +1,21 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-nginx
+  namespace: whoami
+#  annotations:
+#    neo.traefik.io/access-control-policy: "my-acp@app"
+spec:
+  ingressClassName: nginx-k8s
+  rules:
+    - host: nginx-k8s.docker.localhost
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: whoami
+                port:
+                  number: 80

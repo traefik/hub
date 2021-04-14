@@ -1,0 +1,61 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: neo-token
+  namespace: neo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: neo-token
+  template:
+    metadata:
+      labels:
+        app: neo-token
+    spec:
+      imagePullSecrets:
+        - name: gcr-access-token
+      containers:
+        - name: neo-token
+          image: gcr.io/traefiklabs/neo-token:latest
+          imagePullPolicy: Always
+          livenessProbe:
+            httpGet:
+              port: 80
+              path: /live
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 2
+          readinessProbe:
+            httpGet:
+              port: 80
+              path: /ready
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 2
+          env:
+            - name: TRACING_ENDPOINT
+              value: "http://jaeger.jaeger.svc.cluster.local:14268"
+            - name: TRACING_PROBABILITY
+              value: "1"
+          args:
+            - serve
+            - --addr=:80
+            - --mongodb-uri=mongodb://admin:admin@mongodb.mongo.svc.cluster.local:27017/tokens?authSource=admin
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: neo-token
+  namespace: neo
+  labels:
+    app: neo-token
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      name: neo-token
+  selector:
+    app: neo-token
