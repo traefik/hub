@@ -3,7 +3,7 @@
 SCRIPT_DIR ?= $(CURDIR)/scripts
 
 renew-gcr-token:
-	$(SCRIPT_DIR)/run_local.sh renew-gcr-tokens
+	$(SCRIPT_DIR)/run_local.sh renew-gcr-token
 
 recreate-topology-token:
 	$(SCRIPT_DIR)/run_local.sh recreate-topology-token

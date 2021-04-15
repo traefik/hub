@@ -9,12 +9,10 @@ spec:
     - web
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && (Headers(`Neo-Path`, `/metrics`) || PathPrefix(`/metrics`))
+      match: Host(`platform.docker.localhost`) && (Path(`/agent/data`) || Path(`/agent/metrics`))
       services:
         - name: neo-metrics
           port: 80
-      middlewares:
-        - name: stripprefix
     - kind: Rule
       match: Host(`platform.docker.localhost`) && (Headers(`Neo-Path`, `/topology`) || PathPrefix(`/topology`))
       services:
@@ -50,12 +48,10 @@ spec:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && (Headers(`Neo-Path`, `/metrics`) || PathPrefix(`/metrics`))
+      match: Host(`platform.docker.localhost`) && (Path(`/agent/data`) || Path(`/agent/metrics`))
       services:
         - name: neo-metrics
           port: 80
-      middlewares:
-        - name: stripprefix
     - kind: Rule
       match: Host(`platform.docker.localhost`) && (Headers(`Neo-Path`, `/topology`) || PathPrefix(`/topology`))
       services:
@@ -90,7 +86,7 @@ metadata:
   namespace: neo
 spec:
   forwardAuth:
-    address: http://neo-topology.neo.svc.cluster.local:80/auth
+    address: http://neo-topology.neo.svc.cluster.local:80/internal/auth
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: Middleware
@@ -101,7 +97,6 @@ spec:
   stripPrefix:
     prefixes:
       - /organization
-      - /metrics
       - /topology
 
 ---

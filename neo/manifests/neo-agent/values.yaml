@@ -14,7 +14,3 @@ deployment:
   args:
     - --log-level=debug
     - --platform-url=http://platform.docker.localhost
-    - --scrape-name=traefik-controller
-    - --scrape-kind=traefik
-    - --scrape-ip=http://traefik-metrics.traefik.svc.cluster.local:8080/metrics
-    - --topology-info=traefik=whoami/whoami

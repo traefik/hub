@@ -47,7 +47,7 @@ main() {
   # Install Neo
   echo "Deploying Neo services."
 
-  export GITHUB_TOKEN_B64=$(echo -n "$GITHUB_TOKEN" | base64)
+  export GITHUB_TOKEN_B64=$(echo -n "${GITHUB_TOKEN}:" | base64)
   envsubst < "$PROJECT_DIR"/neo/manifests/neo/templates/github-token.yaml > "$PROJECT_DIR"/neo/manifests/neo/02-github-token.yaml
 
   export GITHUB_ORG
