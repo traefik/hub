@@ -50,6 +50,8 @@ spec:
       name: neo-agent-webhook
     - port: 80
       name: neo-agent-auth
+    - port: 40000
+      name: neo-agent-debug
   selector:
     app: neo-agent
 

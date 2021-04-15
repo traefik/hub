@@ -66,6 +66,9 @@ main() {
   helm repo update
   helm upgrade --install neo neo/neo --values="$PROJECT_DIR"/neo/manifests/neo-agent/values.yaml --namespace neo-agent
 
+  # Patch service to expose debugging port
+  kubectl patch svc -n neo-agent neo-agent -p '{"spec":{"ports":[{"name":"neo-agent-debug","port":40000}]}}'
+
   # Install Jaeger
   echo "Deploying Jaeger."
   kubectl apply -f "$PROJECT_DIR"/neo/manifests/jaeger/
