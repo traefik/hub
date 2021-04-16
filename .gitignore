@@ -8,4 +8,5 @@ venv
 
 ## Generated templates
 01-neo-cluster.yaml
-02-github-token.yaml
+01-awssecret.yaml
+01-github-token.yaml

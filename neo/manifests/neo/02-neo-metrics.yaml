@@ -2,23 +2,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: neo-cluster
+  name: neo-metrics
   namespace: neo
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: neo-cluster
+      app: neo-metrics
   template:
     metadata:
       labels:
-        app: neo-cluster
+        app: neo-metrics
+        version: "v1"
+        k8s-app: neo-metrics
     spec:
       imagePullSecrets:
         - name: gcr-access-token
       containers:
-        - name: neo-cluster
-          image: gcr.io/traefiklabs/neo-cluster:latest
+        - name: neo-metrics
+          image: gcr.io/traefiklabs/neo-metrics:latest
           imagePullPolicy: Always
           livenessProbe:
             httpGet:
@@ -47,14 +49,6 @@ spec:
                 secretKeyRef:
                   key: jwt-sub
                   name: neo-secret
-            - name: TOKEN_SERVICE_URL
-              value: http://neo-token.neo.svc.cluster.local
-            - name: TOPOLOGY_SERVICE_URL
-              value: http://neo-topology.neo.svc.cluster.local
-            - name: TOPOLOGY_GIT_PROXY_HOST
-              value: platform.docker.localhost
-            - name: TOPOLOGY_GIT_ORG_NAME
-              value: "${GITHUB_ORG}"
             - name: TRACING_ENDPOINT
               value: "http://jaeger.jaeger.svc.cluster.local:14268"
             - name: TRACING_PROBABILITY
@@ -62,20 +56,21 @@ spec:
           args:
             - serve
             - --addr=:80
-            - --mongodb-uri=mongodb://admin:admin@mongodb.mongo.svc.cluster.local:27017/clusters?authSource=admin
+            - --mongo-uri=mongodb://admin:admin@mongodb.mongo.svc.cluster.local:27017/metrics?authSource=admin
+
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: neo-cluster
+  name: neo-metrics
   namespace: neo
   labels:
-    app: neo-cluster
+    app: neo-metrics
 spec:
   type: ClusterIP
   ports:
     - port: 80
       targetPort: 80
-      name: neo-cluster
+      name: neo-metrics
   selector:
-    app: neo-cluster
+    app: neo-metrics

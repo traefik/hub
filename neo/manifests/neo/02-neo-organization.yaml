@@ -36,11 +36,24 @@ spec:
               failureThreshold: 2
           env:
             - name: NEO_JWT_CERT
-              value: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURHekNDQWdPZ0F3SUJBZ0lKVGxvT0FqakliRHduTUEwR0NTcUdTSWIzRFFFQkN3VUFNQ3N4S1RBbkJnTlYKQkFNVElIUnlZV1ZtYVd0c1lXSnpMVzVsYnkxa1pYWXVaWFV1WVhWMGFEQXVZMjl0TUI0WERUSXhNRE13TlRFdwpNVE14TWxvWERUTTBNVEV4TWpFd01UTXhNbG93S3pFcE1DY0dBMVVFQXhNZ2RISmhaV1pwYTJ4aFluTXRibVZ2CkxXUmxkaTVsZFM1aGRYUm9NQzVqYjIwd2dnRWlNQTBHQ1NxR1NJYjNEUUVCQVFVQUE0SUJEd0F3Z2dFS0FvSUIKQVFEb0piVTNZcHQvanlwQTZLRFoxZTNidDBya29mQ1ViUUJ5SWNnL2VsWE9qMHNkaUNtKysyTGN0ajFFZW9RUwowL3B3OGtTcm83dlZBVTc0K0JRYnJ5ZWp4MEhWbEhXRmJqM2hPUzcwSkpkUFl0SlZkYkdxVkdkelp4dHVFOE5CCmpCa3UvNE51QXZOWHMybjlNREZnVDJoZmY1N3VtQzlEeHpMdEFpU1AxaWRpbkdXSGtvNVAxVlMrYmFxYVRGdXoKYnJSOHdBMHFvRTN5MHpDSVdXd2JjUS81OXl0MmhIc0lERHkvb2ovVEh4dGtvTVVHMlZ0cEhjejVxMzJ5ZmY0YQpIcmNRMGdpSzUzcVIvOE5ZaGhYUGdRSUpFRUtIM0d3UEZSdm94MEh1dGRVTE1iZnBWNlVjWU8rRWdNTjM2eGFwCjRkdkprQ0IwcEVzblZsL1BCRm1NM1pySEFnTUJBQUdqUWpCQU1BOEdBMVVkRXdFQi93UUZNQU1CQWY4d0hRWUQKVlIwT0JCWUVGRktlZVQ5enhzc3lUZytkeWlLYXNmMklRYmovTUE0R0ExVWREd0VCL3dRRUF3SUNoREFOQmdrcQpoa2lHOXcwQkFRc0ZBQU9DQVFFQU5LR09EUXYraE1DdExZVVFFQXZNcGp0a0ZjL0RZaHQvRXI0QmhYQmF2UHNsCnc3RVJoaVZqVnBYYzh1NFhxUTdTaE8xZVJFckpUeVVMYjJEOUNnWUxva3F4L0kzRlVQZ05CTno4NnhRRnh0bjQKbFBtWi8rU2szWTVpOXdMWFRzYkUrWkIvVWZWd3A2cmRuLzRYWHRIY3hsUnRzaXA1NkprMXRsMXFUSmNlV3ZYawpLM3ZjRmM4aFZ5c0ZreldYdzN1N2MvaGFiZDcrK0VaWDY0YUVGRi9TSnp5SkdxOE9OTW5kZDdwSHpmM1l1YzdmCmowOSt2N0JDdFdyZDVpZGZWcmt0WnpwTzVuUGRFSndhTTk5em9BT3pUcVNuUDhITHJ3b1VqbGs3TytYY0N5NmIKMW5wN0FMWHlJTkJxT2xVTG5HdkVMVVpadHBtK1VUWWNnbW5GMlpDOWN3PT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ=="
+              valueFrom:
+                secretKeyRef:
+                  key: jwt-cert
+                  name: neo-secret
             - name: NEO_JWT_ISS
               value: "https://traefiklabs-neo-dev.eu.auth0.com/"
             - name: NEO_JWT_SUB
-              value: "3J5WCTSPnEnKInmliKWf2hPcOBvnjEvi@clients"
+              valueFrom:
+                secretKeyRef:
+                  key: jwt-sub
+                  name: neo-secret
+            - name: AUTH0_URL
+              value: "https://traefiklabs-neo-dev.eu.auth0.com"
+            - name: AUTH0_ACCESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: auth0-admin-token
+                  key: token
             - name: TRACING_ENDPOINT
               value: "http://jaeger.jaeger.svc.cluster.local:14268"
             - name: TRACING_USERNAME

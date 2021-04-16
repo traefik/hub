@@ -252,7 +252,11 @@ GCLOUD_EMAIL => Your email address to connect to gcr.
 GITHUB_ORG => The organization where the repository will be created by the topology service.
 GITHUB_TOPOLOGY_REPO => The name of the repository that will be created on the github organization by the topology service.
 GITHUB_TOKEN => A github token with 'repo:*' and 'admin:org:*' permissions.
+AWS_CLIENT_ID => A client ID for connection to AWS
+AWS_CLIENT_SECRET => A client secret ID for AWS
 ```
+
+The AWS secrets can be found [here](keybase://team/containous.dev/neo/k3d.md)
 
 ## renew-gcr-token
 
@@ -260,6 +264,15 @@ If your gcr credentials expire, you need to renew them. You can just run this co
 
 ```
 make renew-gcr-token
+```
+
+## renew-auth0-admin-token
+
+If the organization service doesn't work as expected and you get some auth0 errors logs, your token is probably expired.
+You can renew it with this command:
+
+```
+make renew-auth0-admin-token
 ```
 
 ## recreate-topology-token
