@@ -79,3 +79,79 @@ spec:
       name: neo-cluster
   selector:
     app: neo-cluster
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: cluster-agent-tls
+  namespace: neo
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && (Path(`/agent/link`) || Path(`/agent/config`))
+      services:
+        - name: neo-cluster
+          port: 80
+      middlewares:
+        - name: auth-token
+  tls:
+    certResolver: default
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: cluster-agent
+  namespace: neo
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && (Path(`/agent/link`) || Path(`/agent/config`))
+      services:
+        - name: neo-cluster
+          port: 80
+      middlewares:
+        - name: auth-token
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: cluster-external-tls
+  namespace: neo
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/cluster/external`)
+      services:
+        - name: neo-cluster
+          port: 80
+      middlewares:
+        - name: stripprefix
+  tls:
+    certResolver: default
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: cluster-external
+  namespace: neo
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/cluster/external`)
+      services:
+        - name: neo-cluster
+          port: 80
+      middlewares:
+        - name: stripprefix

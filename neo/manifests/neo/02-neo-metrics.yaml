@@ -74,3 +74,79 @@ spec:
       name: neo-metrics
   selector:
     app: neo-metrics
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: metrics-agent-tls
+  namespace: neo
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && (Path(`/agent/data`) || Path(`/agent/metrics`))
+      services:
+        - name: neo-metrics
+          port: 80
+      middlewares:
+        - name: auth-token
+  tls:
+    certResolver: default
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: metrics-agent
+  namespace: neo
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && (Path(`/agent/data`) || Path(`/agent/metrics`))
+      services:
+        - name: neo-metrics
+          port: 80
+      middlewares:
+        - name: auth-token
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: metrics-external-tls
+  namespace: neo
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/metrics/external`)
+      services:
+        - name: neo-metrics
+          port: 80
+      middlewares:
+        - name: stripprefix
+  tls:
+    certResolver: default
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: metrics-external
+  namespace: neo
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.locahost`) && PathPrefix(`/metrics/external`)
+      services:
+        - name: neo-metrics
+          port: 80
+      middlewares:
+        - name: stripprefix

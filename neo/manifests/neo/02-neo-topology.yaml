@@ -86,3 +86,41 @@ spec:
       name: neo-topology
   selector:
     app: neo-topology
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: topology-external-tls
+  namespace: neo
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/topology/external`)
+      services:
+        - name: neo-topology
+          port: 80
+      middlewares:
+        - name: stripprefix
+  tls:
+    certResolver: default
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: topology-external
+  namespace: neo
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/topology/external`)
+      services:
+        - name: neo-topology
+          port: 80
+      middlewares:
+        - name: stripprefix
