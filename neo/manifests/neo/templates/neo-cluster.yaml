@@ -48,9 +48,9 @@ spec:
                   key: jwt-sub
                   name: neo-secret
             - name: TOKEN_SERVICE_URL
-              value: http://neo-token.neo.svc.cluster.local
+              value: http://neo-token.neo.svc.cluster.local/internal
             - name: TOPOLOGY_SERVICE_URL
-              value: http://neo-topology.neo.svc.cluster.local
+              value: http://neo-topology.neo.svc.cluster.local/internal
             - name: TOPOLOGY_GIT_PROXY_HOST
               value: platform.docker.localhost
             - name: TOPOLOGY_GIT_ORG_NAME

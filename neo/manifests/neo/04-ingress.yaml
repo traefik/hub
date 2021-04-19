@@ -13,6 +13,43 @@ spec:
       services:
         - name: neo-metrics
           port: 80
+      middlewares:
+        - name: auth-token
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && (Headers(`Neo-Path`, `/token`) || PathPrefix(`/token`))
+      services:
+        - name: neo-token
+          port: 80
+      middlewares:
+        - name: stripprefix
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && (Headers(`Neo-Path`, `/cluster`) || PathPrefix(`/cluster`))
+      services:
+        - name: neo-cluster
+          port: 80
+      middlewares:
+        - name: stripprefix
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && (Headers(`Neo-Path`, `/alert`) || PathPrefix(`/alert`))
+      services:
+        - name: neo-alert
+          port: 80
+      middlewares:
+        - name: stripprefix
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && (Headers(`Neo-Path`, `/certificates`) || PathPrefix(`/certificates`))
+      services:
+        - name: neo-certificates
+          port: 80
+      middlewares:
+        - name: stripprefix
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && (Headers(`Neo-Path`, `/notification`) || PathPrefix(`/notification`))
+      services:
+        - name: neo-notification
+          port: 80
+      middlewares:
+        - name: stripprefix
     - kind: Rule
       match: Host(`platform.docker.localhost`) && (Headers(`Neo-Path`, `/topology`) || PathPrefix(`/topology`))
       services:
@@ -60,6 +97,41 @@ spec:
       middlewares:
         - name: stripprefix
     - kind: Rule
+      match: Host(`platform.docker.localhost`) && (Headers(`Neo-Path`, `/alert`) || PathPrefix(`/alert`))
+      services:
+        - name: neo-alert
+          port: 80
+      middlewares:
+        - name: stripprefix
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && (Headers(`Neo-Path`, `/certificates`) || PathPrefix(`/certificates`))
+      services:
+        - name: neo-certificates
+          port: 80
+      middlewares:
+        - name: stripprefix
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && (Headers(`Neo-Path`, `/notification`) || PathPrefix(`/notification`))
+      services:
+        - name: neo-notification
+          port: 80
+      middlewares:
+        - name: stripprefix
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && (Headers(`Neo-Path`, `/token`) || PathPrefix(`/token`))
+      services:
+        - name: neo-token
+          port: 80
+      middlewares:
+        - name: stripprefix
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && (Headers(`Neo-Path`, `/cluster`) || PathPrefix(`/cluster`))
+      services:
+        - name: neo-cluster
+          port: 80
+      middlewares:
+        - name: stripprefix
+    - kind: Rule
       match: Host(`platform.docker.localhost`) && (Headers(`Neo-Path`, `/organization`) || PathPrefix(`/organization`))
       services:
         - name: neo-organization
@@ -82,6 +154,19 @@ spec:
 apiVersion: traefik.containo.us/v1alpha1
 kind: Middleware
 metadata:
+  name: auth-token
+  namespace: neo
+spec:
+  forwardAuth:
+    address: http://neo-token.neo.svc.cluster.local:80/internal/verify-token
+    authResponseHeaders:
+      - Organization-Id
+      - Cluster-Id
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
   name: auth
   namespace: neo
 spec:
@@ -98,6 +183,11 @@ spec:
     prefixes:
       - /organization
       - /topology
+      - /cluster
+      - /token
+      - /notification
+      - /alert
+      - /certificates
 
 ---
 apiVersion: v1

@@ -18,11 +18,12 @@ main() {
   kubectl cluster-info
 
   [[ "x$GCLOUD_EMAIL" == "x" ]] && read -p "Enter gcloud email: " GCLOUD_EMAIL
-  [[ "x$GITHUB_TOPOLOGY_REPO" == "x" ]] && read -p "Enter github topology repo name: " GITHUB_TOPOLOGY_REPO
   [[ "x$GITHUB_ORG" == "x" ]] && read -p "Enter github organization: " GITHUB_ORG
   [[ "x$GITHUB_TOKEN" == "x" ]] && read -p "Enter github token: " GITHUB_TOKEN
   [[ "x$AWS_CLIENT_ID" == "x" ]] && read -p "Enter aws client id: " AWS_CLIENT_ID
   [[ "x$AWS_CLIENT_SECRET" == "x" ]] && read -p "Enter aws client secret: " AWS_CLIENT_SECRET
+  [[ "x$NEO_USERNAME" == "x" ]] && read -p "Enter your neo username: " NEO_USERNAME
+  [[ "x$NEO_PASSWORD" == "x" ]] && read -p "Enter your neo password: " NEO_PASSWORD
 
   kubectl apply -f "$PROJECT_DIR"/neo/manifests/neo/00-namespace.yaml
   kubectl apply -f "$PROJECT_DIR"/neo/manifests/neo-agent/00-namespace.yaml
@@ -52,6 +53,10 @@ main() {
   kubectl apply -f "$PROJECT_DIR"/neo/manifests/traefik/
   kubectl -n traefik wait --for condition=available --timeout=180s deployment/traefik
 
+  # Populate Mongo
+  kubectl cp "$PROJECT_DIR"/neo/documents/organization.json -n mongo $(kubectl get pods -n mongo -l app=mongodb --output=jsonpath={.items..metadata.name}):/tmp/organization.json
+  kubectl exec -it -n mongo $(kubectl get pods -n mongo -l app=mongodb --output=jsonpath={.items..metadata.name}) -- bash -c "mongoimport --db organizations --collection organizations --file /tmp/organization.json --username admin --password admin  --authenticationDatabase admin"
+
   # Install Neo
   echo "Deploying Neo services."
 
@@ -66,14 +71,38 @@ main() {
 
   # Create token
   kubectl rollout status deploy -n neo neo-topology
+  kubectl rollout status deploy -n neo neo-cluster
+  kubectl rollout status deploy -n neo neo-token
   sleep 2
 
-  recreate-topology-token
+  JWT_CLIENT_ID=$(kubectl get secret neo-secret -n neo -o json | jq -r '.data["auth0-client-id"]' | tr -d '\n' | base64 -d)
+  JWT_CLIENT_SECRET=$(kubectl get secret neo-secret -n neo -o json | jq -r '.data["auth0-client-secret"]' | tr -d '\n' | base64 -d)
+
+  JWT_EXTERNAL=$(curl --silent --location --request POST 'https://traefiklabs-neo-dev.eu.auth0.com/oauth/token' \
+    --header 'Content-Type: application/x-www-form-urlencoded' \
+    --data-urlencode 'grant_type=password' \
+    --data-urlencode "username=${NEO_USERNAME}" \
+    --data-urlencode "password=${NEO_PASSWORD}" \
+    --data-urlencode 'audience=https://clients.neo.traefik.io/' \
+    --data-urlencode "client_id=${JWT_CLIENT_ID}" \
+    --data-urlencode "client_secret=${JWT_CLIENT_SECRET}" \
+    --data-urlencode 'scope=openid' \
+    --data-urlencode 'realm=Username-Password-Authentication' \
+    --data-urlencode 'organizationId=607997e8406c62aace2d493d' | jq -r '.access_token' | tr -d '\n')
+
+  CLUSTER_NAME=$(date +%s | sha256sum | base64 | head -c 32 ; echo)
+
+  export TOKEN_CLUSTER=$(curl --silent --location --request POST 'http://platform.docker.localhost/cluster/external/clusters' \
+  --header "Authorization: Bearer ${JWT_EXTERNAL}" \
+  --header 'Content-Type: application/json' \
+  --data-raw "{\"name\": \"${CLUSTER_NAME}\"}" | jq -r '.token' | tr -d '\n')
+
+  envsubst < "$PROJECT_DIR"/neo/manifests/neo-agent/templates/values.yaml > "$PROJECT_DIR"/neo/manifests/neo-agent/01-values.yaml
 
   # Install Neo Agent
   helm repo add neo https://helm.traefik.io/neo
   helm repo update
-  helm upgrade --install neo neo/neo --values="$PROJECT_DIR"/neo/manifests/neo-agent/values.yaml --namespace neo-agent
+  helm upgrade --install neo neo/neo --values="$PROJECT_DIR"/neo/manifests/neo-agent/01-values.yaml --namespace neo-agent
 
   # Patch service to expose debugging port
   kubectl patch svc -n neo-agent neo-agent -p '{"spec":{"ports":[{"name":"neo-agent-debug","port":40000}]}}'
@@ -116,10 +145,6 @@ renew-gcr-token() {
 renew-auth0-admin-token() {
   kubectl delete job -n neo auth0-admin-token-renew
   kubectl apply -f "$PROJECT_DIR"/neo/manifests/neo/01-auth0-admin-token-renew.yaml
-}
-
-recreate-topology-token() {
-  curl --insecure --silent -X POST -d "{\"id\": \"${GITHUB_TOPOLOGY_REPO}\", \"token\": \"4a585aab-f00e-4548-8528-222ef086bebb\"}" https://platform.docker.localhost/topology/internal/repos
 }
 
 check-tools() {
@@ -205,9 +230,6 @@ case $cmd in
     renew-auth0-admin-token)
         renew-auth0-admin-token
     ;;
-    recreate-topology-token)
-        recreate-topology-token
-    ;;
     run)
         main "$@"
     ;;
@@ -215,7 +237,7 @@ case $cmd in
         clean
     ;;
     *)
-        echo "Commands available: recreate-topology-token, renew-gcr-token, run, clean"
+        echo "Commands available: renew-auth0-admin-token, renew-gcr-token, run, clean"
         exit 1
     ;;
 esac

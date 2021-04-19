@@ -37,15 +37,13 @@ spec:
             periodSeconds: 5
             failureThreshold: 2
           env:
-            - name: FAKE_USER
-              value: "test-topology"
-            - name: FAKE_USER_TOKEN
-              value: "4a585aab-f00e-4548-8528-222ef086bebb"
             - name: NEO_JWT_CERT
               valueFrom:
                 secretKeyRef:
                   key: jwt-cert
                   name: neo-secret
+            - name: TOKEN_SERVICE_URL
+              value: http://neo-token.neo.svc.cluster.local/internal
             - name: NEO_JWT_ISS
               value: "https://traefiklabs-neo-dev.eu.auth0.com/"
             - name: NEO_JWT_SUB

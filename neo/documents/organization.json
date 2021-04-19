@@ -1,0 +1,49 @@
+{
+  "_id": {
+    "$oid": "607997e8406c62aace2d493d"
+  },
+  "name": "Traefik Labs",
+  "isUser": false,
+  "users": [
+    "10481e52-a958-4edb-a03a-3f84e9c33bdc",
+    "e51b0ecc-2ab9-4387-b3b9-375d00eb1347",
+    "7e80b039-4daa-44fc-bab9-2842a9036378",
+    "74f3f6f3-185a-43d3-86c0-eb575085edbc",
+    "2f2f8487-9560-44ab-8e49-a4cdcfacf182"
+  ],
+  "teams": [
+    {
+      "_id": {
+        "$oid": "60672c44dea2196293ae5604"
+      },
+      "name": "admin",
+      "users": [
+        "10481e52-a958-4edb-a03a-3f84e9c33bdc",
+        "e51b0ecc-2ab9-4387-b3b9-375d00eb1347",
+        "7e80b039-4daa-44fc-bab9-2842a9036378",
+        "74f3f6f3-185a-43d3-86c0-eb575085edbc",
+        "2f2f8487-9560-44ab-8e49-a4cdcfacf182"
+      ],
+      "updatedAt": {
+        "$date": {
+          "$numberLong": "1617374276060"
+        }
+      },
+      "createdAt": {
+        "$date": {
+          "$numberLong": "1617374276060"
+        }
+      }
+    }
+  ],
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1618583876060"
+    }
+  },
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1618583876060"
+    }
+  }
+}

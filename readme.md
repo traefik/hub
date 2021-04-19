@@ -250,10 +250,11 @@ Before running the script, you need a `.env` file. Just copy the `.env.example` 
 ```
 GCLOUD_EMAIL => Your email address to connect to gcr.
 GITHUB_ORG => The organization where the repository will be created by the topology service.
-GITHUB_TOPOLOGY_REPO => The name of the repository that will be created on the github organization by the topology service.
 GITHUB_TOKEN => A github token with 'repo:*' and 'admin:org:*' permissions.
 AWS_CLIENT_ID => A client ID for connection to AWS
 AWS_CLIENT_SECRET => A client secret ID for AWS
+NEO_USERNAME => Your username on Neo
+NEO_PASSWORD => Your password on Neo
 ```
 
 The AWS secrets can be found [here](keybase://team/containous.dev/neo/k3d.md)
@@ -273,15 +274,6 @@ You can renew it with this command:
 
 ```
 make renew-auth0-admin-token
-```
-
-## recreate-topology-token
-
-If you restart topology service, your token created with the `make run` command is no longer available.
-You need to recreate it. You can run this command: 
-
-```
-make recreate-topology-token
 ```
 
 ## clean
