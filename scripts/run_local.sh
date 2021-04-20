@@ -161,7 +161,7 @@ check-tools() {
 prepare-docker-images() {
   for image in $(find $PROJECT_DIR -type f -name '*.yaml' | xargs grep 'image: ' | awk -F ':' '{ print $3":"$4 }'); do
     docker pull "${image}"
-    k3d image import ${image}
+    k3d image import ${image} -c k3s-default-neo
   done
 }
 
