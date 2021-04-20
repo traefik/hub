@@ -148,7 +148,7 @@ renew-auth0-admin-token() {
 }
 
 check-tools() {
-  cmdList="kubectl k3d gcloud helm"
+  cmdList="kubectl k3d gcloud helm jq"
   for cmd in $cmdList; do
     echo -n "checking ${cmd}: "
     command -v "$cmd" >/dev/null 2>&1 || {

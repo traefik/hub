@@ -47,6 +47,8 @@ spec:
                 secretKeyRef:
                   key: jwt-sub
                   name: neo-secret
+            - name: ORGANIZATION_SERVICE_URL
+              value: http://neo-organization.neo.svc.cluster.local/internal
             - name: TOKEN_SERVICE_URL
               value: http://neo-token.neo.svc.cluster.local/internal
             - name: TOPOLOGY_SERVICE_URL
