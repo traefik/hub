@@ -1,4 +1,95 @@
-# Neo with the classic installation
+# Neo
+
+  - [K3D](#k3d)
+    - [Prerequisites](#prerequisites)
+    - [Installation](#installation)
+  - [Manual installation](#manual-installation)
+    - [Create the cluster](#create-the-cluster)
+    - [Install Ingress Controllers](#install-ingress-controllers)
+    - [Install Neo Agent](#install-neo-agent)
+    - [Install demo application](#install-demo-application)
+    - [Test application](#test-application)
+    
+**You can run the full stack of Neo with K3D or by manually install every piece of the puzzle.
+We hardly recommend the K3D way of course.**
+
+## K3D
+
+### Prerequisites
+
+You need to be logged in gcloud before running any script.
+
+```
+gcloud auth login
+gcloud auth configure-docker
+```
+
+Before running the script, you need a `.env` file in the `neo` folder. Just copy the `.env.example` and fill it with your own credentials.
+
+```
+GCLOUD_EMAIL => Your email address to connect to gcr.
+GITHUB_ORG => The organization where the repository will be created by the topology service.
+GITHUB_TOKEN => A github token with 'repo:*' and 'admin:org:*' permissions.
+AWS_CLIENT_ID => A client ID for connection to AWS
+AWS_CLIENT_SECRET => A client secret ID for AWS
+NEO_USERNAME => Your username on Neo
+NEO_PASSWORD => Your password on Neo
+```
+
+The AWS secrets can be found [here](keybase://team/containous.dev/neo/k3d.md).
+
+### Installation
+
+The local installation can be done with `make run`. The script will create a k3d cluster and deploy the following objects:
+- IngressControllers
+  - Nginx
+  - Haproxy
+  - Traefik
+- whoami with one ingress per ingress controller
+
+- Neo platform
+  - MongoDB
+  - Neo services: metrics, organization, topology (+ an ingress to access to all the services)
+
+- Neo-agent
+
+- Jaeger
+
+There are several commands to renew secrets, clean, or speed up the deployment :
+
+#### renew-gcr-token
+
+If your gcr credentials expire, you need to renew them. You can just run this command :
+
+```
+make renew-gcr-token
+```
+
+#### renew-auth0-admin-token
+
+If the organization service doesn't work as expected and you get some auth0 errors logs, your token is probably expired.
+You can renew it with this command:
+
+```
+make renew-auth0-admin-token
+```
+
+#### clean
+
+`make clean` won't delete the k3d cluster but will delete every component created with the `make run` command.
+
+#### delete
+
+`make delete` will delete the k3d cluster.
+
+#### --adsl
+
+`make run-adsl` allows docker to pull the images before starting the cluster.
+We recommand to run it instead of `make run` if your internet connection is a bit slow.
+
+## Manual installation
+
+### Create the cluster
 
 Create the kubernetes cluster with k3d
 
@@ -23,16 +114,16 @@ Available docker images:
 - rancher/k3s:v1.17.17-k3s1
 - rancher/k3s:v1.16.15-k3s1
 
-## Install ingress controllers
+### Install ingress controllers
 
-### Ingress Nginx
+#### Ingress Nginx
 
 ```bash
 kubectl apply -f neo/manifests/ingress-nginx/
 ```
 cf: https://kubernetes.github.io/ingress-nginx/deploy/#installation-guide
 
-### HaProxy
+#### HaProxy
 
 ```bash
 kubectl apply -f neo/manifests/ingress-haproxy
@@ -40,14 +131,14 @@ kubectl apply -f neo/manifests/ingress-haproxy
 
 cf: https://haproxy-ingress.github.io/docs/getting-started/
 
-### Traefik
+#### Traefik
 
 ```bash
 kubectl apply -f neo/manifests/traefik/
 ```
 cf: https://doc.traefik.io/traefik/user-guides/crd-acme/
 
-### Install Neo
+### Install Neo Agent
 
 First you need to create a secret:
 ```bash
@@ -102,25 +193,25 @@ helm repo update
 helm install neo neo/neo
 ```
 
-#### Deploying Neo by overwriting values.yaml
+##### Deploying Neo by overwriting values.yaml
 
 ```bash
 helm install neo neo/neo --values=./values.yaml
 ```
 
-#### Deploying Neo in a specific namespace
+##### Deploying Neo in a specific namespace
 
 ```bash
 helm install neo neo/neo --namespace neo
 ```
 
-#### Deploying Neo with a full-yaml
+##### Deploying Neo with a full-yaml
 
 ```bash
 kubectl apply -f https://traefik.github.io/neo-helm-chart/yaml/0.1.1.yaml
 ```
 
-#### Launch unit tests
+##### Launch unit tests
 
 You need to install the helm-plugin [unittest](https://github.com/rancher/unittest)
 
@@ -130,7 +221,7 @@ Then:
 helm unittest neo/
 ```
 
-#### Uninstall
+##### Uninstall
 
 We consider in this example the version install being <neo>:
 
@@ -144,13 +235,13 @@ If neo-agent was install in a specific namespace
 helm uninstall neo --namespace neo-namespace
 ```
 
-## Install demo application
+### Install demo application
 
 ```bash
 kubectl apply -f neo/manifests/whoami/
 ```
 
-## Test application
+### Test application
 
 - HaProxy
 ```bash
@@ -216,75 +307,3 @@ X-Forwarded-Proto: http
 X-Forwarded-Server: traefik-78b84dc55f-8f25x
 X-Real-Ip: 10.42.1.12
 ```
-
-# Neo with the local installation
-
-## Prerequisites
-
-You need to be logged in gcloud before running any script.
-
-```
-gcloud auth login
-gcloud auth configure-docker
-```
-
-## run
-
-The local installation can be done with `make run`. The script will create a k3d cluster and deploy the following objects:
-- IngressControllers
-    - Nginx
-    - Haproxy
-    - Traefik
-- whoami with 3 ingresses for each ingress controller
-
-- Neo platform
-    - MongoDB
-    - Neo services: metrics, organization, topology (+ an ingress to access to all of the services)
-
-- Neo-agent
-
-- Jaeger
-
-Before running the script, you need a `.env` file. Just copy the `.env.example` and fill it with your own credentials.
-
-```
-GCLOUD_EMAIL => Your email address to connect to gcr.
-GITHUB_ORG => The organization where the repository will be created by the topology service.
-GITHUB_TOKEN => A github token with 'repo:*' and 'admin:org:*' permissions.
-AWS_CLIENT_ID => A client ID for connection to AWS
-AWS_CLIENT_SECRET => A client secret ID for AWS
-NEO_USERNAME => Your username on Neo
-NEO_PASSWORD => Your password on Neo
-```
-
-The AWS secrets can be found [here](keybase://team/containous.dev/neo/k3d.md)
-
-## renew-gcr-token
-
-If your gcr credentials expire, you need to renew them. You can just run this command : 
-
-```
-make renew-gcr-token
-```
-
-## renew-auth0-admin-token
-
-If the organization service doesn't work as expected and you get some auth0 errors logs, your token is probably expired.
-You can renew it with this command:
-
-```
-make renew-auth0-admin-token
-```
-
-## clean
-
-`make clean` won't delete the k3d cluster but will delete every component created with the `make run` command.
-
-## delete
-
-`make delete` will delete the k3d cluster.
-
-## --adsl
-
-`make run-adsl` allows docker to pull the images before starting the cluster. 
-We recommand to run it instead of `make run` if your internet connection is a bit slow.
