@@ -13,4 +13,4 @@ token: "${TOKEN_CLUSTER}"
 deployment:
   args:
     - --log-level=debug
-    - --platform-url=http://platform.docker.localhost
+    - --platform-url=http://platform.docker.localhost/agent
