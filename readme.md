@@ -17,26 +17,38 @@ We hardly recommend the K3D way of course.**
 
 ### Prerequisites
 
+You will need these binaries to use the script:
+- jq
+- gcloud
+- k3d
+- kubectl
+- helm
+
 You need to be logged in gcloud before running any script.
 
-```
+```bash
 gcloud auth login
 gcloud auth configure-docker
 ```
 
-Before running the script, you need a `.env` file in the `neo` folder. Just copy the `.env.example` and fill it with your own credentials.
+Before running the script, you need a `.env` file in the `neo` folder.
+`Just copy the `.env.example` and fill it with your own credentials.
 
-```
-GCLOUD_EMAIL => Your email address to connect to gcr.
-GITHUB_ORG => The organization where the repository will be created by the topology service.
-GITHUB_TOKEN => A github token with 'repo:*' and 'admin:org:*' permissions.
-AWS_CLIENT_ID => A client ID for connection to AWS
-AWS_CLIENT_SECRET => A client secret ID for AWS
-NEO_USERNAME => Your username on Neo
-NEO_PASSWORD => Your password on Neo
-```
+- `GCLOUD_EMAIL` => Your email address to connect to gcr.
+- `GITHUB_ORG` => The organization where the repository will be created by the topology service.
+- `GITHUB_TOKEN` => A github token with `repo:*` permissions.
+- `AWS_CLIENT_ID` => A client ID for connection to AWS
+- `AWS_CLIENT_SECRET` => A client secret ID for AWS
+- `NEO_USERNAME` => Your username on Neo
+- `NEO_PASSWORD` => Your password on Neo
 
-The AWS secrets can be found [here](keybase://team/containous.dev/neo/k3d.md).
+The AWS secrets can be found in `keybase://team/containous.dev/neo/k3d.md`.
+The Neo account can be found in `keybase://team/containous.dev/neo/auth0.md` (`JWT_PASSWORD` and `JWT_USER`).
+The `GITHUB_TOKEN` need the following `repo` scope.
+
+#### Mac User
+
+On MacOs, you need to install `coreutils`, because by default `*.localhost` is not resolved. 
 
 ### Installation
 
@@ -86,6 +98,20 @@ make renew-auth0-admin-token
 
 `make run-adsl` allows docker to pull the images before starting the cluster.
 We recommand to run it instead of `make run` if your internet connection is a bit slow.
+
+### Exposed Endpoints
+
+- Jaeger: https://jaeger-ui.docker.localhost/
+- UI: https://webapp.docker.localhost/
+- Neo-APIs: http://platform.docker.localhost/
+    - /agent 
+    - /organization 
+    - /topology
+    - /cluster
+    - /token
+    - /notification
+    - /alert
+    - /certificates
 
 ## Manual installation
 
@@ -149,7 +175,7 @@ kubectl create secret -n $namespace docker-registry gcr-access-token \
                 --docker-email=${GCLOUD_EMAIL}
 ```
 
-We recommand to overwrite the values file with this values file if you don't need to run neo-services locally:
+We recommend overwriting the values file with this values file if you don't need to run neo-services locally:
 
 
 ```yaml
@@ -229,7 +255,7 @@ We consider in this example the version install being <neo>:
 helm uninstall neo
 ```
 
-If neo-agent was install in a specific namespace
+If neo-agent was installed in a specific namespace
 
 ```bash
 helm uninstall neo --namespace neo-namespace
@@ -244,7 +270,7 @@ kubectl apply -f neo/manifests/whoami/
 ### Test application
 
 - HaProxy
-```bash
+```console
 $ curl -H "Host: haproxy.docker.localhost" http://127.0.0.1:8000
 Hostname: app-v1-9bb4bd54d-64gkk
 IP: 127.0.0.1
@@ -265,7 +291,7 @@ X-Real-Ip: 10.42.1.11
 ```
 
 - Nginx k8s
-```bash
+```console
 $ curl -H "Host: nginx-k8s.docker.localhost" http://127.0.0.1:9000
 Hostname: app-v1-9bb4bd54d-p6zxb
 IP: 127.0.0.1
@@ -287,7 +313,7 @@ X-Scheme: http
 ```
 
 - Traefik
-```bash
+```console
 $ curl -H "Host: traefik.docker.localhost" http://127.0.0.1/
 Hostname: app-v1-9bb4bd54d-p6zxb
 IP: 127.0.0.1
