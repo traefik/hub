@@ -201,11 +201,11 @@ metadata:
 spec:
   ports:
     - name: "http-80"
-      port: 8000
+      port: 80
       protocol: TCP
       targetPort: http
     - name: "https-443"
-      port: 8443
+      port: 443
       protocol: TCP
       targetPort: https
   selector:

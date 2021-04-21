@@ -9,7 +9,7 @@ metadata:
 spec:
   ingressClassName: traefik-lb
   rules:
-    - host: traefik.docker.localhost
+    - host: whoami.traefik.neo.demo.traefiklabs.tech
       http:
         paths:
           - path: /

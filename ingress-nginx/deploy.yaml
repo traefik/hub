@@ -290,11 +290,11 @@ spec:
   externalTrafficPolicy: Local
   ports:
     - name: http
-      port: 9000
+      port: 80
       protocol: TCP
       targetPort: http
     - name: https
-      port: 9443
+      port: 443
       protocol: TCP
       targetPort: https
   selector:
