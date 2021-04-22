@@ -48,8 +48,9 @@ The `GITHUB_TOKEN` need the following `repo` scope.
 
 #### Mac User
 
-On MacOs, you need to install `coreutils`, because by default `*.localhost` is not resolved.
-You then need to add the hosts in `/etc/hosts`:
+On MacOs, you need to install `coreutils` for the script to work.
+
+To resolve `*.docker.localhost`, you also need to add these hosts in your `/etc/hosts`:
 ```bash
 127.0.0.1 platform.docker.localhost
 127.0.0.1 webapp.docker.localhost
@@ -63,14 +64,11 @@ The local installation can be done with `make run`. The script will create a k3d
   - Nginx
   - Haproxy
   - Traefik
-- whoami with one ingress per ingress controller
-
+- Whoami with one ingress per ingress controller
 - Neo platform
   - MongoDB
   - Neo services: metrics, organization, topology (+ an ingress to access to all the services)
-
 - Neo-agent
-
 - Jaeger
 
 There are several commands to renew secrets, clean, or speed up the deployment :
@@ -115,8 +113,8 @@ We recommend running it instead of `make run` if your internet connection is a b
 
 ### Exposed Endpoints
 
-- Jaeger: https://jaeger-ui.docker.localhost/
 - UI: https://webapp.docker.localhost/
+- Jaeger: https://jaeger-ui.docker.localhost/
 - Neo-APIs: http://platform.docker.localhost/
     - /agent 
     - /organization 
