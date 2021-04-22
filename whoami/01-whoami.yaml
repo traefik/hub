@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: whoami
-        image: traefik/whoami:latest
+        image: traefik/traefikee-webapp-demo:v2
 
 ---
 apiVersion: v1

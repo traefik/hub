@@ -15,7 +15,7 @@ kubectl apply -f traefik
 ## Install whoami application
 
 ```bash
-kubectl apply -f neo/manifests/whoami
+kubectl apply -f whoami
 ```
 
 ## Create account on neo and create a cluster
@@ -35,4 +35,12 @@ hey https://whoami.nginx.neo.demo.traefiklabs.tech
 hey https://whoami.nginx.neo.demo.traefiklabs.tech/httpbin/status/409
 hey https://whoami.nginx.neo.demo.traefiklabs.tech/httpbin/status/500
 hey https://whoami.nginx.neo.demo.traefiklabs.tech/httpbin/status/200
+```
+
+## Clean up
+
+```
+helm uninstall --namespace neo-agent neo
+kubectl delete ns neo-agent
+kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io neo
 ```

@@ -4,8 +4,8 @@ kind: Ingress
 metadata:
   name: app-traefik
   namespace: whoami
-#  annotations:
-#    neo.traefik.io/access-control-policy: "my-acp@app"
+#   annotations:
+#     neo.traefik.io/access-control-policy: "my-acp@app"
 spec:
   ingressClassName: traefik-lb
   rules:
