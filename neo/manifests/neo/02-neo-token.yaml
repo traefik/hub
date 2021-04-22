@@ -59,5 +59,8 @@ spec:
     - port: 80
       targetPort: 80
       name: neo-token
+    - port: 40000
+      targetPort: 40000
+      name: neo-token-debug
   selector:
     app: neo-token

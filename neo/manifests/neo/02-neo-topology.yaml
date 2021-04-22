@@ -86,6 +86,9 @@ spec:
     - port: 80
       targetPort: 80
       name: neo-topology
+    - port: 40000
+      targetPort: 40000
+      name: neo-topology-debug
   selector:
     app: neo-topology
 

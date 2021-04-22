@@ -1,4 +1,6 @@
-.PHONY: jwt renew-gcr-tokens renew-auth0-admin-token run run-adsl clean delete
+.PHONY: jwt renew-gcr-tokens renew-auth0-admin-token run run-adsl clean delete \
+		reset-all-images reset-agent-image reset-cluster-image reset-organization-image \
+		reset-topology-image reset-token-image reset-metrics-image
 
 SCRIPT_DIR ?= $(CURDIR)/scripts
 
@@ -16,6 +18,26 @@ run:
 
 run-adsl:
 	$(SCRIPT_DIR)/run_local.sh run --adsl
+
+reset-all-images: reset-agent-image reset-cluster-image reset-organization-image reset-topology-image reset-token-image reset-metrics-image
+
+reset-agent-image:
+	kubectl patch deployment -n neo-agent neo-agent -p '{"spec":{"template":{"spec":{"containers":[{"name":"neo-agent","image":"gcr.io/traefiklabs/neo-agent:latest","imagePullPolicy":"Always"}]}}}}'
+
+reset-cluster-image:
+	kubectl patch deployment -n neo neo-cluster -p '{"spec":{"template":{"spec":{"containers":[{"name":"neo-cluster","image":"gcr.io/traefiklabs/neo-cluster:latest","imagePullPolicy":"Always"}]}}}}'
+
+reset-organization-image:
+	kubectl patch deployment -n neo neo-organization -p '{"spec":{"template":{"spec":{"containers":[{"name":"neo-organization","image":"gcr.io/traefiklabs/neo-organization-service:latest","imagePullPolicy":"Always"}]}}}}'
+
+reset-topology-image:
+	kubectl patch deployment -n neo neo-topology -p '{"spec":{"template":{"spec":{"containers":[{"name":"neo-topology","image":"gcr.io/traefiklabs/neo-topology:latest","imagePullPolicy":"Always"}]}}}}'
+
+reset-token-image:
+	kubectl patch deployment -n neo neo-token -p '{"spec":{"template":{"spec":{"containers":[{"name":"neo-token","image":"gcr.io/traefiklabs/neo-token:latest","imagePullPolicy":"Always"}]}}}}'
+
+reset-metrics-image:
+	kubectl patch deployment -n neo neo-metrics -p '{"spec":{"template":{"spec":{"containers":[{"name":"neo-metrics","image":"gcr.io/traefiklabs/neo-metrics:latest","imagePullPolicy":"Always"}]}}}}'
 
 clean:
 	$(SCRIPT_DIR)/run_local.sh clean
