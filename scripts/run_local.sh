@@ -75,20 +75,7 @@ main() {
   kubectl rollout status deploy -n neo neo-token
   sleep 2
 
-  JWT_CLIENT_ID=$(kubectl get secret neo-secret -n neo -o json | jq -r '.data["auth0-client-id"]' | tr -d '\n' | base64 -d)
-  JWT_CLIENT_SECRET=$(kubectl get secret neo-secret -n neo -o json | jq -r '.data["auth0-client-secret"]' | tr -d '\n' | base64 -d)
-
-  JWT_EXTERNAL=$(curl --silent --location --request POST 'https://traefiklabs-neo-dev.eu.auth0.com/oauth/token' \
-    --header 'Content-Type: application/x-www-form-urlencoded' \
-    --data-urlencode 'grant_type=password' \
-    --data-urlencode "username=${NEO_USERNAME}" \
-    --data-urlencode "password=${NEO_PASSWORD}" \
-    --data-urlencode 'audience=https://clients.neo.traefik.io/' \
-    --data-urlencode "client_id=${JWT_CLIENT_ID}" \
-    --data-urlencode "client_secret=${JWT_CLIENT_SECRET}" \
-    --data-urlencode 'scope=openid' \
-    --data-urlencode 'realm=Username-Password-Authentication' \
-    --data-urlencode 'organizationId=607997e8406c62aace2d493d' | jq -r '.access_token' | tr -d '\n')
+  renew-jwt
 
   CLUSTER_NAME=$(date +%s | sha256sum | base64 | head -c 32 ; echo)
 
@@ -145,6 +132,25 @@ renew-gcr-token() {
 renew-auth0-admin-token() {
   kubectl delete job -n neo auth0-admin-token-renew
   kubectl apply -f "$PROJECT_DIR"/neo/manifests/neo/01-auth0-admin-token-renew.yaml
+}
+
+renew-jwt() {
+  JWT_CLIENT_ID=$(kubectl get secret neo-secret -n neo -o json | jq -r '.data["auth0-client-id"]' | tr -d '\n' | base64 -d)
+  JWT_CLIENT_SECRET=$(kubectl get secret neo-secret -n neo -o json | jq -r '.data["auth0-client-secret"]' | tr -d '\n' | base64 -d)
+
+  JWT_EXTERNAL=$(curl --silent --location --request POST 'https://traefiklabs-neo-dev.eu.auth0.com/oauth/token' \
+    --header 'Content-Type: application/x-www-form-urlencoded' \
+    --data-urlencode 'grant_type=password' \
+    --data-urlencode "username=${NEO_USERNAME}" \
+    --data-urlencode "password=${NEO_PASSWORD}" \
+    --data-urlencode 'audience=https://clients.neo.traefik.io/' \
+    --data-urlencode "client_id=${JWT_CLIENT_ID}" \
+    --data-urlencode "client_secret=${JWT_CLIENT_SECRET}" \
+    --data-urlencode 'scope=openid' \
+    --data-urlencode 'realm=Username-Password-Authentication' \
+    --data-urlencode 'organizationId=607997e8406c62aace2d493d' | jq -r '.access_token' | tr -d '\n')
+
+  echo $JWT_EXTERNAL
 }
 
 check-tools() {
@@ -227,6 +233,9 @@ case $cmd in
     renew-gcr-token)
         renew-gcr-token
     ;;
+    renew-jwt)
+        renew-jwt
+    ;;
     renew-auth0-admin-token)
         renew-auth0-admin-token
     ;;
@@ -237,7 +246,7 @@ case $cmd in
         clean
     ;;
     *)
-        echo "Commands available: renew-auth0-admin-token, renew-gcr-token, run, clean"
+        echo "Commands available: renew-auth0-admin-token, renew-gcr-token, renew-jwt, run, clean"
         exit 1
     ;;
 esac

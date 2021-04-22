@@ -1,6 +1,9 @@
-.PHONY: renew-gcr-tokens renew-auth0-admin-token run run-adsl clean delete
+.PHONY: jwt renew-gcr-tokens renew-auth0-admin-token run run-adsl clean delete
 
 SCRIPT_DIR ?= $(CURDIR)/scripts
+
+jwt:
+	$(SCRIPT_DIR)/run_local.sh renew-jwt
 
 renew-gcr-token:
 	$(SCRIPT_DIR)/run_local.sh renew-gcr-token
@@ -18,5 +21,5 @@ clean:
 	$(SCRIPT_DIR)/run_local.sh clean
 
 delete:
-	read -p "This will destroy your k3d cluster. Are you sure ? (Y/n): " confirm && [[ $$confirm == [yY] ]] || exit 1
+	@read -p "This will destroy your k3d cluster. Are you sure ? (Y/n): " confirm && [[ $$confirm == [yY] ]] || exit 1
 	k3d cluster delete k3s-default-neo

@@ -48,7 +48,13 @@ The `GITHUB_TOKEN` need the following `repo` scope.
 
 #### Mac User
 
-On MacOs, you need to install `coreutils`, because by default `*.localhost` is not resolved. 
+On MacOs, you need to install `coreutils`, because by default `*.localhost` is not resolved.
+You then need to add the hosts in `/etc/hosts`:
+```bash
+127.0.0.1 platform.docker.localhost
+127.0.0.1 webapp.docker.localhost
+127.0.0.1 jaeger-ui.docker.localhost
+```
 
 ### Installation
 
@@ -69,6 +75,14 @@ The local installation can be done with `make run`. The script will create a k3d
 
 There are several commands to renew secrets, clean, or speed up the deployment :
 
+#### jwt
+
+If you need to renew your jwt. You can just run this command :
+
+```
+make jwt
+```
+
 #### renew-gcr-token
 
 If your gcr credentials expire, you need to renew them. You can just run this command :
@@ -79,7 +93,7 @@ make renew-gcr-token
 
 #### renew-auth0-admin-token
 
-If the organization service doesn't work as expected and you get some auth0 errors logs, your token is probably expired.
+If the organization service doesn't work as expected, and you get some auth0 errors logs, your token is probably expired.
 You can renew it with this command:
 
 ```
@@ -97,7 +111,7 @@ make renew-auth0-admin-token
 #### --adsl
 
 `make run-adsl` allows docker to pull the images before starting the cluster.
-We recommand to run it instead of `make run` if your internet connection is a bit slow.
+We recommend running it instead of `make run` if your internet connection is a bit slow.
 
 ### Exposed Endpoints
 
