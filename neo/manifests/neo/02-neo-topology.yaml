@@ -15,6 +15,9 @@ spec:
         app: neo-topology
         version: "v1"
         k8s-app: neo-topology
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "80"
     spec:
       imagePullSecrets:
         - name: gcr-access-token

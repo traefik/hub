@@ -145,6 +145,7 @@ metadata:
   namespace: haproxy-ingress-controller
 data:
   ssl-redirect: "false"
+  prometheus-port: "9105"
 ---
 # see https://kubernetes.io/docs/reference/workloads-18-19
 apiVersion: apps/v1
@@ -162,6 +163,9 @@ spec:
     metadata:
       labels:
         run: haproxy-ingress
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9105"
     spec:
       serviceAccountName: haproxy-ingress-controller
       containers:
@@ -177,6 +181,8 @@ spec:
               containerPort: 443
             - name: stat
               containerPort: 1936
+            - name: metrics
+              containerPort: 9105
           livenessProbe:
             httpGet:
               path: /healthz

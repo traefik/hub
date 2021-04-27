@@ -55,6 +55,8 @@ To resolve `*.docker.localhost`, you also need to add these hosts in your `/etc/
 127.0.0.1 platform.docker.localhost
 127.0.0.1 webapp.docker.localhost
 127.0.0.1 jaeger-ui.docker.localhost
+127.0.0.1 prometheus.docker.localhost
+127.0.0.1 grafana.docker.localhost
 ```
 
 ### Installation
@@ -70,6 +72,9 @@ The local installation can be done with `make run`. The script will create a k3d
   - Neo services: metrics, organization, topology (+ an ingress to access to all the services)
 - Neo-agent
 - Jaeger
+- Monitoring
+  - Grafana
+  - Prometheus
 
 There are several commands to renew secrets, clean, or speed up the deployment :
 
@@ -124,6 +129,9 @@ We recommend running it instead of `make run` if your internet connection is a b
     - /notification
     - /alert
     - /certificates
+    
+- Grafana: https://grafana.docker.localhost
+- Prometheus: https://prometheus.docker.localhost/
 
 ## Manual installation
 

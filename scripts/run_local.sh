@@ -113,6 +113,13 @@ main() {
   echo "Deploying whoami."
   kubectl apply -f "$PROJECT_DIR"/neo/manifests/whoami/
   kubectl -n whoami wait --for condition=available --timeout=180s deployment/whoami
+
+  # Install monitoring
+  echo "Deploying monitoring."
+  kubectl apply -f "$PROJECT_DIR"/neo/manifests/monitoring/00-namespace.yaml
+  kubectl delete configmap -n monitoring grafana-dashboard || true
+  kubectl create configmap -n monitoring grafana-dashboard --from-file="$PROJECT_DIR"/neo/manifests/monitoring/dashboards/
+  kubectl apply -f "$PROJECT_DIR"/neo/manifests/monitoring/
 }
 
 renew-gcr-token() {
@@ -222,6 +229,10 @@ clean() {
   # Uninstall Mongo
   echo "Undeploying Mongo"
   kubectl delete -f "$PROJECT_DIR"/neo/manifests/mongo/
+
+  # Uninstall Monitoring
+  echo "Undeploying Monitoring"
+  kubectl delete -f "$PROJECT_DIR"/neo/manifests/monitoring/
 
   # Delete ClusterRole, secrets and namespaces
   kubectl delete -f "$PROJECT_DIR"/neo/manifests/neo-agent/00-namespace.yaml

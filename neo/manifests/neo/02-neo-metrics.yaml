@@ -15,6 +15,9 @@ spec:
         app: neo-metrics
         version: "v1"
         k8s-app: neo-metrics
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "80"
     spec:
       imagePullSecrets:
         - name: gcr-access-token
