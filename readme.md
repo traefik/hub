@@ -3,6 +3,7 @@
   - [K3D](#k3d)
     - [Prerequisites](#prerequisites)
     - [Installation](#installation)
+  - [Postman](#postman)
   - [Manual installation](#manual-installation)
     - [Create the cluster](#create-the-cluster)
     - [Install Ingress Controllers](#install-ingress-controllers)
@@ -132,6 +133,10 @@ We recommend running it instead of `make run` if your internet connection is a b
     
 - Grafana: https://grafana.docker.localhost
 - Prometheus: https://prometheus.docker.localhost/
+    
+## Postman
+
+A Postman collection with multiple environments is available in this repo. Check out the dedicated [readme](/postman/readme.md).
 
 ## Manual installation
 

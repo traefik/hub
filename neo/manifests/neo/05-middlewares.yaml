@@ -27,3 +27,4 @@ spec:
       - /notification
       - /alert
       - /certificates
+      - /metrics

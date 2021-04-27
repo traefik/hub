@@ -152,7 +152,7 @@ spec:
     - web
   routes:
     - kind: Rule
-      match: Host(`platform.docker.locahost`) && PathPrefix(`/metrics/external`)
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/metrics/external`)
       services:
         - name: neo-metrics
           port: 80

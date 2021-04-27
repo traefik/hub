@@ -140,10 +140,12 @@ spec:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && PathPrefix(`/auth0`)
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/organization/auth0`)
       services:
         - name: neo-organization
           port: 80
+      middlewares:
+        - name: stripprefix
   tls:
     certResolver: default
 
@@ -158,7 +160,47 @@ spec:
     - web
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && PathPrefix(`/auth0`)
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/organization/auth0`)
       services:
         - name: neo-organization
           port: 80
+      middlewares:
+        - name: stripprefix
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: organization-internal-tls
+  namespace: neo
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/organization/internal`)
+      services:
+        - name: neo-organization
+          port: 80
+      middlewares:
+        - name: stripprefix
+  tls:
+    certResolver: default
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: organization-internal
+  namespace: neo
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/organization/internal`)
+      services:
+        - name: neo-organization
+          port: 80
+      middlewares:
+        - name: stripprefix

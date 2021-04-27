@@ -27,8 +27,7 @@
       "permissions": [
         {
           "action": "view",
-          "resource": "organization",
-          "scope": "*"
+          "resource": "organization"
         },
         {
           "action": "edit",
