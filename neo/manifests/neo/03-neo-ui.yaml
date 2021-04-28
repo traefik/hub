@@ -47,13 +47,17 @@ spec:
             - name: AUTH0_ADMIN_TOKEN
               value: "toto"
             - name: TOPOLOGY_SERVICE_ENDPOINT
-              value: "http://neo-topology.neo.svc.cluster.local"
+              value: "http://neo-topology.neo.svc.cluster.local/external"
             - name: METRICS_SERVICE_ENDPOINT
-              value: "http://neo-metrics.neo.svc.cluster.local"
+              value: "http://neo-metrics.neo.svc.cluster.local/external"
             - name: ORGANIZATION_SERVICE_ENDPOINT
-              value: "http://neo-organization.neo.svc.cluster.local"
+              value: "http://neo-organization.neo.svc.cluster.local/external"
+            - name: CLUSTER_SERVICE_ENDPOINT
+              value: "http://neo-cluster.neo.svc.cluster.local/external"
             - name: IS_LOCAL
               value: "true"
+            - name: "NODE_TLS_REJECT_UNAUTHORIZED"
+              value: "0"
 
 ---
 apiVersion: v1
@@ -87,3 +91,5 @@ spec:
       services:
         - name: neo-ui
           port: 80
+  tls:
+    certResolver: default

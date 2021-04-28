@@ -106,24 +106,6 @@ data:
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: jaeger-collector
-  namespace: jaeger
-spec:
-  entryPoints:
-    - web
-  routes:
-    - kind: Rule
-      match: Host(`jaeger-collector.docker.localhost`)
-      middlewares:
-        - name: jaeger-collector-basic-auth
-          namespace: pilot
-      services:
-        - name: jaeger
-          port: 14268
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
   name: jaeger-ui
   namespace: jaeger
 spec:
@@ -135,3 +117,5 @@ spec:
       services:
         - name: jaeger
           port: 16686
+  tls:
+    certResolver: default

@@ -5,19 +5,22 @@
 SCRIPT_DIR ?= $(CURDIR)/scripts
 
 jwt:
-	$(SCRIPT_DIR)/run_local.sh renew-jwt
+	@$(SCRIPT_DIR)/run_local.sh renew-jwt
 
 renew-gcr-token:
-	$(SCRIPT_DIR)/run_local.sh renew-gcr-token
+	@$(SCRIPT_DIR)/run_local.sh renew-gcr-token
 
 renew-auth0-admin-token:
-	$(SCRIPT_DIR)/run_local.sh renew-auth0-admin-token
+	@$(SCRIPT_DIR)/run_local.sh renew-auth0-admin-token
 
 run:
-	$(SCRIPT_DIR)/run_local.sh run
+	@$(SCRIPT_DIR)/run_local.sh run
 
 run-adsl:
-	$(SCRIPT_DIR)/run_local.sh run --adsl
+	@$(SCRIPT_DIR)/run_local.sh run --adsl
+
+apply-coredns-conf:
+	@$(SCRIPT_DIR)/run_local.sh apply-coredns-conf
 
 reset-all-images: reset-agent-image reset-cluster-image reset-organization-image reset-topology-image reset-token-image reset-metrics-image
 

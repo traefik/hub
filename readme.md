@@ -104,6 +104,15 @@ You can renew it with this command:
 make renew-auth0-admin-token
 ```
 
+#### apply-coredns-conf
+
+If you have some errors like this:
+```
+getaddrinfo ENOTFOUND platform.docker.localhost
+```
+
+You have to reapply the coredns configuration with `make apply-coredns-conf`.
+
 #### clean
 
 `make clean` won't delete the k3d cluster but will delete every component created with the `make run` command.

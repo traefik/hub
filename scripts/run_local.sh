@@ -29,9 +29,7 @@ main() {
   kubectl apply -f "$PROJECT_DIR"/neo/manifests/neo-agent/00-namespace.yaml
   kubectl apply -f "$PROJECT_DIR"/neo/manifests/aws-secret-operator/00-namespace.yaml
 
-  # Create CoreDNS configmap and rollout restart
-  kubectl apply -f "$PROJECT_DIR"/coredns/00-configmap.yaml
-  kubectl rollout restart -n kube-system deploy/coredns
+  apply-coredns-conf
 
   # Create secrets
   renew-gcr-token
@@ -89,10 +87,16 @@ main() {
   # Install Neo Agent
   helm repo add neo https://helm.traefik.io/neo
   helm repo update
-  helm upgrade --install neo neo/neo --values="$PROJECT_DIR"/neo/manifests/neo-agent/01-values.yaml --namespace neo-agent
+
+  # Sets the version to v0.1.6 since ingressroutes are currently not supported by the neo-agent.
+  # TODO: remove --version when acp can deal with ingressroutes
+  helm upgrade --install neo neo/neo --version v0.1.6 --values="$PROJECT_DIR"/neo/manifests/neo-agent/01-values.yaml --namespace neo-agent
 
   # Patch Neo agent to expose debugging port
   kubectl patch svc -n neo-agent neo-agent -p '{"spec":{"ports":[{"name":"neo-agent-debug","port":40000}]}}'
+
+  # Wait for Neo agent to start
+  kubectl -n neo-agent wait --for condition=available --timeout=180s deployment/neo-agent
 
   # Install Jaeger
   echo "Deploying Jaeger."
@@ -120,6 +124,12 @@ main() {
   kubectl delete configmap -n monitoring grafana-dashboard || true
   kubectl create configmap -n monitoring grafana-dashboard --from-file="$PROJECT_DIR"/neo/manifests/monitoring/dashboards/
   kubectl apply -f "$PROJECT_DIR"/neo/manifests/monitoring/
+}
+
+apply-coredns-conf() {
+    # Create CoreDNS configmap and rollout restart
+    kubectl apply -f "$PROJECT_DIR"/coredns/00-configmap.yaml
+    kubectl rollout restart -n kube-system deploy/coredns
 }
 
 renew-gcr-token() {
@@ -241,6 +251,9 @@ clean() {
 cmd=$1
 
 case $cmd in
+    apply-coredns-conf)
+        apply-coredns-conf
+    ;;
     renew-gcr-token)
         renew-gcr-token
     ;;
@@ -257,7 +270,7 @@ case $cmd in
         clean
     ;;
     *)
-        echo "Commands available: renew-auth0-admin-token, renew-gcr-token, renew-jwt, run, clean"
+        echo "Commands available: apply-coredns-conf, renew-auth0-admin-token, renew-gcr-token, renew-jwt, run, clean"
         exit 1
     ;;
 esac
