@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1619443433725,
+  "iteration": 1619596638372,
   "links": [],
   "panels": [
     {
@@ -491,6 +491,7 @@
       },
       "id": 12,
       "options": {
+        "frameIndex": 0,
         "showHeader": true,
         "sortBy": [
           {
@@ -503,8 +504,9 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(http_request_duration_seconds_count{code!~\"200|201|202|203|204\", service=~\"$service\", namespace=~\"$namespace\"}) by (service) / sum(http_request_duration_seconds_count{code=~\"200|201|202|203|204\", service=~\"$service\", namespace=~\"$namespace\"}) by (service)",
+          "expr": "sum(http_request_duration_seconds_count{code!~\"200|201|202|203|204\", service=~\"$service\", namespace=~\"$namespace\"}) by (service, namespace) / sum(http_request_duration_seconds_count{service=~\"$service\", namespace=~\"$namespace\"}) by (service, namespace)",
           "format": "table",
+          "hide": false,
           "instant": true,
           "interval": "",
           "legendFormat": "{{service}}",
@@ -524,8 +526,8 @@
             "indexByName": {
               "Time": 0,
               "Value": 3,
-              "code": 2,
-              "service": 1
+              "namespace": 1,
+              "service": 2
             },
             "renameByName": {}
           }
