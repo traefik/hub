@@ -87,13 +87,7 @@ main() {
   # Install Neo Agent
   helm repo add neo https://helm.traefik.io/neo
   helm repo update
-
-  # Sets the version to v0.1.6 since ingressroutes are currently not supported by the neo-agent.
-  # TODO: remove --version when acp can deal with ingressroutes
-  helm upgrade --install neo neo/neo --version v0.1.6 --values="$PROJECT_DIR"/neo/manifests/neo-agent/01-values.yaml --namespace neo-agent
-
-  # Patch Neo deployment to add readiness and liveness (TODO This will be remove it will be integrate in the helm-chart)
-  kubectl patch deployment.apps -n neo-agent neo-agent -p '{"spec":{"template":{"spec":{"containers":[{"name":"neo-agent","livenessProbe":{"tcpSocket":{"port":443}},"initialDelaySeconds":5,"periodSeconds":20,"readinessProbe":{"tcpSocket":{"port":443}},"initialDelaySeconds":5,"periodSeconds":10}]}}}}'
+  helm upgrade --install neo neo/neo --values="$PROJECT_DIR"/neo/manifests/neo-agent/01-values.yaml --namespace neo-agent
 
   # Patch Neo agent to expose debugging port
   kubectl patch svc -n neo-agent neo-agent -p '{"spec":{"ports":[{"name":"neo-agent-debug","port":40000}]}}'
