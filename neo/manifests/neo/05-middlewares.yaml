@@ -28,3 +28,4 @@ spec:
       - /alert
       - /certificates
       - /metrics
+      - /invitation

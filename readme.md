@@ -70,7 +70,18 @@ The local installation can be done with `make run`. The script will create a k3d
 - Whoami with one ingress per ingress controller
 - Neo platform
   - MongoDB
-  - Neo services: metrics, organization, topology (+ an ingress to access to all the services)
+  - Neo services:
+    - metrics
+    - organization
+    - topology
+    - alert
+    - clusters
+    - certificates
+    - invitation
+    - ui
+    - token
+    - notification
+    - (+ an ingress to access to all the services)
 - Neo-agent
 - Jaeger
 - Monitoring
@@ -139,6 +150,7 @@ We recommend running it instead of `make run` if your internet connection is a b
     - /notification
     - /alert
     - /certificates
+    - /invitation
     
 - Grafana: https://grafana.docker.localhost
 - Prometheus: https://prometheus.docker.localhost/
