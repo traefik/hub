@@ -237,12 +237,16 @@ clean() {
   echo "Undeploying Mongo"
   kubectl delete -f "$PROJECT_DIR"/neo/manifests/mongo/
 
-  # Uninstall Monitoring
-  echo "Undeploying Monitoring"
-  kubectl delete -f "$PROJECT_DIR"/neo/manifests/monitoring/
+  # Delete webhook
+  kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io neo || true
 
   # Delete ClusterRole, secrets and namespaces
   kubectl delete -f "$PROJECT_DIR"/neo/manifests/neo-agent/00-namespace.yaml
+  kubectl delete -f "$PROJECT_DIR"/neo/manifests/aws-secret-operator/00-namespace.yaml
+
+  # Uninstall Monitoring
+  echo "Undeploying Monitoring"
+  kubectl delete -f "$PROJECT_DIR"/neo/manifests/monitoring/00-namespace.yaml
 }
 
 cmd=$1
