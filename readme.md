@@ -1,8 +1,8 @@
 # Alpha 1
 
-The Kubernetes cluster has been created with [env-on-demand](https://github.com/traefik/env-on-demand/issues/327)
+The Kubernetes cluster has been created with [env-on-demand](https://github.com/traefik/env-on-demand/issues/339)
 
-The kubeconfig is available in this [comment](https://github.com/traefik/env-on-demand/issues/327#issuecomment-823890725)
+The kubeconfig is available in this [comment](https://github.com/traefik/env-on-demand/issues/339#issuecomment-833514563)
 
 ## Install ingress controller
 
@@ -20,7 +20,7 @@ kubectl apply -f whoami
 
 ## Create account on neo and create a cluster
 
-https://traefiklabs-neo-ui.netlify.app/
+[ui](https://traefiklabs-neo-ui.netlify.app/)
 
 - Create an account
 - Create a new cluster
