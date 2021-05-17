@@ -1,6 +1,6 @@
 .PHONY: jwt renew-gcr-tokens renew-auth0-admin-token run run-adsl clean delete \
 		reset-all-images reset-agent-image reset-cluster-image reset-organization-image \
-		reset-topology-image reset-token-image reset-metrics-image
+		reset-topology-image reset-token-image reset-metrics-image diagrams
 
 SCRIPT_DIR ?= $(CURDIR)/scripts
 
@@ -48,3 +48,6 @@ clean:
 delete:
 	@read -p "This will destroy your k3d cluster. Are you sure? (Y/n): " confirm && [ "$${confirm}" != "$${confirm#[Yy]}" ] || exit 1
 	k3d cluster delete k3s-default-neo
+
+diagrams:
+	$(MAKE) --directory=diagrams

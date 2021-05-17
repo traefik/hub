@@ -11,3 +11,7 @@ venv
 01-awssecret.yaml
 01-github-token.yaml
 01-values.yaml
+
+# generated for diagrams
+diagrams/dist
+diagrams/diagrams
