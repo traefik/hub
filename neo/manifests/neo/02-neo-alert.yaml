@@ -38,6 +38,18 @@ spec:
             periodSeconds: 5
             failureThreshold: 2
           env:
+            - name: NEO_JWT_CERT
+              valueFrom:
+                secretKeyRef:
+                  key: jwt-cert
+                  name: neo-secret
+            - name: NEO_JWT_ISS
+              value: "https://traefiklabs-neo-dev.eu.auth0.com/"
+            - name: NEO_JWT_SUB
+              valueFrom:
+                secretKeyRef:
+                  key: jwt-sub
+                  name: neo-secret
             - name: TRACING_ENDPOINT
               value: "http://jaeger.jaeger.svc.cluster.local:14268"
             - name: TRACING_PROBABILITY
@@ -47,6 +59,8 @@ spec:
           args:
             - serve
             - --addr=:80
+            - --mongodb-uri=mongodb://admin:admin@mongodb.mongo.svc.cluster.local:27017/alerts?authSource=admin
+
 ---
 apiVersion: v1
 kind: Service
@@ -63,3 +77,79 @@ spec:
       name: neo-alert
   selector:
     app: neo-alert
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: alert-agent-tls
+  namespace: neo
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && (Path(`/agent/rules`) || Path(`/agent/notify`))
+      services:
+        - name: neo-alert
+          port: 80
+      middlewares:
+        - name: auth-token
+  tls:
+    certResolver: default
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: alert-agent
+  namespace: neo
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && (Path(`/agent/rules`) || Path(`/agent/notify`))
+      services:
+        - name: neo-alert
+          port: 80
+      middlewares:
+        - name: auth-token
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: alert-external-tls
+  namespace: neo
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/alert/external`)
+      services:
+        - name: neo-alert
+          port: 80
+      middlewares:
+        - name: stripprefix
+  tls:
+    certResolver: default
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: alert-external
+  namespace: neo
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/alert/external`)
+      services:
+        - name: neo-alert
+          port: 80
+      middlewares:
+        - name: stripprefix
