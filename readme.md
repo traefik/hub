@@ -86,7 +86,8 @@ The local installation can be done with `make run`. The script will create a k3d
 - Jaeger
 - Monitoring
   - Grafana
-  - Prometheus
+  - Prometheus 
+- Pebble
 
 There are several commands to renew secrets, clean, or speed up the deployment :
 

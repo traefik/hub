@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "a07ab843-99a4-428b-9783-f5ea0b27a9a5",
+		"_postman_id": "4324d819-e6fc-44e2-9f3b-13825ae146f8",
 		"name": "Neo",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1540,6 +1540,144 @@
 									"path": [
 										"internal",
 										"repos"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Certificates",
+			"item": [
+				{
+					"name": "/external",
+					"item": [
+						{
+							"name": "/certificates - List certificates of an organization",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{CERTIFICATES_URL}}/external/certificates",
+									"host": [
+										"{{CERTIFICATES_URL}}"
+									],
+									"path": [
+										"external",
+										"certificates"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/certificates/:id/revoke - Revoke/Renew a certificate",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{CERTIFICATES_URL}}/external/certificates/:id/revoke",
+									"host": [
+										"{{CERTIFICATES_URL}}"
+									],
+									"path": [
+										"external",
+										"certificates",
+										":id",
+										"revoke"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_CERTIFICATION_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/certificates/:id - Delete certificate",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{CERTIFICATES_URL}}/external/certificates/:id",
+									"host": [
+										"{{CERTIFICATES_URL}}"
+									],
+									"path": [
+										"external",
+										"certificates",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_CERTIFICATION_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "/agent",
+					"item": [
+						{
+							"name": "/certificates?domains= - Obtain a certificate",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_NEO_TOKEN}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{CERTIFICATES_URL}}/agent/certificates?domains=",
+									"host": [
+										"{{CERTIFICATES_URL}}"
+									],
+									"path": [
+										"agent",
+										"certificates"
+									],
+									"query": [
+										{
+											"key": "domains",
+											"value": ""
+										}
 									]
 								}
 							},

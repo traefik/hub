@@ -161,3 +161,21 @@ spec:
         - name: stripprefix
   tls:
     certResolver: default
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: certificates-external
+  namespace: neo
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/certificates/external`)
+      services:
+        - name: neo-certificates
+          port: 80
+      middlewares:
+        - name: stripprefix
