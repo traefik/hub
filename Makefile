@@ -42,6 +42,9 @@ reset-token-image:
 reset-metrics-image:
 	kubectl patch deployment -n neo neo-metrics -p '{"spec":{"template":{"spec":{"containers":[{"name":"neo-metrics","image":"gcr.io/traefiklabs/neo-metrics:latest","imagePullPolicy":"Always"}]}}}}'
 
+reset-certificate-image:
+	kubectl patch deployment -n neo neo-certificates -p '{"spec":{"template":{"spec":{"containers":[{"name":"neo-certificates","image":"gcr.io/traefiklabs/neo-certificates:latest","imagePullPolicy":"Always"}]}}}}'
+
 clean:
 	$(SCRIPT_DIR)/run_local.sh clean
 

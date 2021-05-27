@@ -15,3 +15,6 @@ venv
 # generated for diagrams
 diagrams/dist
 diagrams/diagrams
+
+# relicats
+neo-agent/

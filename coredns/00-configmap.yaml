@@ -7,6 +7,7 @@ data:
         ready
         rewrite name platform.docker.localhost traefik.traefik.svc.cluster.local
         rewrite name webapp.docker.localhost traefik.traefik.svc.cluster.local
+        rewrite name regex (.*)\.tls.docker\.localhost neo-certificates.neo.svc.cluster.local
         kubernetes cluster.local in-addr.arpa ip6.arpa {
           pods insecure
           fallthrough in-addr.arpa ip6.arpa

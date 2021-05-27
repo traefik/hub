@@ -9,7 +9,7 @@ metadata:
 spec:
   ingressClassName: nginx-k8s
   rules:
-    - host: nginx-k8s.docker.localhost
+    - host: nginx.docker.localhost
       http:
         paths:
           - path: /

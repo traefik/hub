@@ -51,6 +51,11 @@ main() {
   kubectl apply -f "$PROJECT_DIR"/neo/manifests/traefik/
   kubectl -n traefik wait --for condition=available --timeout=180s deployment/traefik
 
+  # Install Pebble
+  echo "Deploying Pebble."
+  kubectl apply -f "$PROJECT_DIR"/neo/manifests/pebble/
+  kubectl -n pebble wait --for condition=available --timeout=180s deployment/pebble
+
   # Populate Mongo
   kubectl cp "$PROJECT_DIR"/neo/documents/organization.json -n mongo $(kubectl get pods -n mongo -l app=mongodb --output=jsonpath={.items..metadata.name}):/tmp/organization.json
   kubectl exec -it -n mongo $(kubectl get pods -n mongo -l app=mongodb --output=jsonpath={.items..metadata.name}) -- bash -c "mongoimport --db organizations --collection organizations --file /tmp/organization.json --username admin --password admin  --authenticationDatabase admin"
@@ -191,7 +196,7 @@ setup-k3s() {
     k3d cluster start k3s-default-neo
   else
     echo "Setting up k3s cluster."
-    k3d cluster create k3s-default-neo --agents=2 --k3s-server-arg "--no-deploy=traefik" --image="rancher/k3s:v1.20.5-k3s1" --port 80:80@loadbalancer --port 443:443@loadbalancer --port 8000:8000@loadbalancer --port 9000:9000@loadbalancer
+    k3d cluster create k3s-default-neo --agents=2 --k3s-server-arg "--no-deploy=traefik" --image="rancher/k3s:v1.20.5-k3s1" --port 80:80@loadbalancer --port 443:443@loadbalancer --port 8000:8000@loadbalancer --port 8443:8443@loadbalancer --port 9000:9000@loadbalancer --port 9443:9443@loadbalancer
   fi
 
   # Wait until cluster is ready
@@ -247,6 +252,10 @@ clean() {
   # Uninstall Monitoring
   echo "Undeploying Monitoring"
   kubectl delete -f "$PROJECT_DIR"/neo/manifests/monitoring/00-namespace.yaml
+
+  # Uninstall Pebble
+  echo "Undeploying Pebble"
+  kubectl delete -f "$PROJECT_DIR"/neo/manifests/pebble/
 }
 
 cmd=$1
