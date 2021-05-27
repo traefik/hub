@@ -16,13 +16,19 @@ spec:
     spec:
       containers:
         - name: mongodb
-          image: mongo:4.2.11
+          image: bitnami/mongodb:4.2.11
           imagePullPolicy: Always
           env:
-            - name: MONGO_INITDB_ROOT_USERNAME
+            - name: MONGODB_ROOT_PASSWORD
               value: admin
-            - name: MONGO_INITDB_ROOT_PASSWORD
-              value: admin
+            - name: MONGODB_REPLICA_SET_MODE
+              value: primary
+            - name: MONGODB_REPLICA_SET_KEY
+              value: replicatsetkey
+            - name: MONGODB_INITIAL_PRIMARY_HOST
+              value: "mongodb.mongo.svc.cluster.local"
+            - name: MONGODB_ADVERTISED_HOSTNAME
+              value: "mongodb.mongo.svc.cluster.local"
           volumeMounts:
             - name: mongodb-storage
               mountPath: /data/db

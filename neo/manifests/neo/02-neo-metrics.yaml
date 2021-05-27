@@ -61,7 +61,7 @@ spec:
           args:
             - serve
             - --addr=:80
-            - --mongo-uri=mongodb://admin:admin@mongodb.mongo.svc.cluster.local:27017/metrics?authSource=admin
+            - --mongo-uri=mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/metrics?authSource=admin
 
 ---
 apiVersion: v1
@@ -153,6 +153,44 @@ spec:
   routes:
     - kind: Rule
       match: Host(`platform.docker.localhost`) && PathPrefix(`/metrics/external`)
+      services:
+        - name: neo-metrics
+          port: 80
+      middlewares:
+        - name: stripprefix
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: metrics-internal-tls
+  namespace: neo
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/metrics/internal`)
+      services:
+        - name: neo-metrics
+          port: 80
+      middlewares:
+        - name: stripprefix
+  tls:
+    certResolver: default
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: metrics-internal
+  namespace: neo
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/metrics/internal`)
       services:
         - name: neo-metrics
           port: 80

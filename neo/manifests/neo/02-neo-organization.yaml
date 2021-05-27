@@ -70,7 +70,7 @@ spec:
           args:
             - serve
             - --addr=:80
-            - --mongodb-uri=mongodb://admin:admin@mongodb.mongo.svc.cluster.local:27017/organizations?authSource=admin
+            - --mongodb-uri=mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/organizations?authSource=admin
 ---
 apiVersion: v1
 kind: Service

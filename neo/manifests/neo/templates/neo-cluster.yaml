@@ -52,6 +52,8 @@ spec:
                   name: neo-secret
             - name: ORGANIZATION_SERVICE_URL
               value: http://neo-organization.neo.svc.cluster.local/internal
+            - name: METRICS_SERVICE_URL
+              value: http://neo-metrics.neo.svc.cluster.local/internal
             - name: TOKEN_SERVICE_URL
               value: http://neo-token.neo.svc.cluster.local/internal
             - name: TOPOLOGY_SERVICE_URL
@@ -69,7 +71,7 @@ spec:
           args:
             - serve
             - --addr=:80
-            - --mongodb-uri=mongodb://admin:admin@mongodb.mongo.svc.cluster.local:27017/clusters?authSource=admin
+            - --mongodb-uri=mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/clusters?authSource=admin
 ---
 apiVersion: v1
 kind: Service

@@ -59,7 +59,7 @@ spec:
           args:
             - serve
             - --addr=:80
-            - --mongodb-uri=mongodb://admin:admin@mongodb.mongo.svc.cluster.local:27017/alerts?authSource=admin
+            - --mongodb-uri=mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/alerts?authSource=admin
 
 ---
 apiVersion: v1

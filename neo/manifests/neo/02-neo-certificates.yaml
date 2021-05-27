@@ -99,7 +99,7 @@ spec:
             - serve
             - --addr=:80
             - --challenge-addr=:443
-            - --mongodb-uri=mongodb://admin:admin@mongodb.mongo.svc.cluster.local:27017/certifications?authSource=admin
+            - --mongodb-uri=mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/certifications?authSource=admin
       volumes:
         - name: config-volume
           configMap:

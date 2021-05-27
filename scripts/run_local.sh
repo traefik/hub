@@ -58,7 +58,7 @@ main() {
 
   # Populate Mongo
   kubectl cp "$PROJECT_DIR"/neo/documents/organization.json -n mongo $(kubectl get pods -n mongo -l app=mongodb --output=jsonpath={.items..metadata.name}):/tmp/organization.json
-  kubectl exec -it -n mongo $(kubectl get pods -n mongo -l app=mongodb --output=jsonpath={.items..metadata.name}) -- bash -c "mongoimport --db organizations --collection organizations --file /tmp/organization.json --username admin --password admin  --authenticationDatabase admin"
+  kubectl exec -it -n mongo $(kubectl get pods -n mongo -l app=mongodb --output=jsonpath={.items..metadata.name}) -- bash -c "mongoimport --db organizations --collection organizations --file /tmp/organization.json --username root --password admin  --authenticationDatabase admin"
 
   # Install Neo
   echo "Deploying Neo services."
