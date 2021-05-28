@@ -1,8 +1,8 @@
 # Alpha 1
 
-The Kubernetes cluster has been created with [env-on-demand](https://github.com/traefik/env-on-demand/issues/339)
+The Kubernetes cluster has been created with [env-on-demand](https://github.com/traefik/env-on-demand/issues/356)
 
-The kubeconfig is available in this [comment](https://github.com/traefik/env-on-demand/issues/339#issuecomment-833514563)
+The kubeconfig is available in this [comment](https://github.com/traefik/env-on-demand/issues/356#issuecomment-849664409)
 
 ## Install ingress controller
 
@@ -20,7 +20,7 @@ kubectl apply -f whoami
 
 ## Create account on neo and create a cluster
 
-[ui](https://traefiklabs-neo-ui.netlify.app/)
+[ui](https://hub.traefiklabs.tech/)
 
 - Create an account
 - Create a new cluster
@@ -29,12 +29,12 @@ kubectl apply -f whoami
 ## Run query to simulate traffic on applications
 
 ```
-hey https://whoami.haproxy.neo.demo.traefiklabs.tech
-hey https://whoami.traefik.neo.demo.traefiklabs.tech
-hey https://whoami.nginx.neo.demo.traefiklabs.tech
-hey https://whoami.nginx.neo.demo.traefiklabs.tech/httpbin/status/409
-hey https://whoami.nginx.neo.demo.traefiklabs.tech/httpbin/status/500
-hey https://whoami.nginx.neo.demo.traefiklabs.tech/httpbin/status/200
+hey https://whoami.haproxy.hub.demo.traefiklabs.tech
+hey https://whoami.traefik.hub.demo.traefiklabs.tech
+hey https://whoami.nginx.hub.demo.traefiklabs.tech
+hey https://whoami.nginx.hub.demo.traefiklabs.tech/httpbin/status/409
+hey https://whoami.nginx.hub.demo.traefiklabs.tech/httpbin/status/500
+hey https://whoami.nginx.hub.demo.traefiklabs.tech/httpbin/status/200
 ```
 
 ## Clean up

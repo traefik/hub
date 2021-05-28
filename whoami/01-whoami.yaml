@@ -22,7 +22,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: whoami
+  name: whoami-traefik
   namespace: whoami
   labels:
     app: whoami
@@ -31,5 +31,37 @@ spec:
   ports:
   - port: 80
     name: whoami
+  selector:
+    app: whoami
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: whoami-nginx
+  namespace: whoami
+  labels:
+    app: whoami
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      name: whoami
+  selector:
+    app: whoami
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: whoami-haproxy
+  namespace: whoami
+  labels:
+    app: whoami
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      name: whoami
   selector:
     app: whoami
