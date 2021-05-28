@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "4324d819-e6fc-44e2-9f3b-13825ae146f8",
+		"_postman_id": "ab79587c-bc69-4668-a9d3-1be823ffd44d",
 		"name": "Neo",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -543,18 +543,8 @@
 					"name": "/external",
 					"item": [
 						{
-							"name": "/query - Query metrics meta Copy",
+							"name": "/query - Query metrics meta",
 							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{AG_JWT_EXTERNAL}}",
-											"type": "string"
-										}
-									]
-								},
 								"method": "GET",
 								"header": [],
 								"url": {
@@ -573,16 +563,6 @@
 						{
 							"name": "/query/:id - Query cluster metrics",
 							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{AG_JWT_EXTERNAL}}",
-											"type": "string"
-										}
-									]
-								},
 								"method": "GET",
 								"header": [],
 								"url": {
@@ -608,16 +588,6 @@
 						{
 							"name": "/query/:id/:ic/:ing - Query ingress metrics",
 							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{AG_JWT_EXTERNAL}}",
-											"type": "string"
-										}
-									]
-								},
 								"method": "GET",
 								"header": [],
 								"url": {
@@ -636,12 +606,12 @@
 										{
 											"key": "dur",
 											"value": "1m",
-											"description": "Enter the duration metrics you want to get"
+											"description": "Enter the granularity of metrics you want to get (1m, 10m, 1h, 1d)"
 										},
 										{
 											"key": "from",
 											"value": "",
-											"description": "Enter the start time"
+											"description": "Enter the start time (timestamp)"
 										}
 									],
 									"variable": [
@@ -667,16 +637,6 @@
 						{
 							"name": "/query/:id/:ic/:ing/services - Query services metrics",
 							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{AG_JWT_EXTERNAL}}",
-											"type": "string"
-										}
-									]
-								},
 								"method": "GET",
 								"header": [],
 								"url": {
@@ -696,12 +656,12 @@
 										{
 											"key": "dur",
 											"value": "1m",
-											"description": "Enter the duration metrics you want to get"
+											"description": "Enter the granularity of metrics you want to get (1m, 10m, 1h, 1d)"
 										},
 										{
 											"key": "from",
 											"value": "",
-											"description": "Enter the start time"
+											"description": "Enter the start time (timestamp)"
 										}
 									],
 									"variable": [
@@ -724,7 +684,94 @@
 							},
 							"response": []
 						}
+					],
+					"auth": {
+						"type": "bearer",
+						"bearer": [
+							{
+								"key": "token",
+								"value": "{{AG_JWT_EXTERNAL}}",
+								"type": "string"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
 					]
+				},
+				{
+					"name": "/internal",
+					"item": [
+						{
+							"name": "/organizations/:orgId/clusters/:id - Delete cluster metrics",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{METRICS_URL}}/internal/organizations/:orgId/clusters/:id",
+									"host": [
+										"{{METRICS_URL}}"
+									],
+									"path": [
+										"internal",
+										"organizations",
+										":orgId",
+										"clusters",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "orgId",
+											"value": "{{AG_ORGANIZATION_ID}}"
+										},
+										{
+											"key": "id",
+											"value": "{{AG_CLUSTER_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"description": "Agent have also routes on:\n- /agent/data\n- /agent/metrics\n\nThose are using AVRO schemas so we didn't add it to postman collection.",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
 				}
 			]
 		},
@@ -1682,6 +1729,445 @@
 								}
 							},
 							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Alert",
+			"item": [
+				{
+					"name": "/agent",
+					"item": [
+						{
+							"name": "/config - Get alerting rules",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PLATFORM_URL}}/agent/rules",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"agent",
+										"rules"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/notify - Send notification",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[\n    {\n        \"ruleId\": \"60a6302d9309f8789c68cd13\",\n        \"ingress\": \"app-traefik@whoami\",\n        \"service\": \"whoami@whoami\",\n        \"points\": [\n        {\n            \"ts\": 1618842352,\n            \"value\": 10\n        }\n        ],\n        \"state\": 1,\n        \"logs\": \"H4sIAAAAAAAAA8vJT1fIycxL5QIARxHSvAkAAAA=\"\n    }\n  ]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{PLATFORM_URL}}/agent/notify",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"agent",
+										"notify"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"auth": {
+						"type": "bearer",
+						"bearer": [
+							{
+								"key": "token",
+								"value": "{{AG_NEO_TOKEN}}",
+								"type": "string"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "/external",
+					"item": [
+						{
+							"name": "/rules - List rules",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PLATFORM_URL}}/alert/external/rules",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"alert",
+										"external",
+										"rules"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/alerts - List alerts",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PLATFORM_URL}}/alert/external/alerts",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"alert",
+										"external",
+										"alerts"
+									],
+									"query": [
+										{
+											"key": "clusterId",
+											"value": "{{AG_CLUSTER_ID}}",
+											"disabled": true
+										},
+										{
+											"key": "ingress",
+											"value": "app-traefik@whoami",
+											"disabled": true
+										},
+										{
+											"key": "service",
+											"value": "whoami@whoami",
+											"disabled": true
+										},
+										{
+											"key": "state",
+											"value": "resolved",
+											"description": "state of the alert: resolved/unresolved",
+											"disabled": true
+										},
+										{
+											"key": "sortBy",
+											"value": "ingress",
+											"disabled": true
+										},
+										{
+											"key": "sortOrder",
+											"value": "asc",
+											"description": "asc/desc",
+											"disabled": true
+										},
+										{
+											"key": "limit",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "offset",
+											"value": "1",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/alerts/:id - Get an alert",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PLATFORM_URL}}/alert/external/alerts/:id",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"alert",
+										"external",
+										"alerts",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "",
+											"description": "Enter your alert ID"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/alerts/:id - Get an alert logs",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PLATFORM_URL}}/alert/external/alerts/:id/logs",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"alert",
+										"external",
+										"alerts",
+										":id",
+										"logs"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "",
+											"description": "Enter your alert ID"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/alerts/count - Count alerts",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PLATFORM_URL}}/alert/external/alerts/count",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"alert",
+										"external",
+										"alerts",
+										"count"
+									],
+									"query": [
+										{
+											"key": "state",
+											"value": "resolved",
+											"description": "the state of the alert: resolved/unresolved",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/rules - Create a rule",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"type\": \"threshold\",\n    \"cluster\": \"b059cbde-1b7b-4768-a340-8f72732e764f\",\n    \"ingress\": \"app-traefik@whoami\",\n    \"service\": \"whoami@whoami\",\n    \"emails\": [\n        \"nick.wiersma@traefik.io\",\n        \"remi.buisson@traefik.io\"\n    ],\n    \"threshold\": {\n        \"metric\": \"requestsPerSecond\",\n        \"condition\": {\n            \"above\": true,\n            \"value\": 1\n        },\n        \"occurrence\": 3,\n        \"timeRange\": \"10m\"\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{PLATFORM_URL}}/alert/external/rules",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"alert",
+										"external",
+										"rules"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/rules/:id - Update a rule",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"type\": \"threshold\",\n    \"cluster\": \"b059cbde-1b7b-4768-a340-8f72732e764f\",\n    \"ingress\": \"app-traefik@whoami\",\n    \"service\": \"whoami@whoami\",\n    \"emails\": [\n        \"nick.wiersma@traefik.io\"\n    ],\n    \"threshold\": {\n        \"metric\": \"requestsPerSecond\",\n        \"condition\": {\n            \"above\": true,\n            \"value\": 1\n        },\n        \"occurrence\": 3,\n        \"timeRange\": \"10m\"\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{PLATFORM_URL}}/alert/external/rules/:id",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"alert",
+										"external",
+										"rules",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "",
+											"description": "Enter your rule ID"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/rules/:id - Get a rule",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PLATFORM_URL}}/alert/external/rules/:id",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"alert",
+										"external",
+										"rules",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "",
+											"description": "Enter your rule ID"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/rules/:id - Delete a rule",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{PLATFORM_URL}}/alert/external/rules/:id",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"alert",
+										"external",
+										"rules",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "",
+											"description": "Enter your rule ID"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/rules/{id} - Enable/disable a rule",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"enabled\": false}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{PLATFORM_URL}}/alert/external/rules/:id",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"alert",
+										"external",
+										"rules",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "",
+											"description": "Enter your rule ID"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"auth": {
+						"type": "bearer",
+						"bearer": [
+							{
+								"key": "token",
+								"value": "{{AG_JWT_EXTERNAL}}",
+								"type": "string"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
 						}
 					]
 				}
