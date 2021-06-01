@@ -38,6 +38,10 @@ spec:
             periodSeconds: 5
             failureThreshold: 2
           env:
+            - name: CLUSTER_SERVICE_URL
+              value: "http://neo-cluster.neo.svc.cluster.local/internal"
+            - name: NOTIFICATION_SERVICE_URL
+              value: "http://neo-notification.neo.svc.cluster.local/internal"
             - name: NEO_JWT_CERT
               valueFrom:
                 secretKeyRef:
