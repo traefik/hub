@@ -2,17 +2,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: neo-token
-  namespace: neo
+  name: hub-config-provider
+  namespace: pop
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: neo-token
+      app: hub-config-provider
   template:
     metadata:
       labels:
-        app: neo-token
+        app: hub-config-provider
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "80"
@@ -20,9 +20,9 @@ spec:
       imagePullSecrets:
         - name: gcr-access-token
       containers:
-        - name: neo-token
-          image: gcr.io/traefiklabs/neo-token:latest
-          imagePullPolicy: Always
+        - name: hub-config-provider
+          image: gcr.io/traefiklabs/hub-gslb:latest
+          imagePullPolicy: Never
           livenessProbe:
             httpGet:
               port: 80
@@ -38,6 +38,14 @@ spec:
             periodSeconds: 5
             failureThreshold: 2
           env:
+            - name: RETENTION_FILE
+              value: /var/run/gslb/retention.json
+            - name: UPDATE_INTERVAL
+              value: 10s
+            - name: CHECK_INTERVAL
+              value: 10s
+            - name: CHECK_URL
+              value: http://hub-check.pop.svc.cluster.local/internal
             - name: TRACING_ENDPOINT
               value: "http://jaeger.jaeger.svc.cluster.local:14268"
             - name: TRACING_PROBABILITY
@@ -45,43 +53,43 @@ spec:
             - name: LOG_LEVEL
               value: debug
           args:
-            - serve
+            - serveconfig
             - --addr=:80
-            - --mongodb-uri=mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/tokens?authSource=admin
+            - --mongodb-uri=mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/gslb?authSource=admin
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: neo-token
-  namespace: neo
+  name: hub-config-provider
+  namespace: pop
   labels:
-    app: neo-token
+    app: hub-config-provider
 spec:
   type: ClusterIP
   ports:
     - port: 80
       targetPort: 80
-      name: neo-token
+      name: hub-config-provider
     - port: 40000
       targetPort: 40000
-      name: neo-token-debug
+      name: hub-config-provider-debug
   selector:
-    app: neo-token
+    app: hub-config-provider
 
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: token-internal-tls
-  namespace: neo
+  name: config-provider-internal-tls
+  namespace: pop
 spec:
   entryPoints:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && PathPrefix(`/token/internal`)
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/config-provider/internal`)
       services:
-        - name: neo-token
+        - name: hub-config-provider
           port: 80
       middlewares:
         - name: stripprefix
@@ -92,16 +100,16 @@ spec:
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: token-internal
-  namespace: neo
+  name: config-provider-internal
+  namespace: pop
 spec:
   entryPoints:
     - web
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && PathPrefix(`/token/internal`)
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/config-provider/internal`)
       services:
-        - name: neo-token
+        - name: hub-config-provider
           port: 80
       middlewares:
         - name: stripprefix

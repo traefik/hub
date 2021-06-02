@@ -2,17 +2,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: neo-token
-  namespace: neo
+  name: hub-check
+  namespace: pop
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: neo-token
+      app: hub-check
   template:
     metadata:
       labels:
-        app: neo-token
+        app: hub-check
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "80"
@@ -20,9 +20,9 @@ spec:
       imagePullSecrets:
         - name: gcr-access-token
       containers:
-        - name: neo-token
-          image: gcr.io/traefiklabs/neo-token:latest
-          imagePullPolicy: Always
+        - name: hub-check
+          image: gcr.io/traefiklabs/check-service:latest
+          imagePullPolicy: Never
           livenessProbe:
             httpGet:
               port: 80
@@ -47,41 +47,40 @@ spec:
           args:
             - serve
             - --addr=:80
-            - --mongodb-uri=mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/tokens?authSource=admin
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: neo-token
-  namespace: neo
+  name: hub-check
+  namespace: pop
   labels:
-    app: neo-token
+    app: hub-check
 spec:
   type: ClusterIP
   ports:
     - port: 80
       targetPort: 80
-      name: neo-token
+      name: hub-check
     - port: 40000
       targetPort: 40000
-      name: neo-token-debug
+      name: hub-check-debug
   selector:
-    app: neo-token
+    app: hub-check
 
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: token-internal-tls
-  namespace: neo
+  name: check-internal-tls
+  namespace: pop
 spec:
   entryPoints:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && PathPrefix(`/token/internal`)
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/check/internal`)
       services:
-        - name: neo-token
+        - name: hub-check
           port: 80
       middlewares:
         - name: stripprefix
@@ -92,16 +91,16 @@ spec:
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: token-internal
-  namespace: neo
+  name: check-internal
+  namespace: pop
 spec:
   entryPoints:
     - web
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && PathPrefix(`/token/internal`)
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/check/internal`)
       services:
-        - name: neo-token
+        - name: hub-check
           port: 80
       middlewares:
         - name: stripprefix

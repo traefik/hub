@@ -100,6 +100,11 @@ main() {
   # Wait for Neo agent to start
   kubectl -n neo-agent wait --for condition=available --timeout=180s deployment/neo-agent
 
+  # Install PoP
+  echo "Deploying PoP services."
+  kubectl apply -f "$PROJECT_DIR"/neo/manifests/pop
+  kubectl apply -f "$PROJECT_DIR"/neo/manifests/pop/secrets
+
   # Install Jaeger
   echo "Deploying Jaeger."
   kubectl apply -f "$PROJECT_DIR"/neo/manifests/jaeger/

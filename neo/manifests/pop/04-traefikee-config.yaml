@@ -1,0 +1,36 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: traefikee-static-config
+  namespace: pop
+data:
+  static.toml: |
+    [api]
+      insecure = true
+      dashboard = true
+    [entryPoints]
+      [entryPoints.web]
+        address = ":80"
+        [entryPoints.web.http.redirections.entryPoint]
+          to = "websecure"
+          permanent = true
+      [entryPoints.web.proxyProtocol]
+        insecure = true
+      [entryPoints.websecure]
+        address = ":443"
+      [entryPoints.websecure.http]
+        tls = true
+      [entryPoints.websecure.proxyProtocol]
+        insecure = true
+      [entryPoints.prometheus]
+        address = ":9090"
+      [entryPoints.traefikgslb]
+        address = ":8081"
+      [metrics.prometheus]
+        entryPoint = "traefik"
+    [providers]
+      [providers.http]
+        endpoint = "http://hub-config-provider.pop.svc.cluster.local/internal/conf"
+      [providers.kubernetesCRD]
+        namespaces = ["pop"]

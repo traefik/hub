@@ -1,0 +1,149 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: "traefikee-gslb-svc-acc"
+  namespace: pop
+  labels:
+    k8s-app: traefikee
+    release: "traefik-gslb"
+
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: "traefikee-gslb-svc-acc-role"
+  labels:
+    k8s-app: traefikee
+    release: "traefik-gslb"
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - services
+      - endpoints
+      - pods
+      - pods/log
+      - nodes
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - create
+      - update
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - extensions
+    resources:
+      - ingresses
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - "extensions"
+    resources:
+      - ingresses/status
+    verbs:
+      - update
+  - apiGroups:
+      - traefik.containo.us
+    resources:
+      - ingressroutes
+      - ingressroutetcps
+      - ingressrouteudps
+      - tlsstores
+      - tlsoptions
+      - middlewares
+      - traefikservices
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - access.smi-spec.io
+      - specs.smi-spec.io
+      - split.smi-spec.io
+    resources:
+      - traffictargets
+      - tcproutes
+      - httproutegroups
+      - trafficsplits
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - get
+      - create
+      - update
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+    verbs:
+      - get
+      - update
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: "traefikee-gslb-svc-acc"
+  labels:
+    k8s-app: traefikee
+    release: "traefik-gslb"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: "traefikee-gslb-svc-acc-role"
+subjects:
+  - kind: ServiceAccount
+    name: "traefikee-gslb-svc-acc"
+    namespace: pop
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: "traefikee-gslb-svc-acc-role-traefikee"
+  namespace: pop
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+      - services
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - delete
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: "traefikee-gslb-svc-acc-traefikee"
+  namespace: pop
+roleRef:
+  kind: Role
+  name: "traefikee-gslb-svc-acc-role-traefikee"
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+  - kind: ServiceAccount
+    name: "traefikee-gslb-svc-acc"
+    namespace: pop

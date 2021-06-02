@@ -2,17 +2,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: neo-token
+  name: hub-gslb
   namespace: neo
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: neo-token
+      app: hub-gslb
   template:
     metadata:
       labels:
-        app: neo-token
+        app: hub-gslb
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "80"
@@ -20,8 +20,8 @@ spec:
       imagePullSecrets:
         - name: gcr-access-token
       containers:
-        - name: neo-token
-          image: gcr.io/traefiklabs/neo-token:latest
+        - name: hub-gslb
+          image: gcr.io/traefiklabs/hub-gslb:latest
           imagePullPolicy: Always
           livenessProbe:
             httpGet:
@@ -38,6 +38,22 @@ spec:
             periodSeconds: 5
             failureThreshold: 2
           env:
+            - name: CNAME_DOMAIN
+              value: "unused.localhost"
+            - name: GA_NAME
+              value: gslb-ga.docker.localhost
+            - name: HUB_JWT_CERT
+              valueFrom:
+                secretKeyRef:
+                  key: jwt-cert
+                  name: neo-secret
+            - name: HUB_JWT_ISS
+              value: "https://traefiklabs-neo-dev.eu.auth0.com/"
+            - name: HUB_JWT_SUB
+              valueFrom:
+                secretKeyRef:
+                  key: jwt-sub
+                  name: neo-secret
             - name: TRACING_ENDPOINT
               value: "http://jaeger.jaeger.svc.cluster.local:14268"
             - name: TRACING_PROBABILITY
@@ -47,41 +63,42 @@ spec:
           args:
             - serve
             - --addr=:80
-            - --mongodb-uri=mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/tokens?authSource=admin
+            - --dev-mode
+            - --mongodb-uri=mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/gslb?authSource=admin
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: neo-token
+  name: hub-gslb
   namespace: neo
   labels:
-    app: neo-token
+    app: hub-gslb
 spec:
   type: ClusterIP
   ports:
     - port: 80
       targetPort: 80
-      name: neo-token
+      name: hub-gslb
     - port: 40000
       targetPort: 40000
-      name: neo-token-debug
+      name: hub-gslb-debug
   selector:
-    app: neo-token
+    app: hub-gslb
 
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: token-internal-tls
+  name: gslb-external-tls
   namespace: neo
 spec:
   entryPoints:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && PathPrefix(`/token/internal`)
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/gslb/external`)
       services:
-        - name: neo-token
+        - name: hub-gslb
           port: 80
       middlewares:
         - name: stripprefix
@@ -92,16 +109,16 @@ spec:
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: token-internal
+  name: gslb-external
   namespace: neo
 spec:
   entryPoints:
     - web
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && PathPrefix(`/token/internal`)
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/gslb/external`)
       services:
-        - name: neo-token
+        - name: hub-gslb
           port: 80
       middlewares:
         - name: stripprefix

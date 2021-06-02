@@ -1,0 +1,60 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hub-pop-status
+  namespace: pop
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hub-pop-status
+  template:
+    metadata:
+      labels:
+        app: hub-pop-status
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "80"
+    spec:
+      imagePullSecrets:
+        - name: gcr-access-token
+      containers:
+        - name: hub-pop-status
+          image: gcr.io/traefiklabs/hub-gslb:latest
+          imagePullPolicy: Never
+          env:
+            - name: POP_NAME
+              value: k3d
+            - name: POP_REGION
+              value: local
+            - name: POP_UPDATE_INTERVAL
+              value: 30s
+            - name: PROXY_SERVICE_URL
+              value: http://traefikee-gslb-proxy-svc.pop.svc.cluster.local:8081/api/overview
+            - name: TRACING_ENDPOINT
+              value: "http://jaeger.jaeger.svc.cluster.local:14268"
+            - name: TRACING_PROBABILITY
+              value: "1"
+            - name: LOG_LEVEL
+              value: debug
+          args:
+            - popstatus
+            - --mongodb-uri=mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/gslb?authSource=admin
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hub-pop-status
+  namespace: pop
+  labels:
+    app: hub-pop-status
+spec:
+  type: ClusterIP
+  ports:
+    - port: 40000
+      targetPort: 40000
+      name: hub-pop-status-debug
+  selector:
+    app: hub-pop-status
+
