@@ -50,6 +50,8 @@ spec:
                 secretKeyRef:
                   key: jwt-sub
                   name: neo-secret
+            - name: ALERT_SERVICE_URL
+              value: http://neo-alert.neo.svc.cluster.local/internal
             - name: ORGANIZATION_SERVICE_URL
               value: http://neo-organization.neo.svc.cluster.local/internal
             - name: METRICS_SERVICE_URL
