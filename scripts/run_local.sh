@@ -79,6 +79,7 @@ main() {
   sleep 2
 
   renew-jwt
+  sleep 5
 
   CLUSTER_NAME=$(date +%s | sha256sum | base64 | head -c 32 ; echo)
 
