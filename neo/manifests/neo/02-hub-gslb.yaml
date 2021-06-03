@@ -58,7 +58,7 @@ spec:
                   name: neo-secret
             - name: TRACING_ENDPOINT
               value: "http://jaeger.jaeger.svc.cluster.local:14268"
-            - name: ORGANIZATION_SERVICE_URL
+            - name: WORKSPACE_SERVICE_URL
               value: http://neo-organization.neo.svc.cluster.local/internal
             - name: TRACING_PROBABILITY
               value: "1"
