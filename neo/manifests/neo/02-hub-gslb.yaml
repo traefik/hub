@@ -49,6 +49,8 @@ spec:
                   name: neo-secret
             - name: HUB_JWT_ISS
               value: "https://traefiklabs-neo-dev.eu.auth0.com/"
+            - name: BASE_POP_URL
+              value: http://hub-check.pop.svc.cluster.local/internal
             - name: HUB_JWT_SUB
               valueFrom:
                 secretKeyRef:

@@ -5,6 +5,7 @@ data:
         errors
         health
         ready
+        rewrite name k3d.hub-check.pop.svc.cluster.local hub-check.pop.svc.cluster.local
         rewrite name platform.docker.localhost traefik.traefik.svc.cluster.local
         rewrite name webapp.docker.localhost traefik.traefik.svc.cluster.local
         rewrite name regex (.*)\.tls.docker\.localhost neo-certificates.neo.svc.cluster.local
