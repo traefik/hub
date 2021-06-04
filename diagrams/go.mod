@@ -1,4 +1,4 @@
-module github.com/traefik/neo/diagrams
+module github.com/traefik/hub/diagrams
 
 go 1.15
 

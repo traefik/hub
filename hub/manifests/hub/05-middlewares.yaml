@@ -1,0 +1,33 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: auth-token
+  namespace: hub
+spec:
+  forwardAuth:
+    address: http://hub-token.hub.svc.cluster.local:80/internal/verify-token
+    authResponseHeaders:
+      - Workspace-Id
+      - Cluster-Id
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: stripprefix
+  namespace: hub
+spec:
+  stripPrefix:
+    prefixes:
+      - /workspace
+      - /topology
+      - /cluster
+      - /token
+      - /notification
+      - /alert
+      - /certificates
+      - /metrics
+      - /invitation
+      - /check
+      - /gslb

@@ -1,6 +1,6 @@
 # Postman
 
-In this folder you can find the postman collection for Neo, with 3 environments: 
+In this folder you can find the postman collection for Hub, with 3 environments: 
 
 - K3D
 - Preview
@@ -21,7 +21,7 @@ but you need to fill some others variables like credentials.
 Don't put values of variables in the "*Initial value*", but just in "*Current value*". Initial Values are
 shared when exporting the environment, not current value.
 
-All common vars can be found on keybase here: `keybase://team/containous.dev/neo/auth0.md`.
+All common vars can be found on keybase here: `keybase://team/containous.dev/hub/auth0.md`.
 
 You need to fill these variables with your own values :
 - `GITHUB_ORG` => The organization where the repository will be created by the topology service.
@@ -33,7 +33,7 @@ manually, but they can be overwritten, so be careful.
 ## Unavailable requests
 
 Postman doesn't support avro schema, so if you want to test these routes:
- - `agent/data` in `neo-metrics`
- - `agent/metrics` in `neo-metrics`
+ - `agent/data` in `hub-metrics`
+ - `agent/metrics` in `hub-metrics`
 
 You have to do it with curl.

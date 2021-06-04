@@ -1,4 +1,4 @@
-# Neo
+# Hub
 
   - [K3D](#k3d)
     - [Prerequisites](#prerequisites)
@@ -7,11 +7,11 @@
   - [Manual installation](#manual-installation)
     - [Create the cluster](#create-the-cluster)
     - [Install Ingress Controllers](#install-ingress-controllers)
-    - [Install Neo Agent](#install-neo-agent)
+    - [Install Hub Agent](#install-hub-agent)
     - [Install demo application](#install-demo-application)
     - [Test application](#test-application)
     
-**You can run the full stack of Neo with K3D or by manually install every piece of the puzzle.
+**You can run the full stack of Hub with K3D or by manually install every piece of the puzzle.
 We hardly recommend the K3D way of course.**
 
 ## K3D
@@ -32,7 +32,7 @@ gcloud auth login
 gcloud auth configure-docker
 ```
 
-Before running the script, you need a `.env` file in the `neo` folder.
+Before running the script, you need a `.env` file in the `hub` folder.
 `Just copy the `.env.example` and fill it with your own credentials.
 
 - `GCLOUD_EMAIL` => Your email address to connect to gcr.
@@ -40,11 +40,11 @@ Before running the script, you need a `.env` file in the `neo` folder.
 - `GITHUB_TOKEN` => A github token with `repo:*` permissions.
 - `AWS_CLIENT_ID` => A client ID for connection to AWS
 - `AWS_CLIENT_SECRET` => A client secret ID for AWS
-- `NEO_USERNAME` => Your username on Neo
-- `NEO_PASSWORD` => Your password on Neo
+- `HUB_USERNAME` => Your username on Hub
+- `HUB_PASSWORD` => Your password on Hub
 
-The AWS secrets can be found in `keybase://team/containous.dev/neo/k3d.md`.
-The Neo account can be found in `keybase://team/containous.dev/neo/auth0.md` (`JWT_PASSWORD` and `JWT_USER`).
+The AWS secrets can be found in `keybase://team/containous.dev/hub/k3d.md`.
+The Hub account can be found in `keybase://team/containous.dev/hub/auth0.md` (`JWT_PASSWORD` and `JWT_USER`).
 The `GITHUB_TOKEN` need the following `repo` scope.
 
 #### Mac User
@@ -68,11 +68,11 @@ The local installation can be done with `make run`. The script will create a k3d
   - Haproxy
   - Traefik
 - Whoami with one ingress per ingress controller
-- Neo platform
+- Hub platform
   - MongoDB
-  - Neo services:
+  - Hub services:
     - metrics
-    - organization
+    - workspace
     - topology
     - alert
     - clusters
@@ -81,8 +81,9 @@ The local installation can be done with `make run`. The script will create a k3d
     - ui
     - token
     - notification
+    - gslb
     - (+ an ingress to access to all the services)
-- Neo-agent
+- Hub-agent
 - Jaeger
 - Monitoring
   - Grafana
@@ -109,7 +110,7 @@ make renew-gcr-token
 
 #### renew-auth0-admin-token
 
-If the organization service doesn't work as expected, and you get some auth0 errors logs, your token is probably expired.
+If the workspace service doesn't work as expected, and you get some auth0 errors logs, your token is probably expired.
 You can renew it with this command:
 
 ```
@@ -142,9 +143,9 @@ We recommend running it instead of `make run` if your internet connection is a b
 
 - UI: https://webapp.docker.localhost/
 - Jaeger: https://jaeger-ui.docker.localhost/
-- Neo-APIs: http://platform.docker.localhost/
+- Hub-APIs: http://platform.docker.localhost/
     - /agent 
-    - /organization 
+    - /workspace 
     - /topology
     - /cluster
     - /token
@@ -177,7 +178,7 @@ k3d cluster create --k3s-server-arg "--no-deploy=traefik" \
 --port 9000:9000@loadbalancer \
 --port 9443:9443@loadbalancer
 
-k3d image import gcr.io/traefiklabs/neo-agent:latest
+k3d image import gcr.io/traefiklabs/hub-agent:latest
 ```
 
 Available docker images:
@@ -192,14 +193,14 @@ Available docker images:
 #### Ingress Nginx
 
 ```bash
-kubectl apply -f neo/manifests/ingress-nginx/
+kubectl apply -f hub/manifests/ingress-nginx/
 ```
 cf: https://kubernetes.github.io/ingress-nginx/deploy/#installation-guide
 
 #### HaProxy
 
 ```bash
-kubectl apply -f neo/manifests/ingress-haproxy
+kubectl apply -f hub/manifests/ingress-haproxy
 ```
 
 cf: https://haproxy-ingress.github.io/docs/getting-started/
@@ -207,11 +208,11 @@ cf: https://haproxy-ingress.github.io/docs/getting-started/
 #### Traefik
 
 ```bash
-kubectl apply -f neo/manifests/traefik/
+kubectl apply -f hub/manifests/traefik/
 ```
 cf: https://doc.traefik.io/traefik/user-guides/crd-acme/
 
-### Install Neo Agent
+### Install Hub Agent
 
 First you need to create a secret:
 ```bash
@@ -222,36 +223,36 @@ kubectl create secret -n $namespace docker-registry gcr-access-token \
                 --docker-email=${GCLOUD_EMAIL}
 ```
 
-We recommend overwriting the values file with this values file if you don't need to run neo-services locally:
+We recommend overwriting the values file with this values file if you don't need to run hub-services locally:
 
 
 ```yaml
-# Default values for neo-helm-chart.
+# Default values for hub-helm-chart.
 image:
-  name: gcr.io/traefiklabs/neo-agent
+  name: gcr.io/traefiklabs/hub-agent
   pullPolicy: IfNotPresent
   pullSecrets:
     - name: gcr-access-token
   # Overrides the image tag whose default is the chart appVersion.
   tag: "2e63cbf"
 
-# User token to access to neo
+# User token to access to hub
 token: "4a585aab-f00e-4548-8528-222ef086bebb"
 
 deployment:
   args:
     - --log-level=debug
-    - --platform-url=https://platform.neo.traefiklabs.tech
+    - --platform-url=https://platform.hub.traefiklabs.tech
     - --scrape-ip=http://10.42.0.36:8080/metrics
     - --scrape-name=traefik
     - --scrape-kind=traefik
     - --topology-info=traefik=whoami/whoami
 ```
 
-Add Neo's chart repository to Helm:
+Add Hub's chart repository to Helm:
 
 ```bash
-helm repo add neo https://helm.traefik.io/neo
+helm repo add hub https://helm.traefik.io/hub
 ```
 
 You can update the chart repository by running:
@@ -260,28 +261,28 @@ You can update the chart repository by running:
 helm repo update
 ```
 
-#### Deploying Neo
+#### Deploying Hub
 
 ```bash
-helm install neo neo/neo
+helm install hub hub/hub
 ```
 
-##### Deploying Neo by overwriting values.yaml
+##### Deploying Hub by overwriting values.yaml
 
 ```bash
-helm install neo neo/neo --values=./values.yaml
+helm install hub hub/hub --values=./values.yaml
 ```
 
-##### Deploying Neo in a specific namespace
+##### Deploying Hub in a specific namespace
 
 ```bash
-helm install neo neo/neo --namespace neo
+helm install hub hub/hub --namespace hub
 ```
 
-##### Deploying Neo with a full-yaml
+##### Deploying Hub with a full-yaml
 
 ```bash
-kubectl apply -f https://traefik.github.io/neo-helm-chart/yaml/0.1.1.yaml
+kubectl apply -f https://traefik.github.io/hub-helm-chart/yaml/0.1.1.yaml
 ```
 
 ##### Launch unit tests
@@ -291,27 +292,27 @@ You need to install the helm-plugin [unittest](https://github.com/rancher/unitte
 Then:
 
 ```bash
-helm unittest neo/
+helm unittest hub/
 ```
 
 ##### Uninstall
 
-We consider in this example the version install being <neo>:
+We consider in this example the version install being <hub>:
 
 ```bash
-helm uninstall neo
+helm uninstall hub
 ```
 
-If neo-agent was installed in a specific namespace
+If hub-agent was installed in a specific namespace
 
 ```bash
-helm uninstall neo --namespace neo-namespace
+helm uninstall hub --namespace hub-namespace
 ```
 
 ### Install demo application
 
 ```bash
-kubectl apply -f neo/manifests/whoami/
+kubectl apply -f hub/manifests/whoami/
 ```
 
 ### Test application

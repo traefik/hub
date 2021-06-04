@@ -1,0 +1,61 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: platform
+  namespace: hub
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`)
+      services:
+        - name: github
+          passHostHeader: false
+          port: 443
+      middlewares:
+        - name: auth
+        - name: github-token
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: platform-tls
+  namespace: hub
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`)
+      services:
+        - name: github
+          passHostHeader: false
+          port: 443
+      middlewares:
+        - name: auth
+        - name: github-token
+  tls:
+    certResolver: default
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: auth
+  namespace: hub
+spec:
+  forwardAuth:
+    address: http://hub-topology.hub.svc.cluster.local:80/internal/auth
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: github
+  namespace: hub
+spec:
+  type: ExternalName
+  externalName: github.com

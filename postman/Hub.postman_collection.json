@@ -1,0 +1,2523 @@
+{
+	"info": {
+		"_postman_id": "ab79587c-bc69-4668-a9d3-1be823ffd44d",
+		"name": "Hub",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth0",
+			"item": [
+				{
+					"name": "/external token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"AG_JWT_EXTERNAL\", pm.response.json().access_token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "{{JWT_USER}}",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "{{JWT_PASSWORD}}",
+									"type": "text"
+								},
+								{
+									"key": "audience",
+									"value": "https://clients.hub.traefik.io/",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "{{JWT_CLIENT_ID}}",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{JWT_CLIENT_SECRET}}",
+									"type": "text"
+								},
+								{
+									"key": "scope",
+									"value": "openid",
+									"type": "text"
+								},
+								{
+									"key": "realm",
+									"value": "Username-Password-Authentication",
+									"type": "text"
+								},
+								{
+									"key": "workspaceId",
+									"value": "{{TRAEFIKLABS_WORKSPACE}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{OAUTH_URL}}/oauth/token",
+							"host": [
+								"{{OAUTH_URL}}"
+							],
+							"path": [
+								"oauth",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Service to service token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"AG_JWT_SERVICES\", pm.response.json().access_token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "client_id",
+									"value": "{{JWT_SERVICES_CLIENT_ID}}",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{JWT_SERVICES_CLIENT_SECRET}}",
+									"type": "text"
+								},
+								{
+									"key": "audience",
+									"value": "https://services.hub.traefik.io/",
+									"type": "text"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{OAUTH_URL}}/oauth/token",
+							"host": [
+								"{{OAUTH_URL}}"
+							],
+							"path": [
+								"oauth",
+								"token"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Cluster",
+			"item": [
+				{
+					"name": "/external",
+					"item": [
+						{
+							"name": "/clusters - Create cluster",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.environment.set(\"AG_HUB_TOKEN\", pm.response.json().token)",
+											"pm.environment.set(\"AG_CLUSTER_ID\", pm.response.json().id)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"traefik\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{CLUSTER_URL}}/external/clusters",
+									"host": [
+										"{{CLUSTER_URL}}"
+									],
+									"path": [
+										"external",
+										"clusters"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/clusters - List clusters",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{CLUSTER_URL}}/external/clusters",
+									"host": [
+										"{{CLUSTER_URL}}"
+									],
+									"path": [
+										"external",
+										"clusters"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/clusters/:id - Get cluster",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{CLUSTER_URL}}/external/clusters/:id",
+									"host": [
+										"{{CLUSTER_URL}}"
+									],
+									"path": [
+										"external",
+										"clusters",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_CLUSTER_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/clusters/:id - Update cluster",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"tutu\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{CLUSTER_URL}}/external/clusters/:id",
+									"host": [
+										"{{CLUSTER_URL}}"
+									],
+									"path": [
+										"external",
+										"clusters",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_CLUSTER_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/clusters/:id - Delete cluster",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{CLUSTER_URL}}/external/clusters/:id",
+									"host": [
+										"{{CLUSTER_URL}}"
+									],
+									"path": [
+										"external",
+										"clusters",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_CLUSTER_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "/internal",
+					"item": [
+						{
+							"name": "/clusters/:id - Get cluster",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{CLUSTER_URL}}/internal/clusters/:id",
+									"host": [
+										"{{CLUSTER_URL}}"
+									],
+									"path": [
+										"internal",
+										"clusters",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_CLUSTER_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/clusters/:id/config - Get config",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{CLUSTER_URL}}/internal/clusters/:id/config",
+									"host": [
+										"{{CLUSTER_URL}}"
+									],
+									"path": [
+										"internal",
+										"clusters",
+										":id",
+										"config"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_CLUSTER_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "/agent",
+					"item": [
+						{
+							"name": "/link - Link agent to the cluster",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_HUB_TOKEN}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"kubeId\": \"toto\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{PLATFORM_URL}}/agent/link",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"agent",
+										"link"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/config - Get config",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_HUB_TOKEN}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PLATFORM_URL}}/agent/config",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"agent",
+										"config"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Metrics",
+			"item": [
+				{
+					"name": "/external",
+					"item": [
+						{
+							"name": "/query - Query metrics meta",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{METRICS_URL}}/external/query",
+									"host": [
+										"{{METRICS_URL}}"
+									],
+									"path": [
+										"external",
+										"query"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/query/:id - Query cluster metrics",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{METRICS_URL}}/external/query/:id",
+									"host": [
+										"{{METRICS_URL}}"
+									],
+									"path": [
+										"external",
+										"query",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_CLUSTER_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/query/:id/:ic/:ing - Query ingress metrics",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{METRICS_URL}}/external/query/:id/:ic/:ing?dur=1m&from=",
+									"host": [
+										"{{METRICS_URL}}"
+									],
+									"path": [
+										"external",
+										"query",
+										":id",
+										":ic",
+										":ing"
+									],
+									"query": [
+										{
+											"key": "dur",
+											"value": "1m",
+											"description": "Enter the granularity of metrics you want to get (1m, 10m, 1h, 1d)"
+										},
+										{
+											"key": "from",
+											"value": "",
+											"description": "Enter the start time (timestamp)"
+										}
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_CLUSTER_ID}}"
+										},
+										{
+											"key": "ic",
+											"value": "ingress-nginx-controller@ingress-nginx",
+											"description": "Enter the ingress controller you want to get"
+										},
+										{
+											"key": "ing",
+											"value": "app-nginx@whoami",
+											"description": "Enter the ingress you want to get"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/query/:id/:ic/:ing/services - Query services metrics",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{METRICS_URL}}/external/query/:id/:ic/:ing/services?dur=1m&from=",
+									"host": [
+										"{{METRICS_URL}}"
+									],
+									"path": [
+										"external",
+										"query",
+										":id",
+										":ic",
+										":ing",
+										"services"
+									],
+									"query": [
+										{
+											"key": "dur",
+											"value": "1m",
+											"description": "Enter the granularity of metrics you want to get (1m, 10m, 1h, 1d)"
+										},
+										{
+											"key": "from",
+											"value": "",
+											"description": "Enter the start time (timestamp)"
+										}
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_CLUSTER_ID}}"
+										},
+										{
+											"key": "ic",
+											"value": "ingress-nginx-controller@ingress-nginx",
+											"description": "Enter the ingress controller you want to get"
+										},
+										{
+											"key": "ing",
+											"value": "app-nginx@whoami",
+											"description": "Enter the ingress you want to get"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"auth": {
+						"type": "bearer",
+						"bearer": [
+							{
+								"key": "token",
+								"value": "{{AG_JWT_EXTERNAL}}",
+								"type": "string"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "/internal",
+					"item": [
+						{
+							"name": "/workspaces/:workspaceId/clusters/:id - Delete cluster metrics",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{METRICS_URL}}/internal/workspaces/:workspaceId/clusters/:id",
+									"host": [
+										"{{METRICS_URL}}"
+									],
+									"path": [
+										"internal",
+										"workspaces",
+										":workspaceId",
+										"clusters",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "{{AG_WORKSPACE_ID}}"
+										},
+										{
+											"key": "id",
+											"value": "{{AG_CLUSTER_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"description": "Agent have also routes on:\n- /agent/data\n- /agent/metrics\n\nThose are using AVRO schemas so we didn't add it to postman collection.",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Workspace",
+			"item": [
+				{
+					"name": "/auth0",
+					"item": [
+						{
+							"name": "/workspaces - Create a new user workspace",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.environment.set(\"AG_WORKSPACE_ID\", pm.response.json().id);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_SERVICES}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"userID\": \"plop\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{WORKSPACE_URL}}/auth0/workspaces",
+									"host": [
+										"{{WORKSPACE_URL}}"
+									],
+									"path": [
+										"auth0",
+										"workspaces"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/workspaces/:id - Get an workspace",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_SERVICES}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{WORKSPACE_URL}}/auth0/workspaces/:id",
+									"host": [
+										"{{WORKSPACE_URL}}"
+									],
+									"path": [
+										"auth0",
+										"workspaces",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_WORKSPACE_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "/external",
+					"item": [
+						{
+							"name": "/workspaces - Create a new workspace",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.environment.set(\"AG_WORKSPACE_ID\", pm.response.json().id);",
+											"pm.environment.set(\"AG_USER_ID\", pm.response.json().users[0]);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"workspace\",\n    \"contactEmail\": \"toto@pouet.com\",\n    \"type\": \"business\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{WORKSPACE_URL}}/external/workspaces",
+									"host": [
+										"{{WORKSPACE_URL}}"
+									],
+									"path": [
+										"external",
+										"workspaces"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/workspaces - List workspaces",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{WORKSPACE_URL}}/external/workspaces",
+									"host": [
+										"{{WORKSPACE_URL}}"
+									],
+									"path": [
+										"external",
+										"workspaces"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/workspaces/:id - Get workspaces",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{WORKSPACE_URL}}/external/workspaces/:id",
+									"host": [
+										"{{WORKSPACE_URL}}"
+									],
+									"path": [
+										"external",
+										"workspaces",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_WORKSPACE_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/workspaces/:id - Update workspace",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"pouet\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{WORKSPACE_URL}}/external/workspaces/:id",
+									"host": [
+										"{{WORKSPACE_URL}}"
+									],
+									"path": [
+										"external",
+										"workspaces",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_WORKSPACE_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/workspaces/:id - Delete workspace",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{WORKSPACE_URL}}/external/workspaces/:id",
+									"host": [
+										"{{WORKSPACE_URL}}"
+									],
+									"path": [
+										"external",
+										"workspaces",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_WORKSPACE_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "/internal",
+					"item": [
+						{
+							"name": "/workspaces/:workspaceID/users/:usrID/check-permissions -  Check permissions",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"permission\": \"view:cluster\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{WORKSPACE_URL}}/internal/workspaces/:workspaceID/users/:usrID/check-permissions",
+									"host": [
+										"{{WORKSPACE_URL}}"
+									],
+									"path": [
+										"internal",
+										"workspaces",
+										":workspaceID",
+										"users",
+										":usrID",
+										"check-permissions"
+									],
+									"variable": [
+										{
+											"key": "workspaceID",
+											"value": "{{AG_WORKSPACE_ID}}"
+										},
+										{
+											"key": "usrID",
+											"value": "{{AG_USER_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Token",
+			"item": [
+				{
+					"name": "/internal",
+					"item": [
+						{
+							"name": "/tokens - Create token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.environment.set(\"AG_HUB_TOKEN\", pm.response.json().token)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"workspaceID\": \"{{AG_WORKSPACE_ID}}\",\n    \"clusterID\": \"cluster\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{TOKEN_URL}}/internal/tokens",
+									"host": [
+										"{{TOKEN_URL}}"
+									],
+									"path": [
+										"internal",
+										"tokens"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/verify-token - Verify token",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_HUB_TOKEN}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{TOKEN_URL}}/internal/verify-token",
+									"host": [
+										"{{TOKEN_URL}}"
+									],
+									"path": [
+										"internal",
+										"verify-token"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Topology",
+			"item": [
+				{
+					"name": "/external",
+					"item": [
+						{
+							"name": "/clusters - List clusters",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{TOPOLOGY_URL}}/external/clusters",
+									"host": [
+										"{{TOPOLOGY_URL}}"
+									],
+									"path": [
+										"external",
+										"clusters"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/ingresses - List ingresses",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{TOPOLOGY_URL}}/external/ingresses?limit=10",
+									"host": [
+										"{{TOPOLOGY_URL}}"
+									],
+									"path": [
+										"external",
+										"ingresses"
+									],
+									"query": [
+										{
+											"key": "limit",
+											"value": "10"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/access-control-policies - List ACP",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{TOPOLOGY_URL}}/external/access-control-policies",
+									"host": [
+										"{{TOPOLOGY_URL}}"
+									],
+									"path": [
+										"external",
+										"access-control-policies"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/namespaces - List namespaces",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{TOPOLOGY_URL}}/external/namespaces",
+									"host": [
+										"{{TOPOLOGY_URL}}"
+									],
+									"path": [
+										"external",
+										"namespaces"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/clusters/:id - Get cluster",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{TOPOLOGY_URL}}/external/clusters/:id",
+									"host": [
+										"{{TOPOLOGY_URL}}"
+									],
+									"path": [
+										"external",
+										"clusters",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_CLUSTER_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/clusters/:id/ingress-controllers - List ingress Controllers for cluster",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{TOPOLOGY_URL}}/external/clusters/:id/ingress-controllers",
+									"host": [
+										"{{TOPOLOGY_URL}}"
+									],
+									"path": [
+										"external",
+										"clusters",
+										":id",
+										"ingress-controllers"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_CLUSTER_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/clusters/:id/ingresses/:ing- Get ingress for cluster",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{TOPOLOGY_URL}}/external/clusters/:id/ingresses/:ing",
+									"host": [
+										"{{TOPOLOGY_URL}}"
+									],
+									"path": [
+										"external",
+										"clusters",
+										":id",
+										"ingresses",
+										":ing"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_CLUSTER_ID}}"
+										},
+										{
+											"key": "ing",
+											"value": "app-haproxy@whoami",
+											"description": "Fill the name of the ingress who want to get."
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/clusters/:id/access-control-policies/:acp - Get ACP for a cluster",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{TOPOLOGY_URL}}/external/clusters/:id/access-control-policies/:acp",
+									"host": [
+										"{{TOPOLOGY_URL}}"
+									],
+									"path": [
+										"external",
+										"clusters",
+										":id",
+										"access-control-policies",
+										":acp"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_CLUSTER_ID}}"
+										},
+										{
+											"key": "acp",
+											"value": "my-acp@whoami",
+											"description": "Fill the name of the acp who want to get."
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "/internal",
+					"item": [
+						{
+							"name": "/auth",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{AG_HUB_TOKEN}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PLATFORM_URL}}/{{GITHUB_ORG}}/{{TRAEFIKLABS_WORKSPACE}}.git/info/refs?service=git-receive-pack",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"{{GITHUB_ORG}}",
+										"{{TRAEFIKLABS_WORKSPACE}}.git",
+										"info",
+										"refs"
+									],
+									"query": [
+										{
+											"key": "service",
+											"value": "git-receive-pack"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/repos",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{AG_HUB_TOKEN}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"pouet\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{TOPOLOGY_URL}}/internal/repos",
+									"host": [
+										"{{TOPOLOGY_URL}}"
+									],
+									"path": [
+										"internal",
+										"repos"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Notification",
+			"item": [
+				{
+					"name": "/internal",
+					"item": [
+						{
+							"name": "/alerts",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[{\n    \"id\": \"123\",\n    \"type\": \"threshold\",\n    \"clusterID\": \"456\",\n    \"cluster\": \"my_cluster\",\n    \"ingress\": \"ing@app\",\n    \"service\": \"svc@app\",\n    \"time\": \"2018-09-22T12:42:31Z\",\n    \"emails\": [\n        \"baptiste.mayelle@traefik.io\"\n    ],\n    \"threshold\": {\n        \"metric\": \"requestPerSecond\",\n        \"points\": [\n            {\n                \"timestamp\": 123,\n                \"value\": 2.3\n            },\n            {\n                \"timestamp\": 456,\n                \"value\": 3.4\n            }\n        ],\n        \"condition\": {\n            \"above\": true,\n            \"value\": 23.4\n        }\n    }\n}]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost/internal/alerts",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"path": [
+										"internal",
+										"alerts"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/invitations",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"workspaceName\": \"toto\",\n    \"invitations\": [\n        {\n            \"email\": \"baptiste.mayelle@traefik.io\",\n            \"link\": \"https://google.fr\"\n        }\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost/internal/invitations",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"path": [
+										"internal",
+										"invitations"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Check",
+			"item": [
+				{
+					"name": "/internal",
+					"item": [
+						{
+							"name": "/tcp - Check a TCP address",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{CHECK_URL}}/internal/tcp?address=8.8.8.8:443",
+									"host": [
+										"{{CHECK_URL}}"
+									],
+									"path": [
+										"internal",
+										"tcp"
+									],
+									"query": [
+										{
+											"key": "address",
+											"value": "8.8.8.8:443"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "GSLB",
+			"item": [
+				{
+					"name": "/external",
+					"item": [
+						{
+							"name": "/gslb - Get GSLB",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{GSLB_URL}}/external/gslbs/{{AG_HUB_GSLB}}",
+									"host": [
+										"{{GSLB_URL}}"
+									],
+									"path": [
+										"external",
+										"gslbs",
+										"{{AG_HUB_GSLB}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/gslb - Get GSLB Status",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{GSLB_URL}}/external/gslbs/{{AG_HUB_GSLB}}/status",
+									"host": [
+										"{{GSLB_URL}}"
+									],
+									"path": [
+										"external",
+										"gslbs",
+										"{{AG_HUB_GSLB}}",
+										"status"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/gslb - List GSLBs",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{GSLB_URL}}/external/gslbs",
+									"host": [
+										"{{GSLB_URL}}"
+									],
+									"path": [
+										"external",
+										"gslbs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/gslbs - Create GSLB",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.environment.set(\"AG_HUB_GSLB\", pm.response.json().id)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"test\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{GSLB_URL}}/external/gslbs",
+									"host": [
+										"{{GSLB_URL}}"
+									],
+									"path": [
+										"external",
+										"gslbs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/gslb - Update GSLB",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"toto\",\n    \"domains\": [\"toto.localhost\"],\n    \"production\": {\n        \"clusterId\": \"first-cluster\",\n        \"target\": \"whoami.whoami.svc.cluster.local:80\"\n    },\n    \"staging\": {\n        \"clusterId\": \"second-cluster\",\n        \"target\": \"pouet.whoami.svc.cluster.local:80\"\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{GSLB_URL}}/external/gslbs/{{AG_HUB_GSLB}}",
+									"host": [
+										"{{GSLB_URL}}"
+									],
+									"path": [
+										"external",
+										"gslbs",
+										"{{AG_HUB_GSLB}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/gslb - Delete GSLB",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{GSLB_URL}}/external/gslbs/{{AG_HUB_GSLB}}",
+									"host": [
+										"{{GSLB_URL}}"
+									],
+									"path": [
+										"external",
+										"gslbs",
+										"{{AG_HUB_GSLB}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Config Provider",
+			"item": [
+				{
+					"name": "/internal",
+					"item": [
+						{
+							"name": "/conf - Get Configuration",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{CONFIG_PROVIDER_URL}}/internal/conf",
+									"host": [
+										"{{CONFIG_PROVIDER_URL}}"
+									],
+									"path": [
+										"internal",
+										"conf"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Certificates",
+			"item": [
+				{
+					"name": "/external",
+					"item": [
+						{
+							"name": "/certificates - List certificates of an workspace",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{CERTIFICATES_URL}}/external/certificates",
+									"host": [
+										"{{CERTIFICATES_URL}}"
+									],
+									"path": [
+										"external",
+										"certificates"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/certificates/:id/revoke - Revoke/Renew a certificate",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{CERTIFICATES_URL}}/external/certificates/:id/revoke",
+									"host": [
+										"{{CERTIFICATES_URL}}"
+									],
+									"path": [
+										"external",
+										"certificates",
+										":id",
+										"revoke"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_CERTIFICATION_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/certificates/:id - Delete certificate",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{CERTIFICATES_URL}}/external/certificates/:id",
+									"host": [
+										"{{CERTIFICATES_URL}}"
+									],
+									"path": [
+										"external",
+										"certificates",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_CERTIFICATION_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "/agent",
+					"item": [
+						{
+							"name": "/certificates?domains= - Obtain a certificate",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_HUB_TOKEN}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{CERTIFICATES_URL}}/agent/certificates?domains=",
+									"host": [
+										"{{CERTIFICATES_URL}}"
+									],
+									"path": [
+										"agent",
+										"certificates"
+									],
+									"query": [
+										{
+											"key": "domains",
+											"value": ""
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Alert",
+			"item": [
+				{
+					"name": "/agent",
+					"item": [
+						{
+							"name": "/config - Get alerting rules",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PLATFORM_URL}}/agent/rules",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"agent",
+										"rules"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/notify - Send notification",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[\n    {\n        \"ruleId\": \"60a6302d9309f8789c68cd13\",\n        \"ingress\": \"app-traefik@whoami\",\n        \"service\": \"whoami@whoami\",\n        \"points\": [\n        {\n            \"ts\": 1618842352,\n            \"value\": 10\n        }\n        ],\n        \"state\": 1,\n        \"logs\": \"H4sIAAAAAAAAA8vJT1fIycxL5QIARxHSvAkAAAA=\"\n    }\n  ]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{PLATFORM_URL}}/agent/notify",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"agent",
+										"notify"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"auth": {
+						"type": "bearer",
+						"bearer": [
+							{
+								"key": "token",
+								"value": "{{AG_HUB_TOKEN}}",
+								"type": "string"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "/external",
+					"item": [
+						{
+							"name": "/rules - List rules",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PLATFORM_URL}}/alert/external/rules",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"alert",
+										"external",
+										"rules"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/alerts - List alerts",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PLATFORM_URL}}/alert/external/alerts",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"alert",
+										"external",
+										"alerts"
+									],
+									"query": [
+										{
+											"key": "clusterId",
+											"value": "{{AG_CLUSTER_ID}}",
+											"disabled": true
+										},
+										{
+											"key": "ingress",
+											"value": "app-traefik@whoami",
+											"disabled": true
+										},
+										{
+											"key": "service",
+											"value": "whoami@whoami",
+											"disabled": true
+										},
+										{
+											"key": "state",
+											"value": "resolved",
+											"description": "state of the alert: resolved/unresolved",
+											"disabled": true
+										},
+										{
+											"key": "sortBy",
+											"value": "ingress",
+											"disabled": true
+										},
+										{
+											"key": "sortOrder",
+											"value": "asc",
+											"description": "asc/desc",
+											"disabled": true
+										},
+										{
+											"key": "limit",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "offset",
+											"value": "1",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/alerts/:id - Get an alert",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PLATFORM_URL}}/alert/external/alerts/:id",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"alert",
+										"external",
+										"alerts",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "",
+											"description": "Enter your alert ID"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/alerts/:id - Get an alert logs",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PLATFORM_URL}}/alert/external/alerts/:id/logs",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"alert",
+										"external",
+										"alerts",
+										":id",
+										"logs"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "",
+											"description": "Enter your alert ID"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/alerts/count - Count alerts",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PLATFORM_URL}}/alert/external/alerts/count",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"alert",
+										"external",
+										"alerts",
+										"count"
+									],
+									"query": [
+										{
+											"key": "state",
+											"value": "resolved",
+											"description": "the state of the alert: resolved/unresolved",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/rules - Create a rule",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"type\": \"threshold\",\n    \"cluster\": \"b059cbde-1b7b-4768-a340-8f72732e764f\",\n    \"ingress\": \"app-traefik@whoami\",\n    \"service\": \"whoami@whoami\",\n    \"emails\": [\n        \"nick.wiersma@traefik.io\",\n        \"remi.buisson@traefik.io\"\n    ],\n    \"threshold\": {\n        \"metric\": \"requestsPerSecond\",\n        \"condition\": {\n            \"above\": true,\n            \"value\": 1\n        },\n        \"occurrence\": 3,\n        \"timeRange\": \"10m\"\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{PLATFORM_URL}}/alert/external/rules",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"alert",
+										"external",
+										"rules"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/rules/:id - Update a rule",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"type\": \"threshold\",\n    \"cluster\": \"b059cbde-1b7b-4768-a340-8f72732e764f\",\n    \"ingress\": \"app-traefik@whoami\",\n    \"service\": \"whoami@whoami\",\n    \"emails\": [\n        \"nick.wiersma@traefik.io\"\n    ],\n    \"threshold\": {\n        \"metric\": \"requestsPerSecond\",\n        \"condition\": {\n            \"above\": true,\n            \"value\": 1\n        },\n        \"occurrence\": 3,\n        \"timeRange\": \"10m\"\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{PLATFORM_URL}}/alert/external/rules/:id",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"alert",
+										"external",
+										"rules",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "",
+											"description": "Enter your rule ID"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/rules/:id - Get a rule",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PLATFORM_URL}}/alert/external/rules/:id",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"alert",
+										"external",
+										"rules",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "",
+											"description": "Enter your rule ID"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/rules/:id - Delete a rule",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{PLATFORM_URL}}/alert/external/rules/:id",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"alert",
+										"external",
+										"rules",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "",
+											"description": "Enter your rule ID"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/rules/{id} - Enable/disable a rule",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"enabled\": false}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{PLATFORM_URL}}/alert/external/rules/:id",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"alert",
+										"external",
+										"rules",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "",
+											"description": "Enter your rule ID"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"auth": {
+						"type": "bearer",
+						"bearer": [
+							{
+								"key": "token",
+								"value": "{{AG_JWT_EXTERNAL}}",
+								"type": "string"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,172 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hub-topology
+  namespace: hub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hub-topology
+  template:
+    metadata:
+      labels:
+        app: hub-topology
+        version: "v1"
+        k8s-app: hub-topology
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "80"
+    spec:
+      imagePullSecrets:
+        - name: gcr-access-token
+      containers:
+        - name: hub-topology
+          image: gcr.io/traefiklabs/hub-topology:latest
+          imagePullPolicy: Always
+          livenessProbe:
+            httpGet:
+              port: 80
+              path: /live
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 2
+          readinessProbe:
+            httpGet:
+              port: 80
+              path: /ready
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 2
+          env:
+            - name: JWT_CERT
+              valueFrom:
+                secretKeyRef:
+                  key: jwt-cert
+                  name: hub-secret
+            - name: TOKEN_SERVICE_URL
+              value: http://hub-token.hub.svc.cluster.local/internal
+            - name: JWT_ISS
+              value: "https://traefiklabs-hub-dev.eu.auth0.com/"
+            - name: JWT_SUB
+              valueFrom:
+                secretKeyRef:
+                  key: jwt-sub
+                  name: hub-secret
+            - name: GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: github
+                  key: token
+            - name: GITHUB_ORG
+              valueFrom:
+                secretKeyRef:
+                  name: github
+                  key: org
+            - name: TRACING_ENDPOINT
+              value: "http://jaeger.jaeger.svc.cluster.local:14268"
+            - name: TRACING_PROBABILITY
+              value: "1"
+            - name: LOG_LEVEL
+              value: debug
+          args:
+            - serve
+            - --addr=:80
+            - --git-proxy-host=platform.docker.localhost
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hub-topology
+  namespace: hub
+  labels:
+    app: hub-topology
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      name: hub-topology
+    - port: 40000
+      targetPort: 40000
+      name: hub-topology-debug
+  selector:
+    app: hub-topology
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: topology-external-tls
+  namespace: hub
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/topology/external`)
+      services:
+        - name: hub-topology
+          port: 80
+      middlewares:
+        - name: stripprefix
+  tls:
+    certResolver: default
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: topology-external
+  namespace: hub
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/topology/external`)
+      services:
+        - name: hub-topology
+          port: 80
+      middlewares:
+        - name: stripprefix
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: topology-internal-tls
+  namespace: hub
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/topology/internal`)
+      services:
+        - name: hub-topology
+          port: 80
+      middlewares:
+        - name: stripprefix
+  tls:
+    certResolver: default
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: topology-internal
+  namespace: hub
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/topology/internal`)
+      services:
+        - name: hub-topology
+          port: 80
+      middlewares:
+        - name: stripprefix

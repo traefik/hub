@@ -7,7 +7,7 @@ ssl/*.csr
 venv
 
 ## Generated templates
-01-neo-cluster.yaml
+01-hub-cluster.yaml
 01-awssecret.yaml
 01-github-token.yaml
 01-values.yaml
@@ -17,4 +17,4 @@ diagrams/dist
 diagrams/diagrams
 
 # relicats
-neo-agent/
+hub-agent/

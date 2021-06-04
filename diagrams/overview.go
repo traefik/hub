@@ -58,7 +58,7 @@ func overview() {
 	datadog := apps.Monitoring.Datadog(diagram.NodeLabel("Datadog"))
 
 	eks.Add(eks_api)
-	eks.Group(diagram.NewGroup("Neo namespace").Label("Neo namespace").Add(
+	eks.Group(diagram.NewGroup("Hub namespace").Label("Hub namespace").Add(
 		pod1,
 		podx,
 	))

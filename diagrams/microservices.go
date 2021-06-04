@@ -48,7 +48,7 @@ func microservices() {
 	invitation := k8s.Compute.Pod(diagram.NodeLabel("invitation"))
 	metrics := k8s.Compute.Pod(diagram.NodeLabel("metrics"))
 	notification := k8s.Compute.Pod(diagram.NodeLabel("notification"))
-	organization := k8s.Compute.Pod(diagram.NodeLabel("organization"))
+	workspace := k8s.Compute.Pod(diagram.NodeLabel("workspace"))
 	token := k8s.Compute.Pod(diagram.NodeLabel("token"))
 	topology := k8s.Compute.Pod(diagram.NodeLabel("topology"))
 	github_proxy := k8s.Compute.Pod(diagram.NodeLabel("github_proxy"))
@@ -62,15 +62,15 @@ func microservices() {
 
 	d.Connect(cluster, token, RESTEdgeOption)
 	d.Connect(cluster, topology, RESTEdgeOption)
-	d.Connect(cluster, organization, RESTEdgeOption)
+	d.Connect(cluster, workspace, RESTEdgeOption)
 
 	d.Connect(invitation, notification, RESTEdgeOption)
-	d.Connect(invitation, organization, RESTEdgeOption)
+	d.Connect(invitation, workspace, RESTEdgeOption)
 
 	d.Connect(alert, notification, RESTEdgeOption)
 	d.Connect(alert, cluster, RESTEdgeOption)
 
-	d.Connect(organization, saas.Identity.Auth0(diagram.NodeLabel("\"sso.traefik.io\"")), RESTEdgeOption)
+	d.Connect(workspace, saas.Identity.Auth0(diagram.NodeLabel("\"sso.traefik.io\"")), RESTEdgeOption)
 
 	d.Connect(topology, token, RESTEdgeOption)
 	d.Connect(topology, github_proxy, RESTEdgeOption)
@@ -82,7 +82,7 @@ func microservices() {
 	d.Connect(webapp, cluster, RESTEdgeOption)
 	d.Connect(webapp, invitation, RESTEdgeOption)
 	d.Connect(webapp, metrics, RESTEdgeOption)
-	d.Connect(webapp, organization, RESTEdgeOption)
+	d.Connect(webapp, workspace, RESTEdgeOption)
 	d.Connect(webapp, topology, RESTEdgeOption)
 
 	d.Connect(notification, oci.Monitoring.Email(diagram.NodeLabel("Sendgrid")), RESTEdgeOption)
@@ -93,14 +93,14 @@ func microservices() {
 	collInvitation := apps.Database.Mongodb(diagram.NodeLabel("invitation"))
 	collCluster := apps.Database.Mongodb(diagram.NodeLabel("cluster"))
 	collToken := apps.Database.Mongodb(diagram.NodeLabel("token"))
-	collOrganization := apps.Database.Mongodb(diagram.NodeLabel("organization"))
+	collWorkspace := apps.Database.Mongodb(diagram.NodeLabel("workspace"))
 	mongo_atlas := diagram.NewGroup("MongoDB Atlas").Label("MongoDB Atlas").Add(
 		collMetrics,
 		collAlert,
 		collInvitation,
 		collCluster,
 		collToken,
-		collOrganization,
+		collWorkspace,
 	)
 	d.Group(mongo_atlas)
 	d.Connect(metrics, collMetrics, MongoEdgeOption)
@@ -108,7 +108,7 @@ func microservices() {
 	d.Connect(invitation, collInvitation, MongoEdgeOption)
 	d.Connect(cluster, collCluster, MongoEdgeOption)
 	d.Connect(token, collToken, MongoEdgeOption)
-	d.Connect(organization, collOrganization, MongoEdgeOption)
+	d.Connect(workspace, collWorkspace, MongoEdgeOption)
 
 	if err := d.Render(); err != nil {
 		log.Fatal(err)

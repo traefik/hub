@@ -1,0 +1,198 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hub-metrics
+  namespace: hub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hub-metrics
+  template:
+    metadata:
+      labels:
+        app: hub-metrics
+        version: "v1"
+        k8s-app: hub-metrics
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "80"
+    spec:
+      imagePullSecrets:
+        - name: gcr-access-token
+      containers:
+        - name: hub-metrics
+          image: gcr.io/traefiklabs/hub-metrics:latest
+          imagePullPolicy: Always
+          livenessProbe:
+            httpGet:
+              port: 80
+              path: /live
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 2
+          readinessProbe:
+            httpGet:
+              port: 80
+              path: /ready
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 2
+          env:
+            - name: JWT_CERT
+              valueFrom:
+                secretKeyRef:
+                  key: jwt-cert
+                  name: hub-secret
+            - name: JWT_ISS
+              value: "https://traefiklabs-hub-dev.eu.auth0.com/"
+            - name: JWT_SUB
+              valueFrom:
+                secretKeyRef:
+                  key: jwt-sub
+                  name: hub-secret
+            - name: TRACING_ENDPOINT
+              value: "http://jaeger.jaeger.svc.cluster.local:14268"
+            - name: TRACING_PROBABILITY
+              value: "1"
+            - name: LOG_LEVEL
+              value: debug
+          args:
+            - serve
+            - --addr=:80
+            - --mongo-uri=mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/metrics?authSource=admin
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hub-metrics
+  namespace: hub
+  labels:
+    app: hub-metrics
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      name: hub-metrics
+    - port: 40000
+      targetPort: 40000
+      name: hub-metrics-debug
+  selector:
+    app: hub-metrics
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: metrics-agent-tls
+  namespace: hub
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && (Path(`/agent/data`) || Path(`/agent/metrics`))
+      services:
+        - name: hub-metrics
+          port: 80
+      middlewares:
+        - name: auth-token
+  tls:
+    certResolver: default
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: metrics-agent
+  namespace: hub
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && (Path(`/agent/data`) || Path(`/agent/metrics`))
+      services:
+        - name: hub-metrics
+          port: 80
+      middlewares:
+        - name: auth-token
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: metrics-external-tls
+  namespace: hub
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/metrics/external`)
+      services:
+        - name: hub-metrics
+          port: 80
+      middlewares:
+        - name: stripprefix
+  tls:
+    certResolver: default
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: metrics-external
+  namespace: hub
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/metrics/external`)
+      services:
+        - name: hub-metrics
+          port: 80
+      middlewares:
+        - name: stripprefix
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: metrics-internal-tls
+  namespace: hub
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/metrics/internal`)
+      services:
+        - name: hub-metrics
+          port: 80
+      middlewares:
+        - name: stripprefix
+  tls:
+    certResolver: default
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: metrics-internal
+  namespace: hub
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/metrics/internal`)
+      services:
+        - name: hub-metrics
+          port: 80
+      middlewares:
+        - name: stripprefix

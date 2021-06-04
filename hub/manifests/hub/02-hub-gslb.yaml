@@ -1,0 +1,128 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hub-gslb
+  namespace: hub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hub-gslb
+  template:
+    metadata:
+      labels:
+        app: hub-gslb
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "80"
+    spec:
+      imagePullSecrets:
+        - name: gcr-access-token
+      containers:
+        - name: hub-gslb
+          image: gcr.io/traefiklabs/hub-gslb:latest
+          imagePullPolicy: Always
+          livenessProbe:
+            httpGet:
+              port: 80
+              path: /live
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 2
+          readinessProbe:
+            httpGet:
+              port: 80
+              path: /ready
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 2
+          env:
+            - name: CNAME_DOMAIN
+              value: "unused.localhost"
+            - name: GA_NAME
+              value: gslb-ga.docker.localhost
+            - name: JWT_CERT
+              valueFrom:
+                secretKeyRef:
+                  key: jwt-cert
+                  name: hub-secret
+            - name: JWT_ISS
+              value: "https://traefiklabs-hub-dev.eu.auth0.com/"
+            - name: BASE_POP_URL
+              value: http://hub-check.pop.svc.cluster.local/internal
+            - name: JWT_SUB
+              valueFrom:
+                secretKeyRef:
+                  key: jwt-sub
+                  name: hub-secret
+            - name: TRACING_ENDPOINT
+              value: "http://jaeger.jaeger.svc.cluster.local:14268"
+            - name: WORKSPACE_SERVICE_URL
+              value: http://hub-workspace.hub.svc.cluster.local/internal
+            - name: TRACING_PROBABILITY
+              value: "1"
+            - name: LOG_LEVEL
+              value: debug
+          args:
+            - serve
+            - --addr=:80
+            - --dev-mode
+            - --mongodb-uri=mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/gslb?authSource=admin
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hub-gslb
+  namespace: hub
+  labels:
+    app: hub-gslb
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      name: hub-gslb
+    - port: 40000
+      targetPort: 40000
+      name: hub-gslb-debug
+  selector:
+    app: hub-gslb
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: gslb-external-tls
+  namespace: hub
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/gslb/external`)
+      services:
+        - name: hub-gslb
+          port: 80
+      middlewares:
+        - name: stripprefix
+  tls:
+    certResolver: default
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: gslb-external
+  namespace: hub
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/gslb/external`)
+      services:
+        - name: hub-gslb
+          port: 80
+      middlewares:
+        - name: stripprefix
