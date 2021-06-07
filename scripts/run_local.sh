@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 set -o pipefail
 set -o errexit
 
@@ -163,7 +164,7 @@ renew-jwt() {
   JWT_CLIENT_ID=$(kubectl get secret hub-secret -n hub -o json | jq -r '.data["auth0-client-id"]' | tr -d '\n' | base64 -d)
   JWT_CLIENT_SECRET=$(kubectl get secret hub-secret -n hub -o json | jq -r '.data["auth0-client-secret"]' | tr -d '\n' | base64 -d)
 
-  JWT_EXTERNAL=$(curl --silent --location --request POST 'https://traefiklabs-hub-dev.eu.auth0.com/oauth/token' \
+  JWT_EXTERNAL=$(curl --silent --location --request POST 'https://traefiklabs-neo-dev.eu.auth0.com/oauth/token' \
     --header 'Content-Type: application/x-www-form-urlencoded' \
     --data-urlencode 'grant_type=password' \
     --data-urlencode "username=${HUB_USERNAME}" \
