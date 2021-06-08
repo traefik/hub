@@ -99,6 +99,7 @@ spec:
             - serve
             - --addr=:80
             - --mongodb-uri=mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/certifications?authSource=admin
+            - --gslb-service-url=http://hub-gslb.hub.svc.cluster.local/internal
       volumes:
         - name: config-volume
           configMap:
