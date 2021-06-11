@@ -1,14 +1,15 @@
-# Alpha 1
+# Alpha 3
 
-The Kubernetes cluster has been created with [env-on-demand](https://github.com/traefik/env-on-demand/issues/356)
+Two Kubernetes cluster have been created with [env-on-demand](https://github.com/traefik/env-on-demand)
+- [blue](https://github.com/traefik/env-on-demand/issues/375)
+- [green](https://github.com/traefik/env-on-demand/issues/376)
 
-The kubeconfig is available in this [comment](https://github.com/traefik/env-on-demand/issues/356#issuecomment-849664409)
+
+On each cluster we install an ingress controller and whoami
 
 ## Install ingress controller
 
 ```bash
-kubectl apply -f ingress-haproxy
-kubectl apply -f ingress-nginx
 kubectl apply -f traefik
 ```
 
@@ -18,13 +19,19 @@ kubectl apply -f traefik
 kubectl apply -f whoami
 ```
 
-## Create account on neo and create a cluster
+## Connect to hub
 
-[ui](https://hub.traefiklabs.tech/)
+[ui](https://hub.traefik.io) michael+alpha3@traefik.io/Gerald42
 
-- Create an account
-- Create a new cluster
-- Install the neo agent with the ui instructions
+- Install the agent
+
+```bash
+# blue
+helm upgrade --install hub hub/hub --set token="a9a7b210-a52f-41ba-be13-b049976debca" --namespace hub-agent
+
+# green
+helm upgrade --install hub hub/hub --set token="7985948d-f9a1-4157-b5c7-7ac2d98a0a63" --namespace hub-agent
+```
 
 ## Run query to simulate traffic on applications
 

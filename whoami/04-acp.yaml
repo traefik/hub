@@ -1,4 +1,4 @@
-apiVersion: neo.traefik.io/v1alpha1
+apiVersion: hub.traefik.io/v1alpha1
 kind: AccessControlPolicy
 metadata:
   name: my-acp

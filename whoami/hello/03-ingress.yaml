@@ -1,0 +1,17 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: app-hello-tls
+  namespace: whoami
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`alpha-3.hub.demo.traefiklabs.tech`)
+      services:
+        - name: whoami-traefik
+          port: 80
+  tls:
+    secretName: app-alpha3-tls

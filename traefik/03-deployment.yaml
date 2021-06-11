@@ -29,7 +29,7 @@ spec:
       serviceAccountName: traefik
       containers:
         - name: traefik
-          image: traefik:v2.4
+          image: traefik/traefik:experimental-master
           args:
             - --entrypoints.web.Address=:80
             - --entrypoints.websecure.Address=:443
@@ -37,8 +37,8 @@ spec:
             - --providers.kubernetescrd
             - --providers.kubernetesingress.ingressclass=traefik-lb
             - --api.dashboard
-            - --api.insecure
             - --metrics.prometheus
+            - --metrics.prometheus.addrouterslabels
             - --log.level=debug
           ports:
             - name: web
