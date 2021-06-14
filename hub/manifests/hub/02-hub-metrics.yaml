@@ -24,7 +24,7 @@ spec:
       containers:
         - name: hub-metrics
           image: gcr.io/traefiklabs/hub-metrics:latest
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:
               port: 80

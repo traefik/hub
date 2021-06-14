@@ -22,7 +22,7 @@ spec:
       containers:
         - name: hub-cluster
           image: gcr.io/traefiklabs/hub-cluster:latest
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:
               port: 80

@@ -22,7 +22,7 @@ spec:
       containers:
         - name: hub-pop-status
           image: gcr.io/traefiklabs/hub-gslb:latest
-          imagePullPolicy: Never
+          imagePullPolicy: IfNotPresent
           env:
             - name: POP_NAME
               value: k3d

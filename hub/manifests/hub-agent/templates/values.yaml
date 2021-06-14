@@ -8,7 +8,7 @@ image:
   tag: "latest"
 # User token to access to hub
 token: "${TOKEN_CLUSTER}"
-deployment:
+controllerDeployment:
   args:
     - --log-level=debug
     - --platform-url=http://platform.docker.localhost/agent

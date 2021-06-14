@@ -50,7 +50,7 @@ spec:
       containers:
         - name: hub-certificates
           image: gcr.io/traefiklabs/hub-certificates:latest
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           volumeMounts:
             - mountPath: /config
               name: config-volume

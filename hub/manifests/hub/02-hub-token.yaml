@@ -22,7 +22,7 @@ spec:
       containers:
         - name: hub-token
           image: gcr.io/traefiklabs/hub-token:latest
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:
               port: 80

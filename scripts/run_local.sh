@@ -84,6 +84,16 @@ main() {
 
   CLUSTER_NAME=$(date +%s | sha256sum | base64 | head -c 32 ; echo)
 
+  ### THIS IS TEMPORARY AND SHOULD GO AWAY SOON™ ###
+   curl --location --request POST 'http://platform.docker.localhost/cluster/internal/quotas' \
+  --header 'Content-Type: application/json' \
+  --data-raw '{
+      "name": "clusters",
+      "scope": "607997e8406c62aace2d493d",
+      "max": 10
+  }'
+  ### ----------------------------------------- ###
+
   export TOKEN_CLUSTER=$(curl --silent --location --request POST 'http://platform.docker.localhost/cluster/external/clusters' \
   --header "Authorization: Bearer ${JWT_EXTERNAL}" \
   --header 'Content-Type: application/json' \
@@ -97,10 +107,13 @@ main() {
   helm upgrade --install hub hub/hub --values="$PROJECT_DIR"/hub/manifests/hub-agent/01-values.yaml --namespace hub-agent
 
   # Patch Hub agent to expose debugging port
-  kubectl patch svc -n hub-agent hub-agent -p '{"spec":{"ports":[{"name":"hub-agent-debug","port":40000}]}}'
+  kubectl patch svc -n hub-agent hub-agent-controller -p '{"spec":{"ports":[{"name":"hub-agent-debug","port":40000}]}}'
+  kubectl patch svc -n hub-agent hub-agent-auth-server -p '{"spec":{"ports":[{"name":"hub-agent-debug","port":40000}]}}'
+
 
   # Wait for Hub agent to start
-  kubectl -n hub-agent wait --for condition=available --timeout=180s deployment/hub-agent
+  kubectl -n hub-agent wait --for condition=available --timeout=180s deployment/hub-agent-controller
+  kubectl -n hub-agent wait --for condition=available --timeout=180s deployment/hub-agent-auth-server
 
   # Install PoP
   echo "Deploying PoP services."

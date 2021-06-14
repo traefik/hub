@@ -22,7 +22,7 @@ spec:
       containers:
         - name: hub-workspace
           image: gcr.io/traefiklabs/hub-workspace:latest
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:
               port: 80

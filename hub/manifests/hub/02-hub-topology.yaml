@@ -24,7 +24,7 @@ spec:
       containers:
         - name: hub-topology
           image: gcr.io/traefiklabs/hub-topology:latest
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:
               port: 80

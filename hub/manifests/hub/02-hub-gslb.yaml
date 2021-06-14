@@ -22,7 +22,7 @@ spec:
       containers:
         - name: hub-gslb
           image: gcr.io/traefiklabs/hub-gslb:latest
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:
               port: 80

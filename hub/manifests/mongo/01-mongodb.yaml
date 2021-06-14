@@ -17,7 +17,7 @@ spec:
       containers:
         - name: mongodb
           image: bitnami/mongodb:4.2.11
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           env:
             - name: MONGODB_ROOT_PASSWORD
               value: admin

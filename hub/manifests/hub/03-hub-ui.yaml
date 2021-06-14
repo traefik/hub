@@ -20,7 +20,7 @@ spec:
       containers:
         - name: hub-ui
           image: gcr.io/traefiklabs/hub-ui:latest
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           env:
             - name: AUTH0_CLIENT_ID
               valueFrom:
