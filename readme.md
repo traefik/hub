@@ -1,16 +1,22 @@
-# Alpha 3
+# UI team dev env
 
-Two Kubernetes cluster have been created with [env-on-demand](https://github.com/traefik/env-on-demand)
-- [blue](https://github.com/traefik/env-on-demand/issues/375)
-- [green](https://github.com/traefik/env-on-demand/issues/376)
-
-
-On each cluster we install an ingress controller and whoami
+```bash
+k3d cluster create --k3s-server-arg "--no-deploy=traefik" \
+--agents="2" \
+--port 80:80@loadbalancer \
+--port 443:443@loadbalancer \
+--port 8000:8000@loadbalancer \
+--port 8443:8443@loadbalancer \
+--port 9000:9000@loadbalancer \
+--port 9443:9443@loadbalancer
+```
 
 ## Install ingress controller
 
 ```bash
 kubectl apply -f traefik
+kubectl apply -f ingress-haproxy
+kubectl apply -f ingress-nginx
 ```
 
 ## Install whoami application
@@ -26,28 +32,28 @@ kubectl apply -f whoami
 - Install the agent
 
 ```bash
-# blue
-helm upgrade --install hub hub/hub --set token="a9a7b210-a52f-41ba-be13-b049976debca" --namespace hub-agent
-
-# green
-helm upgrade --install hub hub/hub --set token="7985948d-f9a1-4157-b5c7-7ac2d98a0a63" --namespace hub-agent
+kubectl create namespace hub-agent
+helm repo add hub https://helm.traefik.io/hub
+helm repo update
+helm upgrade --install hub hub/hub --set token="2baf55b8-9655-4f4d-89e4-692c7bc4d7fc" --namespace hub-agent --set controllerDeployment.args="{--log-level=debug,--platform-url=https://platform-preview.hub.traefik.io/agent}"
 ```
 
 ## Run query to simulate traffic on applications
 
 ```
-hey https://whoami.haproxy.hub.demo.traefiklabs.tech
-hey https://whoami.traefik.hub.demo.traefiklabs.tech
-hey https://whoami.nginx.hub.demo.traefiklabs.tech
-hey https://whoami.nginx.hub.demo.traefiklabs.tech/httpbin/status/409
-hey https://whoami.nginx.hub.demo.traefiklabs.tech/httpbin/status/500
-hey https://whoami.nginx.hub.demo.traefiklabs.tech/httpbin/status/200
+hey -host whoami.traefik.docker.localhost http://127.0.0.1:80
+hey -host app.traefik.docker.localhost http://127.0.0.1:80
+hey -host whoami.nginx.docker.localhost http://127.0.0.1:8000
+hey -host whoami.haproxy.docker.localhost http://127.0.0.1:9000
+hey -host whoami.nginx.docker.localhost http://127.0.0.1:8000/httpbin/status/409
+hey -host whoami.nginx.docker.localhost http://127.0.0.1:8000/httpbin/status/500
+hey -host whoami.nginx.docker.localhost http://127.0.0.1:8000/httpbin/status/200
 ```
 
 ## Clean up
 
 ```
-helm uninstall --namespace neo-agent neo
-kubectl delete ns neo-agent
-kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io neo
+helm uninstall --namespace hub-agent hub
+kubectl delete ns hub-agent
+kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io hub
 ```

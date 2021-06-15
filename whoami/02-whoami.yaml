@@ -5,7 +5,7 @@ metadata:
   name: whoami
   namespace: whoami
 spec:
-  replicas: 5
+  replicas: 2
   selector:
     matchLabels:
       app: whoami
@@ -16,16 +16,45 @@ spec:
     spec:
       containers:
       - name: whoami
-        image: traefik/traefikee-webapp-demo:v2
-        args:
-          - -ascii
-          - -name=HELLO
+        image: traefik/whoami
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: whoami-traefik
+  namespace: whoami
+  labels:
+    app: whoami
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    name: whoami
+  selector:
+    app: whoami
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: whoami-nginx
+  namespace: whoami
+  labels:
+    app: whoami
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    name: whoami
+  selector:
+    app: whoami
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: whoami-haproxy
   namespace: whoami
   labels:
     app: whoami
