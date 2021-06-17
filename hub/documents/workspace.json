@@ -1,6 +1,6 @@
 {
   "_id": {
-    "$oid": "607997e8406c62aace2d493d"
+    "$oid": "60c91ce465b8bcfc7bf2e35d"
   },
   "name": "Traefik Labs",
   "isUser": false,
@@ -9,7 +9,8 @@
     "e51b0ecc-2ab9-4387-b3b9-375d00eb1347",
     "7e80b039-4daa-44fc-bab9-2842a9036378",
     "74f3f6f3-185a-43d3-86c0-eb575085edbc",
-    "2f2f8487-9560-44ab-8e49-a4cdcfacf182"
+    "2f2f8487-9560-44ab-8e49-a4cdcfacf182",
+    "9204c8f8-703f-4bc5-a0f8-50400d769b7c"
   ],
   "teams": [
     {
@@ -22,7 +23,8 @@
         "e51b0ecc-2ab9-4387-b3b9-375d00eb1347",
         "7e80b039-4daa-44fc-bab9-2842a9036378",
         "74f3f6f3-185a-43d3-86c0-eb575085edbc",
-        "2f2f8487-9560-44ab-8e49-a4cdcfacf182"
+        "2f2f8487-9560-44ab-8e49-a4cdcfacf182",
+        "9204c8f8-703f-4bc5-a0f8-50400d769b7c"
       ],
       "permissions": [
         {

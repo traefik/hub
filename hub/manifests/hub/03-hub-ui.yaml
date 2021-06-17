@@ -39,7 +39,7 @@ spec:
             - name: AUTH0_COOKIE_SECRET
               value: supersecretcookiewith32charactersatleast
             - name: AUTH0_DOMAIN
-              value: "https://traefiklabs-neo-dev.eu.auth0.com"
+              value: "https://traefiklabs-hub-preview.eu.auth0.com"
             - name: AUTH0_SCOPE
               value: openid profile email offline_access
             - name: DEPLOY_URL

@@ -69,6 +69,7 @@ main() {
 
   export GITHUB_ORG
   envsubst < "$PROJECT_DIR"/hub/manifests/hub/templates/hub-cluster.yaml > "$PROJECT_DIR"/hub/manifests/hub/01-hub-cluster.yaml
+  envsubst < "$PROJECT_DIR"/hub/manifests/hub/templates/hub-offer.yaml > "$PROJECT_DIR"/hub/manifests/hub/01-hub-offer.yaml
 
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/hub/secrets/
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/hub/
@@ -82,17 +83,89 @@ main() {
   renew-jwt
   sleep 5
 
-  CLUSTER_NAME=$(date +%s | sha256sum | base64 | head -c 32 ; echo)
+  ## Freemium US
+  kubectl run --timeout=40s --command=true -it --rm --restart=Never --image=gcr.io/traefiklabs/hub-offer:latest \
+  --image-pull-policy=IfNotPresent --namespace=hub \
+  --overrides='{"apiVersion": "v1", "spec": {"imagePullSecrets": [{"name": "gcr-access-token"}]}}' -- hub-offer /hub-offer create-offer \
+  --mongodb-uri="mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/offers?authSource=admin" \
+  --log-level="debug" \
+  --offer-name="freemium" \
+  --offer-zone-name="default" \
+  --offer-priceid="price_1J05aJEfHpKKvvELtLRaL1xl" \
+  --offer-config-metrics-interval="1m" \
+  --offer-config-metrics-tables="1m" \
+  --offer-config-metrics-tables="10m" \
+  --offer-config-metrics-tables="1h" \
+  --offer-quotas-clusters="2" \
+  --offer-config-access-control-max-secured-routes="3" \
+  --offer-quotas-users="2" \
+  --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
 
-  ### THIS IS TEMPORARY AND SHOULD GO AWAY SOON™ ###
-   curl --location --request POST 'http://platform.docker.localhost/cluster/internal/quotas' \
+  ## Premium US
+  kubectl run --timeout=40s --command=true -it --rm --restart=Never --image=gcr.io/traefiklabs/hub-offer:latest \
+  --image-pull-policy=IfNotPresent --namespace=hub \
+  --overrides='{"apiVersion": "v1", "spec": {"imagePullSecrets": [{"name": "gcr-access-token"}]}}' -- hub-offer /hub-offer create-offer \
+  --mongodb-uri="mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/offers?authSource=admin" \
+  --log-level="debug" \
+  --offer-name="premium" \
+  --offer-zone-name="default" \
+  --offer-priceid="price_1J05awEfHpKKvvELb9boaOxw" \
+  --offer-config-metrics-interval="1m" \
+  --offer-config-metrics-tables="1m" \
+  --offer-config-metrics-tables="10m" \
+  --offer-config-metrics-tables="1h" \
+  --offer-config-metrics-tables="1d" \
+  --offer-quotas-clusters="5" \
+  --offer-config-access-control-max-secured-routes="50" \
+  --offer-quotas-users="20" \
+  --offer-features="team-management" --offer-features="geo-steering" \
+  --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
+
+  ## Freemium EU
+  kubectl run --timeout=40s --command=true -it --rm --restart=Never --image=gcr.io/traefiklabs/hub-offer:latest \
+  --image-pull-policy=IfNotPresent --namespace=hub \
+  --overrides='{"apiVersion": "v1", "spec": {"imagePullSecrets": [{"name": "gcr-access-token"}]}}' -- hub-offer /hub-offer create-offer \
+  --mongodb-uri="mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/offers?authSource=admin" \
+  --log-level="debug" \
+  --offer-name="freemium" \
+  --offer-zone-name="eu" \
+  --offer-priceid="price_1J05XOAYmbimY05BcwhLKPgB" \
+  --offer-config-metrics-interval="1m" \
+  --offer-config-metrics-tables="1m" \
+  --offer-config-metrics-tables="10m" \
+  --offer-config-metrics-tables="1h" \
+  --offer-quotas-clusters="2" \
+  --offer-config-access-control-max-secured-routes="3" \
+  --offer-quotas-users="2" \
+  --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
+
+  ## Premium EU
+  kubectl run --timeout=40s --command=true -it --rm --restart=Never --image=gcr.io/traefiklabs/hub-offer:latest \
+  --image-pull-policy=IfNotPresent --namespace=hub \
+  --overrides='{"apiVersion": "v1", "spec": {"imagePullSecrets": [{"name": "gcr-access-token"}]}}' -- hub-offer /hub-offer create-offer \
+  --mongodb-uri="mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/offers?authSource=admin" \
+  --log-level="debug" \
+  --offer-name="premium" \
+  --offer-zone-name="eu" \
+  --offer-priceid="price_1J05YJAYmbimY05BpjcSne7V" \
+  --offer-config-metrics-interval="1m" \
+  --offer-config-metrics-tables="1m" \
+  --offer-config-metrics-tables="10m" \
+  --offer-config-metrics-tables="1h" \
+  --offer-config-metrics-tables="1d" \
+  --offer-quotas-clusters="5" \
+  --offer-config-access-control-max-secured-routes="50" \
+  --offer-quotas-users="20" \
+  --offer-features="team-management" --offer-features="geo-steering" \
+  --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
+
+  # Create subscription
+  curl --silent --location --request POST 'http://platform.docker.localhost/offer/external/subscriptions' \
+  --header "Authorization: Bearer ${JWT_EXTERNAL}" \
   --header 'Content-Type: application/json' \
-  --data-raw '{
-      "name": "clusters",
-      "scope": "607997e8406c62aace2d493d",
-      "max": 10
-  }'
-  ### ----------------------------------------- ###
+  --data-raw "{\"countryCode\": \"FR\", \"workspaceId\": \"60c91ce465b8bcfc7bf2e35d\", \"priceId\": \"price_1J05YJAYmbimY05BpjcSne7V\"}" | jq -r '.access_token' | tr -d '\n'
+
+  CLUSTER_NAME=$(date +%s | sha256sum | base64 | head -c 32 ; echo)
 
   export TOKEN_CLUSTER=$(curl --silent --location --request POST 'http://platform.docker.localhost/cluster/external/clusters' \
   --header "Authorization: Bearer ${JWT_EXTERNAL}" \
@@ -176,7 +249,7 @@ renew-jwt() {
   JWT_CLIENT_ID=$(kubectl get secret hub-secret -n hub -o json | jq -r '.data["auth0-client-id"]' | tr -d '\n' | base64 -d)
   JWT_CLIENT_SECRET=$(kubectl get secret hub-secret -n hub -o json | jq -r '.data["auth0-client-secret"]' | tr -d '\n' | base64 -d)
 
-  JWT_EXTERNAL=$(curl --silent --location --request POST 'https://traefiklabs-neo-dev.eu.auth0.com/oauth/token' \
+  JWT_EXTERNAL=$(curl --silent --location --request POST 'https://traefiklabs-hub-preview.eu.auth0.com/oauth/token' \
     --header 'Content-Type: application/x-www-form-urlencoded' \
     --data-urlencode 'grant_type=password' \
     --data-urlencode "username=${HUB_USERNAME}" \
@@ -186,7 +259,7 @@ renew-jwt() {
     --data-urlencode "client_secret=${JWT_CLIENT_SECRET}" \
     --data-urlencode 'scope=openid' \
     --data-urlencode 'realm=Username-Password-Authentication' \
-    --data-urlencode 'workspaceId=607997e8406c62aace2d493d' | jq -r '.access_token' | tr -d '\n')
+    --data-urlencode 'workspaceId=60c91ce465b8bcfc7bf2e35d' | jq -r '.access_token' | tr -d '\n')
 
   echo $JWT_EXTERNAL
 }

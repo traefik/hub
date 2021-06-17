@@ -82,6 +82,7 @@ The local installation can be done with `make run`. The script will create a k3d
     - token
     - notification
     - gslb
+    - offer
     - (+ an ingress to access to all the services)
 - Hub-agent
 - Jaeger

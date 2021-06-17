@@ -79,7 +79,7 @@ spec:
                   key: jwt-cert
                   name: hub-secret
             - name: JWT_ISS
-              value: "https://traefiklabs-neo-dev.eu.auth0.com/"
+              value: "https://traefiklabs-hub-preview.eu.auth0.com/"
             - name: JWT_SUB
               valueFrom:
                 secretKeyRef:

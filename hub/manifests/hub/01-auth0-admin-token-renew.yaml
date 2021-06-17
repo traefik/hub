@@ -28,7 +28,7 @@ spec:
           args:
             - -c
             - |
-              URL=https://traefiklabs-neo-dev.eu.auth0.com
+              URL=https://traefiklabs-hub-preview.eu.auth0.com
 
               TOKEN=$(curl -s --request POST --url ${URL}/oauth/token \
               --header 'content-type: application/json' \

@@ -8,6 +8,7 @@ venv
 
 ## Generated templates
 01-hub-cluster.yaml
+01-hub-offer.yaml
 01-awssecret.yaml
 01-github-token.yaml
 01-values.yaml

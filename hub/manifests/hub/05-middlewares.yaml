@@ -31,3 +31,4 @@ spec:
       - /invitation
       - /check
       - /gslb
+      - /offer

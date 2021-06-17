@@ -1,0 +1,179 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hub-offer
+  namespace: hub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hub-offer
+  template:
+    metadata:
+      labels:
+        app: hub-offer
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "80"
+    spec:
+      imagePullSecrets:
+        - name: gcr-access-token
+      containers:
+        - name: hub-offer
+          image: gcr.io/traefiklabs/hub-offer:latest
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              cpu: 50m
+              memory: 32Mi
+          env:
+            - name: STRIPE_DEFAULT_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: stripe-default-key-test
+                  name: hub-secret
+            - name: STRIPE_DEFAULT_WEBHOOK_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: stripe-default-webhook-key-test
+                  name: hub-secret
+            - name: STRIPE_EU_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: stripe-eu-key-test
+                  name: hub-secret
+            - name: STRIPE_EU_WEBHOOK_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: stripe-eu-webhook-key-test
+                  name: hub-secret
+            - name: TOPOLOGY_GIT_ORG_NAME
+              value: "${GITHUB_ORG}"
+            - name: TOPOLOGY_GIT_PROXY_HOST
+              value: platform.docker.localhost
+            - name: ALERT_QUOTA_ENFORCER_URL
+              value: http://hub-alert.hub.svc.cluster.local/internal/quotas
+            - name: CLUSTER_QUOTA_ENFORCER_URL
+              value: http://hub-cluster.hub.svc.cluster.local/internal/quotas
+            - name: WORKSPACE_SERVICE_URL
+              value: http://hub-workspace.hub.svc.cluster.local/internal
+            - name: USER_QUOTA_ENFORCER_URL
+              value: http://hub-workspace.hub.svc.cluster.local/internal/quotas
+            - name: TRACING_ENDPOINT
+              value: "http://jaeger.jaeger.svc.cluster.local:14268"
+            - name: JWT_CERT
+              valueFrom:
+                secretKeyRef:
+                  key: jwt-cert
+                  name: hub-secret
+            - name: JWT_ISS
+              value: "https://traefiklabs-hub-preview.eu.auth0.com/"
+            - name: JWT_SUB
+              valueFrom:
+                secretKeyRef:
+                  key: jwt-sub
+                  name: hub-secret
+            - name: TRACING_ENDPOINT
+              value: "http://jaeger.jaeger.svc.cluster.local:14268"
+            - name: TRACING_PROBABILITY
+              value: "1"
+            - name: LOG_LEVEL
+              value: debug
+          args:
+            - serve
+            - --addr=:80
+            - --mongodb-uri=mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/offer?authSource=admin
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hub-offer
+  namespace: hub
+  labels:
+    app: hub-offer
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      name: http
+  selector:
+    app: hub-offer
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: offer-external-tls
+  namespace: hub
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/offer/external`)
+      services:
+        - name: hub-offer
+          port: 80
+      middlewares:
+        - name: stripprefix
+  tls:
+    certResolver: default
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: offer-external
+  namespace: hub
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/offer/external`)
+      services:
+        - name: hub-offer
+          port: 80
+      middlewares:
+        - name: stripprefix
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: offer-agent
+  namespace: hub
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && Path(`/agent/config`)
+      services:
+        - name: hub-offer
+          port: 80
+      middlewares:
+        - name: auth-token
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: offer-agent-tls
+  namespace: hub
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && Path(`/agent/config`)
+      services:
+        - name: hub-offer
+          port: 80
+      middlewares:
+        - name: auth-token
+  tls:
+    certResolver: default
