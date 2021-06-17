@@ -25,25 +25,26 @@ apply-coredns-conf:
 reset-all-images: reset-agent-image reset-cluster-image reset-workspace-image reset-topology-image reset-token-image reset-metrics-image
 
 reset-agent-image:
-	kubectl patch deployment -n hub-agent hub-agent -p '{"spec":{"template":{"spec":{"containers":[{"name":"hub-agent","image":"gcr.io/traefiklabs/hub-agent:latest","imagePullPolicy":"Always"}]}}}}'
+	kubectl patch deployment -n hub-agent hub-agent-controller -p '{"spec":{"template":{"spec":{"containers":[{"name":"hub-agent-controller","image":"gcr.io/traefiklabs/hub-agent:latest","imagePullPolicy":"IfNotPresent"}]}}}}'
+	kubectl patch deployment -n hub-agent hub-agent-auth-server -p '{"spec":{"template":{"spec":{"containers":[{"name":"hub-agent-auth-server","image":"gcr.io/traefiklabs/hub-agent:latest","imagePullPolicy":"IfNotPresent"}]}}}}'
 
 reset-cluster-image:
-	kubectl patch deployment -n hub hub-cluster -p '{"spec":{"template":{"spec":{"containers":[{"name":"hub-cluster","image":"gcr.io/traefiklabs/hub-cluster:latest","imagePullPolicy":"Always"}]}}}}'
+	kubectl patch deployment -n hub hub-cluster -p '{"spec":{"template":{"spec":{"containers":[{"name":"hub-cluster","image":"gcr.io/traefiklabs/hub-cluster:latest","imagePullPolicy":"IfNotPresent"}]}}}}'
 
 reset-workspace-image:
-	kubectl patch deployment -n hub hub-workspace -p '{"spec":{"template":{"spec":{"containers":[{"name":"hub-workspace","image":"gcr.io/traefiklabs/hub-workspace-service:latest","imagePullPolicy":"Always"}]}}}}'
+	kubectl patch deployment -n hub hub-workspace -p '{"spec":{"template":{"spec":{"containers":[{"name":"hub-workspace","image":"gcr.io/traefiklabs/hub-workspace-service:latest","imagePullPolicy":"IfNotPresent"}]}}}}'
 
 reset-topology-image:
-	kubectl patch deployment -n hub hub-topology -p '{"spec":{"template":{"spec":{"containers":[{"name":"hub-topology","image":"gcr.io/traefiklabs/hub-topology:latest","imagePullPolicy":"Always"}]}}}}'
+	kubectl patch deployment -n hub hub-topology -p '{"spec":{"template":{"spec":{"containers":[{"name":"hub-topology","image":"gcr.io/traefiklabs/hub-topology:latest","imagePullPolicy":"IfNotPresent"}]}}}}'
 
 reset-token-image:
-	kubectl patch deployment -n hub hub-token -p '{"spec":{"template":{"spec":{"containers":[{"name":"hub-token","image":"gcr.io/traefiklabs/hub-token:latest","imagePullPolicy":"Always"}]}}}}'
+	kubectl patch deployment -n hub hub-token -p '{"spec":{"template":{"spec":{"containers":[{"name":"hub-token","image":"gcr.io/traefiklabs/hub-token:latest","imagePullPolicy":"IfNotPresent"}]}}}}'
 
 reset-metrics-image:
-	kubectl patch deployment -n hub hub-metrics -p '{"spec":{"template":{"spec":{"containers":[{"name":"hub-metrics","image":"gcr.io/traefiklabs/hub-metrics:latest","imagePullPolicy":"Always"}]}}}}'
+	kubectl patch deployment -n hub hub-metrics -p '{"spec":{"template":{"spec":{"containers":[{"name":"hub-metrics","image":"gcr.io/traefiklabs/hub-metrics:latest","imagePullPolicy":"IfNotPresent"}]}}}}'
 
-reset-certificate-image:
-	kubectl patch deployment -n hub hub-certificates -p '{"spec":{"template":{"spec":{"containers":[{"name":"hub-certificates","image":"gcr.io/traefiklabs/hub-certificates:latest","imagePullPolicy":"Always"}]}}}}'
+reset-certificates-image:
+	kubectl patch deployment -n hub hub-certificates -p '{"spec":{"template":{"spec":{"containers":[{"name":"hub-certificates","image":"gcr.io/traefiklabs/hub-certificates:latest","imagePullPolicy":"IfNotPresent"}]}}}}'
 
 clean:
 	$(SCRIPT_DIR)/run_local.sh clean

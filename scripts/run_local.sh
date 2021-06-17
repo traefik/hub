@@ -110,7 +110,6 @@ main() {
   kubectl patch svc -n hub-agent hub-agent-controller -p '{"spec":{"ports":[{"name":"hub-agent-debug","port":40000}]}}'
   kubectl patch svc -n hub-agent hub-agent-auth-server -p '{"spec":{"ports":[{"name":"hub-agent-debug","port":40000}]}}'
 
-
   # Wait for Hub agent to start
   kubectl -n hub-agent wait --for condition=available --timeout=180s deployment/hub-agent-controller
   kubectl -n hub-agent wait --for condition=available --timeout=180s deployment/hub-agent-auth-server
