@@ -21,7 +21,7 @@ spec:
         - name: gcr-access-token
       containers:
         - name: hub-check
-          image: gcr.io/traefiklabs/check-service:latest
+          image: gcr.io/traefiklabs/hub-check:latest
           imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:
