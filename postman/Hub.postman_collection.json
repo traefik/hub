@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "9cb9310a-6e1a-4dad-ab4a-f131de4e0760",
+		"_postman_id": "9b81624a-094a-400c-ab93-2ae0a7c87f06",
 		"name": "Hub",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -235,12 +235,11 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{PLATFORM_URL}}/alert/external/rules",
+									"raw": "{{ALERT_URL}}/external/rules",
 									"host": [
-										"{{PLATFORM_URL}}"
+										"{{ALERT_URL}}"
 									],
 									"path": [
-										"alert",
 										"external",
 										"rules"
 									]
@@ -254,12 +253,11 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{PLATFORM_URL}}/alert/external/alerts",
+									"raw": "{{ALERT_URL}}/external/alerts",
 									"host": [
-										"{{PLATFORM_URL}}"
+										"{{ALERT_URL}}"
 									],
 									"path": [
-										"alert",
 										"external",
 										"alerts"
 									],
@@ -317,12 +315,11 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{PLATFORM_URL}}/alert/external/alerts/:id",
+									"raw": "{{ALERT_URL}}/external/alerts/:id",
 									"host": [
-										"{{PLATFORM_URL}}"
+										"{{ALERT_URL}}"
 									],
 									"path": [
-										"alert",
 										"external",
 										"alerts",
 										":id"
@@ -344,12 +341,11 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{PLATFORM_URL}}/alert/external/alerts/:id/logs",
+									"raw": "{{ALERT_URL}}/external/alerts/:id/logs",
 									"host": [
-										"{{PLATFORM_URL}}"
+										"{{ALERT_URL}}"
 									],
 									"path": [
-										"alert",
 										"external",
 										"alerts",
 										":id",
@@ -372,12 +368,11 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{PLATFORM_URL}}/alert/external/alerts/count",
+									"raw": "{{ALERT_URL}}/external/alerts/count",
 									"host": [
-										"{{PLATFORM_URL}}"
+										"{{ALERT_URL}}"
 									],
 									"path": [
-										"alert",
 										"external",
 										"alerts",
 										"count"
@@ -437,12 +432,11 @@
 									}
 								},
 								"url": {
-									"raw": "{{PLATFORM_URL}}/alert/external/rules/:id",
+									"raw": "{{ALERT_URL}}/external/rules/:id",
 									"host": [
-										"{{PLATFORM_URL}}"
+										"{{ALERT_URL}}"
 									],
 									"path": [
-										"alert",
 										"external",
 										"rules",
 										":id"
@@ -464,12 +458,11 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{PLATFORM_URL}}/alert/external/rules/:id",
+									"raw": "{{ALERT_URL}}/external/rules/:id",
 									"host": [
-										"{{PLATFORM_URL}}"
+										"{{ALERT_URL}}"
 									],
 									"path": [
-										"alert",
 										"external",
 										"rules",
 										":id"
@@ -491,12 +484,11 @@
 								"method": "DELETE",
 								"header": [],
 								"url": {
-									"raw": "{{PLATFORM_URL}}/alert/external/rules/:id",
+									"raw": "{{ALERT_URL}}/external/rules/:id",
 									"host": [
-										"{{PLATFORM_URL}}"
+										"{{ALERT_URL}}"
 									],
 									"path": [
-										"alert",
 										"external",
 										"rules",
 										":id"
@@ -527,12 +519,11 @@
 									}
 								},
 								"url": {
-									"raw": "{{PLATFORM_URL}}/alert/external/rules/:id",
+									"raw": "{{ALERT_URL}}/external/rules/:id",
 									"host": [
-										"{{PLATFORM_URL}}"
+										"{{ALERT_URL}}"
 									],
 									"path": [
-										"alert",
 										"external",
 										"rules",
 										":id"
@@ -577,6 +568,113 @@
 									""
 								]
 							}
+						}
+					]
+				},
+				{
+					"name": "/internal",
+					"item": [
+						{
+							"name": "/quotas - Create a quota",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"max\": 50,\n    \"scope\": \"{{AG_WORKSPACE_ID}}\",\n    \"name\": \"history\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{ALERT_URL}}/internal/quotas",
+									"host": [
+										"{{ALERT_URL}}"
+									],
+									"path": [
+										"internal",
+										"quotas"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/quotas - GET a quota",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"max\": 50,\n    \"scope\": \"{{AG_WORKSPACE_ID}}\",\n    \"name\": \"triggers\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{ALERT_URL}}/internal/quotas/:scope/:name",
+									"host": [
+										"{{ALERT_URL}}"
+									],
+									"path": [
+										"internal",
+										"quotas",
+										":scope",
+										":name"
+									],
+									"variable": [
+										{
+											"key": "scope",
+											"value": "{{AG_WORKSPACE_ID}}"
+										},
+										{
+											"key": "name",
+											"value": "triggers"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/internal/workspaces/:workspaceId/clusters/:id - Delete cluster data",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{ALERT_URL}}/internal/workspaces/:workspaceId/clusters/:id",
+									"host": [
+										"{{ALERT_URL}}"
+									],
+									"path": [
+										"internal",
+										"workspaces",
+										":workspaceId",
+										"clusters",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "{{AG_WORKSPACE_ID}}",
+											"description": "Enter your workspace ID"
+										},
+										{
+											"key": "id",
+											"value": "{{AG_CLUSTER_ID}}",
+											"description": "Enter your cluster ID"
+										}
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				}
