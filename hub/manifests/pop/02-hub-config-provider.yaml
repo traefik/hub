@@ -46,10 +46,6 @@ spec:
               value: 10s
             - name: CHECK_URL
               value: http://hub-check.pop.svc.cluster.local/internal
-            - name: TRACING_ENDPOINT
-              value: "http://jaeger.jaeger.svc.cluster.local:14268"
-            - name: TRACING_PROBABILITY
-              value: "1"
             - name: LOG_LEVEL
               value: debug
           args:

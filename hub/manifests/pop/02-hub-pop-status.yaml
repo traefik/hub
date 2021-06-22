@@ -32,10 +32,6 @@ spec:
               value: 30s
             - name: PROXY_SERVICE_URL
               value: http://traefikee-gslb-proxy-svc.pop.svc.cluster.local:8081/api/overview
-            - name: TRACING_ENDPOINT
-              value: "http://jaeger.jaeger.svc.cluster.local:14268"
-            - name: TRACING_PROBABILITY
-              value: "1"
             - name: LOG_LEVEL
               value: debug
           args:
