@@ -1,5 +1,4 @@
 #!/bin/bash
-set -x
 set -o pipefail
 set -o errexit
 
@@ -29,6 +28,7 @@ main() {
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/hub/00-namespace.yaml
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/hub-agent/00-namespace.yaml
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/aws-secret-operator/00-namespace.yaml
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/pop/00-namespace.yaml
 
   apply-coredns-conf
 
@@ -227,7 +227,7 @@ apply-coredns-conf() {
 }
 
 renew-gcr-token() {
-    for namespace in hub hub-agent; do
+    for namespace in hub hub-agent pop; do
         set +o errexit
         kubectl delete secret -n $namespace gcr-access-token
         set -o errexit

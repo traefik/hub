@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "9b81624a-094a-400c-ab93-2ae0a7c87f06",
+		"_postman_id": "bb3090d0-efb0-4bfb-ac26-da279814d98b",
 		"name": "Hub",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1367,7 +1367,38 @@
 							"response": []
 						},
 						{
-							"name": "/gslbs - Create GSLB",
+							"name": "/gslbs/:id/domains/verify - Verify domains",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{GSLB_URL}}/external/gslbs/{{AG_HUB_GSLB}}/domains/verify",
+									"host": [
+										"{{GSLB_URL}}"
+									],
+									"path": [
+										"external",
+										"gslbs",
+										"{{AG_HUB_GSLB}}",
+										"domains",
+										"verify"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/gslbs - Create GSLB (blue/green)",
 							"event": [
 								{
 									"listen": "test",
@@ -1394,7 +1425,55 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"test\"\n}",
+									"raw": "{\n    \"name\": \"test\",\n    \"domains\": [\n        \"toto.localhost\"\n    ],\n    \"strategy\": \"blue-green\",\n    \"strategyParameters\": {\n        \"clusterId\": \"pouet\",\n        \"targets\": [\n            \"8.8.8.8:443\"\n        ]\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{GSLB_URL}}/external/gslbs",
+									"host": [
+										"{{GSLB_URL}}"
+									],
+									"path": [
+										"external",
+										"gslbs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/gslbs - Create GSLB (single-cluster)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.environment.set(\"AG_HUB_GSLB\", pm.response.json().id)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"test\",\n    \"domains\": [\n        \"toto.localhost\"\n    ],\n    \"strategy\": \"blue-green\",\n    \"strategyParameters\": {\n        \"blue\": {\n            \"clusterId\": \"pouet\",\n            \"targets\": [\n                \"8.8.8.8:443\"\n            ]\n        },\n        \"green\": {\n            \"clusterId\": \"pouetvert\",\n            \"targets\": [\n                \"8.8.8.8:443\"\n            ]\n        }\n    }\n}",
 									"options": {
 										"raw": {
 											"language": "json"

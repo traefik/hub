@@ -44,7 +44,7 @@ spec:
         component: controllers
     spec:
       imagePullSecrets:
-        - name: googlesecret
+        - name: gcr-access-token
       serviceAccountName: "traefikee-gslb-svc-acc"
       affinity:
         podAntiAffinity:
@@ -77,7 +77,7 @@ spec:
               cpu: 1000m
       containers:
         - name: "traefikee-gslb-controller"
-          image: traefik/traefikee:v2.3.0
+          image: gcr.io/traefiklabs/enterprise:hub-fork
           imagePullPolicy: IfNotPresent
           env:
             - name: POD_NAME
@@ -209,7 +209,7 @@ spec:
         component: proxies
     spec:
       imagePullSecrets:
-        - name: googlesecret
+        - name: gcr-access-token
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -242,7 +242,7 @@ spec:
               cpu: "1000m"
       containers:
         - name: "traefikee-gslb-proxy"
-          image: traefik/traefikee:v2.3.0
+          image: gcr.io/traefiklabs/enterprise:hub-fork
           imagePullPolicy: IfNotPresent
           env:
             - name: POD_NAME
@@ -253,6 +253,8 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
+            - name: ACME_TLS_MONGODB_URI
+              value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/certifications?authSource=admin
           securityContext:
             readOnlyRootFilesystem: true
             capabilities:

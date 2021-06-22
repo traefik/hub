@@ -4,6 +4,8 @@ kind: Ingress
 metadata:
   name: app-traefik-tls
   namespace: whoami
+#  annotations:
+#    hub.traefik.io/enable-acme: "true"
 spec:
   ingressClassName: traefik-lb
   rules:
@@ -19,7 +21,7 @@ spec:
                   number: 80
 
   tls:
-    - secretName: traefik-tls
+    - secretName: tls-secret
       hosts:
         - traefik.tls.docker.localhost
 

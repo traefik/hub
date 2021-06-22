@@ -59,6 +59,25 @@
           "action": "delete",
           "resource": "cluster",
           "scope": "*"
+        },
+        {
+          "action": "create",
+          "resource": "gslb"
+        },
+        {
+          "action": "view",
+          "resource": "gslb",
+          "scope": "*"
+        },
+        {
+          "action": "edit",
+          "resource": "gslb",
+          "scope": "*"
+        },
+        {
+          "action": "delete",
+          "resource": "gslb",
+          "scope": "*"
         }
       ],
       "updatedAt": {

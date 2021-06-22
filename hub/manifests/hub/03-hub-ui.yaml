@@ -46,6 +46,8 @@ spec:
               value: "https://webapp.docker.localhost"
             - name: AUTH0_ADMIN_TOKEN
               value: "toto"
+            - name: OFFER_SERVICE_ENDPOINT
+              value: "http://hub-offer.hub.svc.cluster.local/external"
             - name: TOPOLOGY_SERVICE_ENDPOINT
               value: "http://hub-topology.hub.svc.cluster.local/external"
             - name: METRICS_SERVICE_ENDPOINT
