@@ -56,6 +56,7 @@ spec:
             - --sendgrid-endpoint=/mail/send
             - --sendgrid-alert-template-id=d-2b1b8c1c4e2c472c94f9e0276e724e14
             - --sendgrid-invitation-template-id=d-8f04099ff9e7406d8f58a444b2d52283
+            - --sendgrid-beta-invitation-template-id=d-8f04099ff9e7406d8f58a444b2d52283
             - --sendgrid-from=noreply@traefik.io
             - --sendgrid-from-name=Me
 
