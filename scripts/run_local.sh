@@ -99,6 +99,7 @@ main() {
   --offer-quotas-clusters="2" \
   --offer-config-access-control-max-secured-routes="3" \
   --offer-quotas-users="2" \
+  --offer-quotas-domains="10" \
   --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
 
   ## Premium US
@@ -118,6 +119,7 @@ main() {
   --offer-quotas-clusters="5" \
   --offer-config-access-control-max-secured-routes="50" \
   --offer-quotas-users="20" \
+  --offer-quotas-domains="100" \
   --offer-features="team-management" --offer-features="geo-steering" \
   --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
 
@@ -137,6 +139,7 @@ main() {
   --offer-quotas-clusters="2" \
   --offer-config-access-control-max-secured-routes="3" \
   --offer-quotas-users="2" \
+  --offer-quotas-domains="10" \
   --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
 
   ## Premium EU
@@ -156,6 +159,7 @@ main() {
   --offer-quotas-clusters="5" \
   --offer-config-access-control-max-secured-routes="50" \
   --offer-quotas-users="20" \
+  --offer-quotas-domains="100" \
   --offer-features="team-management" --offer-features="geo-steering" \
   --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
 

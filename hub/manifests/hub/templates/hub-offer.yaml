@@ -60,6 +60,8 @@ spec:
               value: http://hub-workspace.hub.svc.cluster.local/internal
             - name: USER_QUOTA_ENFORCER_URL
               value: http://hub-workspace.hub.svc.cluster.local/internal/quotas
+            - name: DOMAIN_QUOTA_ENFORCER_URL
+              value: http://hub-gslb.hub.svc.cluster.local/internal/quotas
             - name: TRACING_ENDPOINT
               value: "http://jaeger.jaeger.svc.cluster.local:14268"
             - name: JWT_CERT
