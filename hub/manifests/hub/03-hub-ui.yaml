@@ -46,16 +46,24 @@ spec:
               value: "https://webapp.docker.localhost"
             - name: AUTH0_ADMIN_TOKEN
               value: "toto"
-            - name: OFFER_SERVICE_ENDPOINT
-              value: "http://hub-offer.hub.svc.cluster.local/external"
+            - name: ALERT_SERVICE_ENDPOINT
+              value: "http://hub-alert.hub.svc.cluster.local/external"
             - name: TOPOLOGY_SERVICE_ENDPOINT
               value: "http://hub-topology.hub.svc.cluster.local/external"
-            - name: METRICS_SERVICE_ENDPOINT
+            - name: METRIC_SERVICE_ENDPOINT
               value: "http://hub-metrics.hub.svc.cluster.local/external"
             - name: WORKSPACE_SERVICE_ENDPOINT
               value: "http://hub-workspace.hub.svc.cluster.local/external"
             - name: CLUSTER_SERVICE_ENDPOINT
               value: "http://hub-cluster.hub.svc.cluster.local/external"
+            - name: INVITATION_SERVICE_ENDPOINT
+              value: "http://hub-invitation.hub.svc.cluster.local/external"
+            - name: CERTIFICATE_SERVICE_ENDPOINT
+              value: "http://hub-certificates.hub.svc.cluster.local/external"
+            - name: GSLB_SERVICE_ENDPOINT
+              value: "http://hub-gslb.hub.svc.cluster.local/external"
+            - name: OFFER_SERVICE_ENDPOINT
+              value: "http://hub-offer.hub.svc.cluster.local/external"
             - name: IS_LOCAL
               value: "true"
             - name: "NODE_TLS_REJECT_UNAUTHORIZED"
