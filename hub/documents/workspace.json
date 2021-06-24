@@ -78,6 +78,11 @@
           "action": "delete",
           "resource": "gslb",
           "scope": "*"
+        },
+        {
+          "action": "view",
+          "resource": "invitation",
+          "scope": "*"
         }
       ],
       "updatedAt": {
