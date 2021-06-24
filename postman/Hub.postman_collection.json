@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "bb3090d0-efb0-4bfb-ac26-da279814d98b",
+		"_postman_id": "38f030ba-20f6-4a10-8b5b-1fa2cdc5e81c",
 		"name": "Hub",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -189,6 +189,33 @@
 									"path": [
 										"agent",
 										"notify"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/preflight - Preflight check",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[\n    {\n        \"id\": 0,\n        \"ruleId\": \"60a6302d9309f8789c68cd13\",\n        \"ingress\": \"whoami@whoami\"\n    }\n  ]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{PLATFORM_URL}}/agent/preflight",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"agent",
+										"preflight"
 									]
 								}
 							},
@@ -1099,6 +1126,42 @@
 					"name": "/internal",
 					"item": [
 						{
+							"name": "/clusters/unhealthy - List unhealthy clusters",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{CLUSTER_URL}}/internal/clusters/unhealthy?limit=10",
+									"host": [
+										"{{CLUSTER_URL}}"
+									],
+									"path": [
+										"internal",
+										"clusters",
+										"unhealthy"
+									],
+									"query": [
+										{
+											"key": "limit",
+											"value": "10"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "/clusters/:id - Get cluster",
 							"event": [
 								{
@@ -1179,16 +1242,6 @@
 						{
 							"name": "/link - Link agent to the cluster",
 							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{AG_HUB_TOKEN}}",
-											"type": "string"
-										}
-									]
-								},
 								"method": "POST",
 								"header": [],
 								"body": {
@@ -1214,32 +1267,61 @@
 							"response": []
 						},
 						{
-							"name": "/config - Get config",
+							"name": "/ping - Send a heartbeat to the platform",
 							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{AG_HUB_TOKEN}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
+								"method": "POST",
 								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"kubeId\": \"toto\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
 								"url": {
-									"raw": "{{PLATFORM_URL}}/agent/config",
+									"raw": "{{PLATFORM_URL}}/agent/ping",
 									"host": [
 										"{{PLATFORM_URL}}"
 									],
 									"path": [
 										"agent",
-										"config"
+										"ping"
 									]
 								}
 							},
 							"response": []
+						}
+					],
+					"auth": {
+						"type": "bearer",
+						"bearer": [
+							{
+								"key": "token",
+								"value": "{{AG_HUB_TOKEN}}",
+								"type": "string"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
 						}
 					]
 				}

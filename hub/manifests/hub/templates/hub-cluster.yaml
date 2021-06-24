@@ -105,7 +105,7 @@ spec:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && Path(`/agent/link`)
+      match: Host(`platform.docker.localhost`) && (Path(`/agent/link`) || Path(`/agent/ping`))
       services:
         - name: hub-cluster
           port: 80
@@ -125,7 +125,7 @@ spec:
     - web
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && Path(`/agent/link`)
+      match: Host(`platform.docker.localhost`) && (Path(`/agent/link`) || Path(`/agent/ping`))
       services:
         - name: hub-cluster
           port: 80
