@@ -66,6 +66,41 @@ spec:
             - --mongodb-uri=mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/alerts?authSource=admin
 
 ---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: hub-alert-check-job
+  namespace: hub
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      parallelism: 1
+      template:
+        metadata:
+          labels:
+            app: hub-alert-check-job
+        spec:
+          restartPolicy: Never
+          imagePullSecrets:
+            - name: googlesecret
+          containers:
+            - name: hub-alert-check-job
+              image: gcr.io/traefiklabs/hub-alert:latest
+              env:
+                - name: CLUSTER_SERVICE_URL
+                  value: "http://hub-cluster.hub.svc.cluster.local/internal"
+              args:
+                - check
+                - --mongodb-uri=mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/alerts?authSource=admin
+                - --cluster-limit=100
+                - agent-health
+              resources:
+                limits:
+                  cpu: 50m
+                  memory: 32Mi
+
+---
 apiVersion: v1
 kind: Service
 metadata:
