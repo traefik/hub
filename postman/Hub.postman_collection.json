@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "38f030ba-20f6-4a10-8b5b-1fa2cdc5e81c",
+		"_postman_id": "8f3ddb48-c891-413f-ad55-d1002ef98015",
 		"name": "Hub",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1126,7 +1126,7 @@
 					"name": "/internal",
 					"item": [
 						{
-							"name": "/clusters/unhealthy - List unhealthy clusters",
+							"name": "/clusters - List unhealthy clusters",
 							"event": [
 								{
 									"listen": "test",
@@ -1142,19 +1142,22 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{CLUSTER_URL}}/internal/clusters/unhealthy?limit=10",
+									"raw": "{{CLUSTER_URL}}/internal/clusters?limit=10&status=unhealthy",
 									"host": [
 										"{{CLUSTER_URL}}"
 									],
 									"path": [
 										"internal",
-										"clusters",
-										"unhealthy"
+										"clusters"
 									],
 									"query": [
 										{
 											"key": "limit",
 											"value": "10"
+										},
+										{
+											"key": "status",
+											"value": "unhealthy"
 										}
 									]
 								}
