@@ -47,7 +47,7 @@ hey https://whoami.nginx.hub.demo.traefiklabs.tech/httpbin/status/200
 ## Clean up
 
 ```
-helm uninstall --namespace neo-agent neo
-kubectl delete ns neo-agent
-kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io neo
+helm uninstall --namespace hub-agent hub
+kubectl delete ns hub-agent
+kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io hub
 ```

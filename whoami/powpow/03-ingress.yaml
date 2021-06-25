@@ -4,14 +4,57 @@ kind: IngressRoute
 metadata:
   name: app-powpow-tls
   namespace: whoami
+  annotations:
+    hub.traefik.io/enable-acme: "true"
+    hub.traefik.io/access-control-policy: "my-acp@whoami"
 spec:
   entryPoints:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`alpha-3.hub.demo.traefiklabs.tech`)
+      match: Host(`app.hubdemo.demo.traefiklabs.tech`)
+      services:
+        - name: whoami-traefik
+          port: 80
+    - kind: Rule
+      match: Host(`app.hubdemo.demo.traefiklabs.tech`)
+      services:
+        - name: whoami-traefik
+          port: 80
+    - kind: Rule
+      match: Host(`app.hubdemo.demo.traefiklabs.tech`)
+      services:
+        - name: whoami-traefik
+          port: 80
+    - kind: Rule
+      match: Host(`app.hubdemo.demo.traefiklabs.tech`)
+      services:
+        - name: whoami-traefik
+          port: 80
+    - kind: Rule
+      match: Host(`app.hubdemo.demo.traefiklabs.tech`)
+      services:
+        - name: whoami-traefik
+          port: 80
+    - kind: Rule
+      match: Host(`app.hubdemo.demo.traefiklabs.tech`)
+      services:
+        - name: whoami-traefik
+          port: 80
+    - kind: Rule
+      match: Host(`app.hubdemo.demo.traefiklabs.tech`)
+      services:
+        - name: whoami-traefik
+          port: 80
+    - kind: Rule
+      match: Host(`app.hubdemo.demo.traefiklabs.tech`)
+      services:
+        - name: whoami-traefik
+          port: 80
+    - kind: Rule
+      match: Host(`app.hubdemo.demo.traefiklabs.tech`)
       services:
         - name: whoami-traefik
           port: 80
   tls:
-    secretName: app-alpha3-tls
+    secretName: app-tls
