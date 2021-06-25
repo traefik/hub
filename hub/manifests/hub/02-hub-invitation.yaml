@@ -38,6 +38,13 @@ spec:
             periodSeconds: 5
             failureThreshold: 2
           env:
+            - name: AUTH0_URL
+              value: "https://traefiklabs-hub-preview.eu.auth0.com"
+            - name: AUTH0_ACCESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: auth0-admin-token
+                  key: token
             - name: TRACING_ENDPOINT
               value: "http://jaeger.jaeger.svc.cluster.local:14268"
             - name: TRACING_PROBABILITY
