@@ -83,7 +83,7 @@ spec:
         spec:
           restartPolicy: Never
           imagePullSecrets:
-            - name: googlesecret
+            - name: gcr-access-token
           containers:
             - name: hub-alert-check-job
               image: gcr.io/traefiklabs/hub-alert:latest
