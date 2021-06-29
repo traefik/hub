@@ -10,6 +10,10 @@ main() {
   check-tools
   setup-k3s
 
+  if [[ "$AUTO_UPDATE_HOSTS" == "true" ]]; then
+    update-local-hosts
+  fi
+
   if [[ $2 == "--adsl" ]]; then
     prepare-docker-images
   fi
@@ -60,6 +64,11 @@ main() {
   # Populate Mongo
   kubectl cp "$PROJECT_DIR"/hub/documents/workspace.json -n mongo $(kubectl get pods -n mongo -l app=mongodb --output=jsonpath={.items..metadata.name}):/tmp/workspace.json
   kubectl exec -it -n mongo $(kubectl get pods -n mongo -l app=mongodb --output=jsonpath={.items..metadata.name}) -- bash -c "mongoimport --db workspaces --collection workspaces --file /tmp/workspace.json --username root --password admin  --authenticationDatabase admin"
+
+  # Install Jaeger
+  echo "Deploying Jaeger."
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/jaeger/
+  kubectl -n jaeger wait --for condition=available --timeout=600s deployment/jaeger
 
   # Install Hub
   echo "Deploying Hub services."
@@ -196,11 +205,6 @@ main() {
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/pop
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/pop/secrets
 
-  # Install Jaeger
-  echo "Deploying Jaeger."
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/jaeger/
-  kubectl -n jaeger wait --for condition=available --timeout=600s deployment/jaeger
-
   # Install Ingress-nginx
   echo "Deploying nginx."
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/ingress-nginx/
@@ -224,9 +228,35 @@ main() {
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/monitoring/
 }
 
+update-local-hosts() {
+  HUB_DOMAIN=${HUB_DOMAIN:-docker.localhost}
+  # TODO - could fetch real LB address (k3d)
+  lb_address="127.0.0.1"
+  hub_hosts="platform.$HUB_DOMAIN
+    webapp.$HUB_DOMAIN
+    jaeger-ui.$HUB_DOMAIN
+    prometheus.$HUB_DOMAIN
+    grafana.$HUB_DOMAIN"
+
+  echo "Updating /etc/hosts"
+  for hostname in $hub_hosts; do
+    sedi "/[[:space:]]\+$(echo $hostname | sed 's/\./\\\./g')/d" /etc/hosts
+    echo "$lb_address $hostname" | sudo tee -a /etc/hosts
+  done
+}
+
+# Because MacOS exists
+sedi() {
+  sed --version >/dev/null 2>&1 && sudo sed -i -- "$@" || sudo sed -i "" "$@"
+}
+
 apply-coredns-conf() {
     # Create CoreDNS configmap and rollout restart
     kubectl apply -f "$PROJECT_DIR"/coredns/00-configmap.yaml
+    echo "Waiting coredns availability";
+    until kubectl wait deployment/coredns -n kube-system --for=condition=available; do
+      sleep 1;
+    done
     kubectl rollout restart -n kube-system deploy/coredns
 }
 
@@ -309,49 +339,49 @@ setup-k3s() {
 clean() {
   # Uninstall whoami
   echo "Undeploying whoami."
-  kubectl delete -f "$PROJECT_DIR"/hub/manifests/whoami/
+  kubectl delete -f "$PROJECT_DIR"/hub/manifests/whoami/ 2> /dev/null || true
 
   # Uninstall Ingress-nginx-inc
   echo "Undeploying haproxy."
-  kubectl delete -f "$PROJECT_DIR"/hub/manifests/ingress-haproxy/
+  kubectl delete -f "$PROJECT_DIR"/hub/manifests/ingress-haproxy/ 2> /dev/null || true
 
   # Uninstall Ingress-nginx
   echo "Undeploying nginx."
-  kubectl delete -f "$PROJECT_DIR"/hub/manifests/ingress-nginx/
+  kubectl delete -f "$PROJECT_DIR"/hub/manifests/ingress-nginx/ 2> /dev/null || true
 
   # Uninstall Jaeger
   echo "Undeploying Jaeger."
-  kubectl delete -f "$PROJECT_DIR"/hub/manifests/jaeger/
+  kubectl delete -f "$PROJECT_DIR"/hub/manifests/jaeger/ 2> /dev/null || true
 
   # Uninstall Hub Agent
-  helm uninstall hub --namespace hub-agent
+  helm uninstall hub --namespace hub-agent 2> /dev/null || true
 
   # Uninstall Hub
   echo "Undeploying Hub services."
-  kubectl delete -f "$PROJECT_DIR"/hub/manifests/hub/
+  kubectl delete -f "$PROJECT_DIR"/hub/manifests/hub/ 2> /dev/null || true
 
   # Uninstall Traefik
   echo "Undeploying Traefik."
-  kubectl delete -f "$PROJECT_DIR"/hub/manifests/traefik/
+  kubectl delete -f "$PROJECT_DIR"/hub/manifests/traefik/ 2> /dev/null || true
 
   # Uninstall Mongo
   echo "Undeploying Mongo"
-  kubectl delete -f "$PROJECT_DIR"/hub/manifests/mongo/
+  kubectl delete -f "$PROJECT_DIR"/hub/manifests/mongo/ 2> /dev/null || true
 
   # Delete webhook
-  kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io hub || true
+  kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io hub 2> /dev/null || true
 
   # Delete ClusterRole, secrets and namespaces
-  kubectl delete -f "$PROJECT_DIR"/hub/manifests/hub-agent/00-namespace.yaml
-  kubectl delete -f "$PROJECT_DIR"/hub/manifests/aws-secret-operator/00-namespace.yaml
+  kubectl delete -f "$PROJECT_DIR"/hub/manifests/hub-agent/00-namespace.yaml 2> /dev/null || true
+  kubectl delete -f "$PROJECT_DIR"/hub/manifests/aws-secret-operator/00-namespace.yaml 2> /dev/null || true
 
   # Uninstall Monitoring
   echo "Undeploying Monitoring"
-  kubectl delete -f "$PROJECT_DIR"/hub/manifests/monitoring/00-namespace.yaml
+  kubectl delete -f "$PROJECT_DIR"/hub/manifests/monitoring/00-namespace.yaml 2> /dev/null || true
 
   # Uninstall Pebble
   echo "Undeploying Pebble"
-  kubectl delete -f "$PROJECT_DIR"/hub/manifests/pebble/
+  kubectl delete -f "$PROJECT_DIR"/hub/manifests/pebble/ 2> /dev/null || true
 }
 
 cmd=$1
