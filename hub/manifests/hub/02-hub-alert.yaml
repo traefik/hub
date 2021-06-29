@@ -87,6 +87,7 @@ spec:
           containers:
             - name: hub-alert-check-job
               image: gcr.io/traefiklabs/hub-alert:latest
+              imagePullPolicy: IfNotPresent
               env:
                 - name: CLUSTER_SERVICE_URL
                   value: "http://hub-cluster.hub.svc.cluster.local/internal"
