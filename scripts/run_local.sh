@@ -109,6 +109,8 @@ main() {
   --offer-config-access-control-max-secured-routes="3" \
   --offer-quotas-users="2" \
   --offer-quotas-domains="10" \
+  --offer-quotas-alert-triggers="5" \
+  --offer-quotas-alert-history="10" \
   --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
 
   ## Premium US
@@ -129,6 +131,8 @@ main() {
   --offer-config-access-control-max-secured-routes="50" \
   --offer-quotas-users="20" \
   --offer-quotas-domains="100" \
+  --offer-quotas-alert-triggers="100" \
+  --offer-quotas-alert-history="200" \
   --offer-features="team-management" --offer-features="geo-steering" \
   --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
 
@@ -149,6 +153,8 @@ main() {
   --offer-config-access-control-max-secured-routes="3" \
   --offer-quotas-users="2" \
   --offer-quotas-domains="10" \
+  --offer-quotas-alert-triggers="5" \
+  --offer-quotas-alert-history="10" \
   --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
 
   ## Premium EU
@@ -169,6 +175,8 @@ main() {
   --offer-config-access-control-max-secured-routes="50" \
   --offer-quotas-users="20" \
   --offer-quotas-domains="100" \
+  --offer-quotas-alert-triggers="100" \
+  --offer-quotas-alert-history="200" \
   --offer-features="team-management" --offer-features="geo-steering" \
   --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
 

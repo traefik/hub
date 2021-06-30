@@ -608,7 +608,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"max\": 50,\n    \"scope\": \"{{AG_WORKSPACE_ID}}\",\n    \"name\": \"history\"\n}",
+									"raw": "{\n    \"max\": 50,\n    \"scope\": \"{{AG_WORKSPACE_ID}}\",\n    \"name\": \"history\",\n    \"effectiveFrom\": \"2021-06-18T16:35:08+02:00\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
