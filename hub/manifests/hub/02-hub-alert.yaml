@@ -42,6 +42,10 @@ spec:
               value: "http://hub-cluster.hub.svc.cluster.local/internal"
             - name: NOTIFICATION_SERVICE_URL
               value: "http://hub-notification.hub.svc.cluster.local/internal"
+            - name: TOPOLOGY_SERVICE_URL
+              value: "http://hub-topology.hub.svc.cluster.local/internal"
+            - name: METRICS_SERVICE_URL
+              value: "http://hub-metrics.hub.svc.cluster.local/internal"
             - name: JWT_CERT
               valueFrom:
                 secretKeyRef:

@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "8f3ddb48-c891-413f-ad55-d1002ef98015",
+		"_postman_id": "87b9f4a3-67de-438c-b883-5ce2ba9071d8",
 		"name": "Hub",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -439,6 +439,35 @@
 										"alert",
 										"external",
 										"rules"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/rules/test - Test a rule",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"type\": \"threshold\",\n    \"cluster\": \"0ce50f00-54d7-4a2d-8e14-0a46c0b16dfa\",\n    \"annotation\": \"test:foo\",\n    \"emails\": [\n        \"nick.wiersma@traefik.io\",\n        \"remi.buisson@traefik.io\"\n    ],\n    \"threshold\": {\n        \"metric\": \"requestsPerSecond\",\n        \"condition\": {\n            \"above\": true,\n            \"value\": 0.5\n        },\n        \"occurrence\": 3,\n        \"timeRange\": \"10m\"\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{PLATFORM_URL}}/alert/external/rules/test",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"alert",
+										"external",
+										"rules",
+										"test"
 									]
 								}
 							},
@@ -1899,6 +1928,64 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "/workspaces/:workspaceId/clusters/:id/count - Count points given options",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{METRICS_URL}}/internal/workspaces/:workspaceId/clusters/:id/count?metric=requestsPerSecond&dur=1m&services=whoami@whoami&ingress=app-traefik@whoami.ingress.networking.k8s.io&above=true&value=0.5",
+									"host": [
+										"{{METRICS_URL}}"
+									],
+									"path": [
+										"internal",
+										"workspaces",
+										":workspaceId",
+										"clusters",
+										":id",
+										"count"
+									],
+									"query": [
+										{
+											"key": "metric",
+											"value": "requestsPerSecond"
+										},
+										{
+											"key": "dur",
+											"value": "1m"
+										},
+										{
+											"key": "services",
+											"value": "whoami@whoami"
+										},
+										{
+											"key": "ingress",
+											"value": "app-traefik@whoami.ingress.networking.k8s.io"
+										},
+										{
+											"key": "above",
+											"value": "true"
+										},
+										{
+											"key": "value",
+											"value": "0.5"
+										}
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "{{AG_WORKSPACE_ID}}"
+										},
+										{
+											"key": "id",
+											"value": "{{AG_CLUSTER_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				}
@@ -2381,6 +2468,55 @@
 										{
 											"key": "service",
 											"value": "git-receive-pack"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "repos/:id/clusters/:cluster_id/services - List services with annotation",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{AG_HUB_TOKEN}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{TOPOLOGY_URL}}/internal/repos/:id/clusters/:cluster_id/services?annotation=test:foo",
+									"host": [
+										"{{TOPOLOGY_URL}}"
+									],
+									"path": [
+										"internal",
+										"repos",
+										":id",
+										"clusters",
+										":cluster_id",
+										"services"
+									],
+									"query": [
+										{
+											"key": "annotation",
+											"value": "test:foo",
+											"description": "Enter the service annotation."
+										}
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{TRAEFIKLABS_WORKSPACE}}"
+										},
+										{
+											"key": "cluster_id",
+											"value": "{{AG_CLUSTER_ID}}"
 										}
 									]
 								}
