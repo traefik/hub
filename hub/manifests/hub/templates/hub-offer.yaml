@@ -159,6 +159,13 @@ spec:
           port: 80
       middlewares:
         - name: auth-token
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && Path(`/agent/quotas`)
+      services:
+        - name: hub-offer
+          port: 80
+      middlewares:
+        - name: auth-token
 
 ---
 apiVersion: traefik.containo.us/v1alpha1
@@ -172,6 +179,13 @@ spec:
   routes:
     - kind: Rule
       match: Host(`platform.docker.localhost`) && Path(`/agent/config`)
+      services:
+        - name: hub-offer
+          port: 80
+      middlewares:
+        - name: auth-token
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && Path(`/agent/quotas`)
       services:
         - name: hub-offer
           port: 80
