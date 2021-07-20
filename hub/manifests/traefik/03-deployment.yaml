@@ -35,7 +35,7 @@ spec:
             - --entrypoints.web.Address=:80
             - --entrypoints.websecure.Address=:443
             - --entrypoints.websecure.http.tls=true
-            - --providers.kubernetescrd
+            - --providers.kubernetescrd.allowexternalnameservices=true
             - --providers.kubernetesingress.ingressclass=traefik-lb
             - --api.dashboard
             - --api.insecure
