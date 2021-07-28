@@ -38,8 +38,10 @@ spec:
             periodSeconds: 5
             failureThreshold: 2
           env:
+            - name: POP_NAME
+              value: k3d
             - name: RETENTION_FILE
-              value: /var/run/gslb/retention.json
+              value: /var/run/retention.json
             - name: UPDATE_INTERVAL
               value: 10s
             - name: CHECK_INTERVAL
