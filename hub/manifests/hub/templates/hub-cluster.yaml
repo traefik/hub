@@ -68,6 +68,10 @@ spec:
               value: "http://jaeger.jaeger.svc.cluster.local:14268"
             - name: TRACING_PROBABILITY
               value: "1"
+            - name: MAX_MIND_ACCOUNT_ID
+              value: ""
+            - name: MAX_MIND_LICENSE_KEY
+              value: ""
             - name: LOG_LEVEL
               value: debug
           args:
