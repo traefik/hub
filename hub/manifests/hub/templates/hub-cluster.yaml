@@ -50,6 +50,8 @@ spec:
                 secretKeyRef:
                   key: jwt-sub
                   name: hub-secret
+            - name: OFFER_SERVICE_URL
+              value: http://hub-offer.hub.svc.cluster.local/internal
             - name: ALERT_SERVICE_URL
               value: http://hub-alert.hub.svc.cluster.local/internal
             - name: WORKSPACE_SERVICE_URL
