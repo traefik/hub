@@ -7,7 +7,7 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: haproxy
 #    hub.traefik.io/enable-acme: "true"
-#    hub.traefik.io/access-control-policy: "my-acp@app"
+#    hub.traefik.io/access-control-policy: "my-acp@whoami"
 spec:
   rules:
     - host: haproxy.tls.docker.localhost

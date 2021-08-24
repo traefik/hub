@@ -6,7 +6,7 @@ metadata:
   namespace: whoami
   annotations:
     kubernetes.io/ingress.class: haproxy
-#    hub.traefik.io/access-control-policy: "my-acp@app"
+#    hub.traefik.io/access-control-policy: "my-acp@whoami"
 spec:
   rules:
     - host: haproxy.docker.localhost

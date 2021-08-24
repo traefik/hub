@@ -5,7 +5,7 @@ metadata:
   name: app-nginx
   namespace: whoami
 #  annotations:
-#    hub.traefik.io/access-control-policy: "my-acp@app"
+#    hub.traefik.io/access-control-policy: "my-acp@whoami"
 spec:
   ingressClassName: nginx-k8s
   rules:

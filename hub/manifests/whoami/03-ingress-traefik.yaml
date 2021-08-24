@@ -5,7 +5,7 @@ metadata:
   name: app-traefik
   namespace: whoami
 #  annotations:
-#    hub.traefik.io/access-control-policy: "my-acp@app"
+#    hub.traefik.io/access-control-policy: "my-acp@whoami"
 spec:
   ingressClassName: traefik-lb
   rules:
