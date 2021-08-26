@@ -93,6 +93,10 @@ spec:
               image: gcr.io/traefiklabs/hub-alert:latest
               imagePullPolicy: IfNotPresent
               env:
+                - name: TRACING_ENDPOINT
+                  value: "http://jaeger.jaeger.svc.cluster.local:14268"
+                - name: TRACING_PROBABILITY
+                  value: "1"
                 - name: CLUSTER_SERVICE_URL
                   value: "http://hub-cluster.hub.svc.cluster.local/internal"
               args:
