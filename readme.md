@@ -14,6 +14,9 @@
 **You can run the full stack of Hub with K3D or by manually install every piece of the puzzle.
 We hardly recommend the K3D way of course.**
 
+**You have to use a Github organization and not your personal account for the topology repository.
+So the `GITHUB_ORG` should not be set to your personal account anymore.**
+
 ## K3D
 
 ### Prerequisites
