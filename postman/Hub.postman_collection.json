@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "87b9f4a3-67de-438c-b883-5ce2ba9071d8",
+		"_postman_id": "7f63fede-5126-43ff-a3ec-a07f1941c5a5",
 		"name": "Hub",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1710,6 +1710,30 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "/gslbs - List unhealthy GSLBs",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{GSLB_URL}}/internal/gslbs?status=unhealthy",
+									"host": [
+										"{{GSLB_URL}}"
+									],
+									"path": [
+										"internal",
+										"gslbs"
+									],
+									"query": [
+										{
+											"key": "status",
+											"value": "unhealthy"
+										}
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				}
@@ -2427,6 +2451,42 @@
 											"key": "acp",
 											"value": "my-acp@whoami",
 											"description": "Fill the name of the acp who want to get."
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/clusters/:id/services - Get cluster services",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{TOPOLOGY_URL}}/external/clusters/:id/services",
+									"host": [
+										"{{TOPOLOGY_URL}}"
+									],
+									"path": [
+										"external",
+										"clusters",
+										":id",
+										"services"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_CLUSTER_ID}}"
 										}
 									]
 								}
