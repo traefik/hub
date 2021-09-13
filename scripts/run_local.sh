@@ -181,8 +181,7 @@ main() {
   --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
 
   # Create subscription
-  curl --silent --location --request POST 'http://platform.docker.localhost/offer/external/subscriptions' \
-  --header "Authorization: Bearer ${JWT_EXTERNAL}" \
+  curl --silent --location --request POST 'http://platform.docker.localhost/offer/internal/subscriptions' \
   --header 'Content-Type: application/json' \
   --data-raw "{\"countryCode\": \"FR\", \"workspaceId\": \"60c91ce465b8bcfc7bf2e35d\", \"priceId\": \"price_1J05YJAYmbimY05BpjcSne7V\"}" | jq -r '.access_token' | tr -d '\n'
 
