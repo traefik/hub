@@ -329,7 +329,7 @@ setup-k3s() {
     k3d cluster start k3s-default-hub
   else
     echo "Setting up k3s cluster."
-    k3d cluster create k3s-default-hub --agents=2 --k3s-server-arg "--no-deploy=traefik" --image="rancher/k3s:v1.20.5-k3s1" --port 80:80@loadbalancer --port 443:443@loadbalancer --port 8000:8000@loadbalancer --port 8443:8443@loadbalancer --port 9000:9000@loadbalancer --port 9443:9443@loadbalancer
+    k3d cluster create k3s-default-hub --agents=2 --k3s-server-arg "--no-deploy=traefik" --image="rancher/k3s:v1.20.10-k3s1" --port 80:80@loadbalancer --port 443:443@loadbalancer --port 8000:8000@loadbalancer --port 8443:8443@loadbalancer --port 9000:9000@loadbalancer --port 9443:9443@loadbalancer
   fi
 
   # Wait until cluster is ready
