@@ -183,7 +183,7 @@ main() {
   # Create subscription
   curl --silent --location --request POST 'http://platform.docker.localhost/offer/internal/subscriptions' \
   --header 'Content-Type: application/json' \
-  --data-raw "{\"countryCode\": \"FR\", \"workspaceId\": \"60c91ce465b8bcfc7bf2e35d\", \"priceId\": \"price_1J05YJAYmbimY05BpjcSne7V\"}" | jq -r '.access_token' | tr -d '\n'
+  --data-raw "{\"countryCode\": \"FR\", \"workspaceId\": \"60c91ce465b8bcfc7bf2e35d\", \"priceId\": \"price_1J05YJAYmbimY05BpjcSne7V\"}"
 
   CLUSTER_NAME=$(date +%s | sha256sum | base64 | head -c 32 ; echo)
 
