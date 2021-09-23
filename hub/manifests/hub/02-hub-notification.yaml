@@ -63,6 +63,8 @@ spec:
               value: debug
             - name: WORKSPACE_SERVICE_URL
               value: "http://hub-workspace.hub.svc.cluster.local/internal"
+            - name: CLUSTER_SERVICE_URL
+              value: "http://hub-cluster.hub.svc.cluster.local/internal"
           args:
             - serve
             - --addr=:80
