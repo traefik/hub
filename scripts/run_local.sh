@@ -111,6 +111,8 @@ main() {
   --offer-quotas-domains="10" \
   --offer-quotas-alert-triggers="5" \
   --offer-quotas-alert-history="10" \
+  --offer-config-gslb-http-healthcheck-min-interval-seconds=60 \
+  --offer-config-gslb-http-healthcheck-min-threshold-editable="false" \
   --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
 
   ## Premium US
@@ -133,6 +135,8 @@ main() {
   --offer-quotas-domains="100" \
   --offer-quotas-alert-triggers="100" \
   --offer-quotas-alert-history="200" \
+  --offer-config-gslb-http-healthcheck-min-interval-seconds=15 \
+  --offer-config-gslb-http-healthcheck-min-threshold-editable="true" \
   --offer-features="team-management" --offer-features="geo-steering" \
   --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
 
@@ -155,6 +159,8 @@ main() {
   --offer-quotas-domains="10" \
   --offer-quotas-alert-triggers="5" \
   --offer-quotas-alert-history="10" \
+  --offer-config-gslb-http-healthcheck-min-interval-seconds=60 \
+  --offer-config-gslb-http-healthcheck-min-threshold-editable="false" \
   --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
 
   ## Premium EU
@@ -177,6 +183,8 @@ main() {
   --offer-quotas-domains="100" \
   --offer-quotas-alert-triggers="100" \
   --offer-quotas-alert-history="200" \
+  --offer-config-gslb-http-healthcheck-min-interval-seconds=15 \
+  --offer-config-gslb-http-healthcheck-min-threshold-editable="true" \
   --offer-features="team-management" --offer-features="geo-steering" \
   --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
 
