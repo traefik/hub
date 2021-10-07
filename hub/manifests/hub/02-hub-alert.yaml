@@ -93,6 +93,8 @@ spec:
               image: gcr.io/traefiklabs/hub-alert:latest
               imagePullPolicy: IfNotPresent
               env:
+                - name: SUB_SERVICE_TOKEN
+                  value: tEmgBDVUg0D3DxLsVJ9eiHIb6gX0fUcd@clients
                 - name: NOTIFICATION_SERVICE_URL
                   value: "http://hub-notification.hub.svc.cluster.local/internal"
                 - name: TRACING_ENDPOINT
@@ -236,6 +238,44 @@ spec:
   routes:
     - kind: Rule
       match: Host(`platform.docker.localhost`) && PathPrefix(`/alert/internal`)
+      services:
+        - name: hub-alert
+          port: 80
+      middlewares:
+        - name: stripprefix
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: alert-service-tls
+  namespace: hub
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/alert/service`)
+      services:
+        - name: hub-alert
+          port: 80
+      middlewares:
+        - name: stripprefix
+  tls:
+    certResolver: default
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: alert-service
+  namespace: hub
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/alert/service`)
       services:
         - name: hub-alert
           port: 80

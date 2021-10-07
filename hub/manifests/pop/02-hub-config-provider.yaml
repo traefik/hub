@@ -38,6 +38,13 @@ spec:
             periodSeconds: 5
             failureThreshold: 2
           env:
+            - name: ALERT_SERVICE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: service-token
+                  key: token
+            - name: ALERT_SERVICE_URL
+              value: http://platform.docker.localhost/alert/service
             - name: POP_NAME
               value: k3d
             - name: RETENTION_FILE
