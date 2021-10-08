@@ -48,6 +48,8 @@ spec:
               value: "toto"
             - name: ALERT_SERVICE_ENDPOINT
               value: "http://hub-alert.hub.svc.cluster.local/external"
+            - name: NOTIFICATION_SERVICE_ENDPOINT
+              value: "http://hub-notification.hub.svc.cluster.local/external"
             - name: TOPOLOGY_SERVICE_ENDPOINT
               value: "http://hub-topology.hub.svc.cluster.local/external"
             - name: METRIC_SERVICE_ENDPOINT
