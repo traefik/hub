@@ -38,6 +38,8 @@ spec:
             periodSeconds: 5
             failureThreshold: 2
           env:
+            - name: SUB_SERVICE_TOKEN
+              value: tEmgBDVUg0D3DxLsVJ9eiHIb6gX0fUcd@clients
             - name: CLUSTER_SERVICE_URL
               value: "http://hub-cluster.hub.svc.cluster.local/internal"
             - name: NOTIFICATION_SERVICE_URL
@@ -93,8 +95,6 @@ spec:
               image: gcr.io/traefiklabs/hub-alert:latest
               imagePullPolicy: IfNotPresent
               env:
-                - name: SUB_SERVICE_TOKEN
-                  value: tEmgBDVUg0D3DxLsVJ9eiHIb6gX0fUcd@clients
                 - name: NOTIFICATION_SERVICE_URL
                   value: "http://hub-notification.hub.svc.cluster.local/internal"
                 - name: TRACING_ENDPOINT
