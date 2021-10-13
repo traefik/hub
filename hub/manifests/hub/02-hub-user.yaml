@@ -1,0 +1,156 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hub-user
+  namespace: hub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hub-user
+  template:
+    metadata:
+      labels:
+        app: hub-user
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "80"
+    spec:
+      imagePullSecrets:
+        - name: gcr-access-token
+      containers:
+        - name: hub-user
+          image: gcr.io/traefiklabs/hub-user:latest
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              port: 80
+              path: /live
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 2
+          readinessProbe:
+            httpGet:
+              port: 80
+              path: /ready
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 2
+          env:
+            - name: JWT_CERT
+              valueFrom:
+                secretKeyRef:
+                  key: jwt-cert
+                  name: hub-secret
+            - name: JWT_ISS
+              value: "https://traefiklabs-hub-preview.eu.auth0.com/"
+            - name: JWT_SUB
+              valueFrom:
+                secretKeyRef:
+                  key: jwt-sub
+                  name: hub-secret
+            - name: TRACING_ENDPOINT
+              value: "http://jaeger.jaeger.svc.cluster.local:14268"
+            - name: TRACING_PROBABILITY
+              value: "1"
+            - name: LOG_LEVEL
+              value: debug
+            - name: MONGODB_URI
+              value: "mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/user?authSource=admin"
+          args:
+            - serve
+            - --addr=:80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hub-user
+  namespace: hub
+  labels:
+    app: hub-user
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      name: hub-user
+  selector:
+    app: hub-user
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: user-external-tls
+  namespace: hub
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/user/external`)
+      services:
+        - name: hub-user
+          port: 80
+      middlewares:
+        - name: stripprefix
+  tls:
+    certResolver: default
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: user-external
+  namespace: hub
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/user/external`)
+      services:
+        - name: hub-user
+          port: 80
+      middlewares:
+        - name: stripprefix
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: user-auth0-tls
+  namespace: hub
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/user/auth0`)
+      services:
+        - name: hub-user
+          port: 80
+      middlewares:
+        - name: stripprefix
+  tls:
+    certResolver: default
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: user-auth0
+  namespace: hub
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/user/auth0`)
+      services:
+        - name: hub-user
+          port: 80
+      middlewares:
+        - name: stripprefix

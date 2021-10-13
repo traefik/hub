@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "c405e4d7-8efa-4357-983d-69c450e405ef",
+		"_postman_id": "dfee09f2-2984-4a97-92ad-cb2c4c99fd50",
 		"name": "Hub",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -3009,6 +3009,136 @@
 								}
 							},
 							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "/external",
+					"item": [
+						{
+							"name": "/me - Get user infos",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{USER_URL}}/external/me",
+									"host": [
+										"{{USER_URL}}"
+									],
+									"path": [
+										"external",
+										"me"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/me/tos - Accept ToS",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"version\": \"v1\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{USER_URL}}/external/me/tos",
+									"host": [
+										"{{USER_URL}}"
+									],
+									"path": [
+										"external",
+										"me",
+										"tos"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"auth": {
+						"type": "bearer",
+						"bearer": [
+							{
+								"key": "token",
+								"value": "{{AG_JWT_EXTERNAL}}",
+								"type": "string"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "/auth0",
+					"item": [
+						{
+							"name": "/users - Sync a user",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": null
+							},
+							"response": []
+						}
+					],
+					"auth": {
+						"type": "bearer",
+						"bearer": [
+							{
+								"key": "token",
+								"value": "{{AG_JWT_SERVICES}}",
+								"type": "string"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
 						}
 					]
 				}

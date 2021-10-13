@@ -1,0 +1,21 @@
+{
+  "userId": "9204c8f8-703f-4bc5-a0f8-50400d769b7c",
+  "auth0Id": "auth0|60c91cdab86b450070b73d75",
+  "createdAt": {
+    "$date": "2021-10-01T12:24:49.499Z"
+  },
+  "displayName": "John Doe",
+  "email": "john.doe@example.org",
+  "emailVerified": true,
+  "tos": [
+    {
+      "version": "v1",
+      "acceptedAt": {
+        "$date": "2021-10-01T12:27:03.583Z"
+      }
+    }
+  ],
+  "updatedAt": {
+    "$date": "2021-10-01T12:27:03.583Z"
+  }
+}
