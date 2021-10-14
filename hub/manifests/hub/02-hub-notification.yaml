@@ -74,6 +74,7 @@ spec:
             - --sendgrid-invitation-template-id=d-31a4a51c91f245728e419d5980fe1bbc
             - --sendgrid-beta-invitation-template-id=d-57cb9d7ad67e4fddb83db4c9b372eb91
             - --sendgrid-welcome-template-id=d-267cf2806d0f4cdc99a1c1d2cbd6d3dc
+            - --sendgrid-unverified-email-reminder-template-id=d-267cf2806d0f4cdc99a1c1d2cbd6d3dc # Temporary template ID.
             - --sendgrid-from=noreply@traefik.io
             - --sendgrid-from-name=Me
             - --mongodb-uri=mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/notification?authSource=admin
