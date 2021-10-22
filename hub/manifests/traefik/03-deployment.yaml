@@ -35,6 +35,7 @@ spec:
             - --entrypoints.web.Address=:80
             - --entrypoints.websecure.Address=:443
             - --entrypoints.websecure.http.tls=true
+            - --entrypoints.cluster-proxy.Address=:9090
             - --providers.kubernetescrd.allowexternalnameservices=true
             - --providers.kubernetesingress.ingressclass=traefik-lb
             - --api.dashboard
@@ -46,5 +47,7 @@ spec:
               containerPort: 80
             - name: websecure
               containerPort: 443
+            - name: cluster-proxy
+              containerPort: 9090
             - name: metrics
               containerPort: 8080

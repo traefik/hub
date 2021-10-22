@@ -74,12 +74,13 @@ spec:
               value: ""
             - name: MAX_MIND_LICENSE_KEY
               value: ""
+            - name: MONGODB_URI
+              value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/clusters?authSource=admin
             - name: LOG_LEVEL
               value: debug
           args:
             - serve
             - --addr=:80
-            - --mongodb-uri=mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/clusters?authSource=admin
 ---
 apiVersion: v1
 kind: Service

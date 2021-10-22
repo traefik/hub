@@ -2,19 +2,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hub-topology
+  name: hub-topology-indexer
   namespace: hub
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: hub-topology
+      app: hub-topology-indexer
   template:
     metadata:
       labels:
-        app: hub-topology
+        app: hub-topology-indexer
         version: "v1"
-        k8s-app: hub-topology
+        k8s-app: hub-topology-indexer
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "80"
@@ -22,7 +22,7 @@ spec:
       imagePullSecrets:
         - name: gcr-access-token
       containers:
-        - name: hub-topology
+        - name: hub-topology-indexer
           image: gcr.io/traefiklabs/hub-topology:latest
           imagePullPolicy: IfNotPresent
           livenessProbe:
@@ -40,20 +40,8 @@ spec:
             periodSeconds: 5
             failureThreshold: 2
           env:
-            - name: JWT_CERT
-              valueFrom:
-                secretKeyRef:
-                  key: jwt-cert
-                  name: hub-secret
-            - name: TOKEN_SERVICE_URL
-              value: http://hub-token.hub.svc.cluster.local/internal
-            - name: JWT_ISS
-              value: "https://traefiklabs-hub-preview.eu.auth0.com/"
-            - name: JWT_SUB
-              valueFrom:
-                secretKeyRef:
-                  key: jwt-sub
-                  name: hub-secret
+            - name: CLUSTER_SERVICE_URL
+              value: http://hub-cluster.hub.svc.cluster.local/internal
             - name: GITHUB_TOKEN
               valueFrom:
                 secretKeyRef:
@@ -68,124 +56,85 @@ spec:
               value: "http://jaeger.jaeger.svc.cluster.local:14268"
             - name: TRACING_PROBABILITY
               value: "1"
-            - name: LOG_LEVEL
-              value: debug
             - name: MONGODB_URI
               value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/topologies?authSource=admin
+            - name: LOG_LEVEL
+              value: debug
           args:
-            - serve
+            - index
             - --addr=:80
-            - --git-proxy-host=platform.docker.localhost
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: hub-topology
+  name: hub-topology-indexer
   namespace: hub
   labels:
-    app: hub-topology
+    app: hub-topology-indexer
 spec:
   type: ClusterIP
   ports:
     - port: 80
       targetPort: 80
-      name: hub-topology
+      name: hub-topology-indexer
     - port: 40000
       targetPort: 40000
-      name: hub-topology-debug
+      name: hub-topology-indexer-debug
   selector:
-    app: hub-topology
+    app: hub-topology-indexer
 
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: topology-external-tls
-  namespace: hub
-spec:
-  entryPoints:
-    - websecure
-  routes:
-    - kind: Rule
-      match: Host(`platform.docker.localhost`) && PathPrefix(`/topology/external`)
-      services:
-        - name: hub-topology
-          port: 80
-      middlewares:
-        - name: stripprefix
-  tls:
-    certResolver: default
-
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: topology-external
+  name: topology-indexer-agent
   namespace: hub
 spec:
   entryPoints:
     - web
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && PathPrefix(`/topology/external`)
+      match: Host(`platform.docker.localhost`) && Path(`/agent/index`)
       services:
-        - name: hub-topology
-          port: 80
-      middlewares:
-        - name: stripprefix
-
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: topology-internal-tls
-  namespace: hub
-spec:
-  entryPoints:
-    - websecure
-  routes:
-    - kind: Rule
-      match: Host(`platform.docker.localhost`) && PathPrefix(`/topology/internal`)
-      services:
-        - name: hub-topology
-          port: 80
-      middlewares:
-        - name: stripprefix
-  tls:
-    certResolver: default
-
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: topology-internal
-  namespace: hub
-spec:
-  entryPoints:
-    - web
-  routes:
-    - kind: Rule
-      match: Host(`platform.docker.localhost`) && PathPrefix(`/topology/internal`)
-      services:
-        - name: hub-topology
-          port: 80
-      middlewares:
-        - name: stripprefix
-
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: topology-agent
-  namespace: hub
-spec:
-  entryPoints:
-    - web
-  routes:
-    - kind: Rule
-      match: Host(`platform.docker.localhost`) && Path(`/agent/cross-cluster/services`)
-      services:
-        - name: hub-topology
+        - name: hub-topology-indexer
           port: 80
       middlewares:
         - name: auth-token
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: topology-indexer-internal
+  namespace: hub
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/topology-indexer/internal`)
+      services:
+        - name: hub-topology-indexer
+          port: 80
+      middlewares:
+        - name: stripprefix
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: topology-indexer-internal-tls
+  namespace: hub
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/topology-indexer/internal`)
+      services:
+        - name: hub-topology-indexer
+          port: 80
+      middlewares:
+        - name: stripprefix
+  tls:
+    certResolver: default

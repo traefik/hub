@@ -60,12 +60,13 @@ spec:
               value: http://hub-notification.hub.svc.cluster.local/internal
             - name: INVITATION_LINK_BASE_URL
               value: https://webapp.docker.io/r
+            - name: MONGODB_URI
+              value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/invitations?authSource=admin
             - name: LOG_LEVEL
               value: debug
           args:
             - serve
             - --addr=:80
-            - --mongodb-uri=mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/invitations?authSource=admin
 ---
 apiVersion: v1
 kind: Service

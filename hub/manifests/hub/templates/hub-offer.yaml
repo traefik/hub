@@ -26,7 +26,7 @@ spec:
           resources:
             limits:
               cpu: 50m
-              memory: 32Mi
+              memory: 128Mi
           env:
             - name: STRIPE_DEFAULT_KEY
               valueFrom:
@@ -62,8 +62,8 @@ spec:
               value: http://hub-workspace.hub.svc.cluster.local/internal/quotas
             - name: DOMAIN_QUOTA_ENFORCER_URL
               value: http://hub-gslb.hub.svc.cluster.local/internal/quotas
-            - name: TRACING_ENDPOINT
-              value: "http://jaeger.jaeger.svc.cluster.local:14268"
+            - name: CROSS_CLUSTER_SERVICES_QUOTA_ENFORCER_URL
+              value: http://hub-topology-indexer.hub.svc.cluster.local/internal/quotas
             - name: JWT_CERT
               valueFrom:
                 secretKeyRef:
@@ -80,12 +80,13 @@ spec:
               value: "http://jaeger.jaeger.svc.cluster.local:14268"
             - name: TRACING_PROBABILITY
               value: "1"
+            - name: MONGODB_URI
+              value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/offer?authSource=admin
             - name: LOG_LEVEL
               value: debug
           args:
             - serve
             - --addr=:80
-            - --mongodb-uri=mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/offer?authSource=admin
 
 ---
 apiVersion: v1

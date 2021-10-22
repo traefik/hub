@@ -91,6 +91,8 @@ spec:
               value: /config/ca.pem
             - name: LEGO_CA_SERVER_NAME
               value: pebble
+            - name: MONGODB_URI
+              value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/certifications?authSource=admin
             - name: MONGODB_ENCRYPTION_KEY
               value: JUMqRi1KYU5jUmZValhuMnI1dTh4L0E/RChHK0tiUGU=
             - name: LOG_LEVEL
@@ -98,7 +100,6 @@ spec:
           args:
             - serve
             - --addr=:80
-            - --mongodb-uri=mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/certifications?authSource=admin
             - --gslb-service-url=http://hub-gslb.hub.svc.cluster.local/internal
             - --notification-service-url=http://hub-notification.hub.svc.cluster.local/internal
       volumes:

@@ -11,6 +11,9 @@ spec:
       name: web
       port: 80
     - protocol: TCP
+      name: cluster-proxy
+      port: 9090
+    - protocol: TCP
       name: websecure
       port: 443
   selector:

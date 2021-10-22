@@ -13,3 +13,9 @@ controllerDeployment:
     - --log-level=debug
     - --log-format=console
     - --platform-url=http://platform.docker.localhost/agent
+gatewayDeployment:
+  args:
+    - --log-level=debug
+    - --log-format=console
+    - --platform-url=http://platform.docker.localhost/agent
+    - --proxy-addr=platform.docker.localhost:9090

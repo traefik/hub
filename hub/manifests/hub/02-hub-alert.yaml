@@ -103,9 +103,10 @@ spec:
                   value: "1"
                 - name: CLUSTER_SERVICE_URL
                   value: "http://hub-cluster.hub.svc.cluster.local/internal"
+                - name: MONGODB_URI
+                  value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/alerts?authSource=admin
               args:
                 - check
-                - --mongodb-uri=mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/alerts?authSource=admin
                 - --cluster-limit=100
                 - agent-health
               resources:

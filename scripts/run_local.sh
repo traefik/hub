@@ -117,6 +117,7 @@ main() {
   --offer-quotas-domains="10" \
   --offer-quotas-alert-triggers="5" \
   --offer-quotas-alert-history="10" \
+  --offer-quotas-cross-cluster-services="2" \
   --offer-config-gslb-http-healthcheck-min-interval-seconds=60 \
   --offer-config-gslb-http-healthcheck-min-threshold-editable="false" \
   --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
@@ -141,6 +142,7 @@ main() {
   --offer-quotas-domains="100" \
   --offer-quotas-alert-triggers="100" \
   --offer-quotas-alert-history="200" \
+  --offer-quotas-cross-cluster-services="20" \
   --offer-config-gslb-http-healthcheck-min-interval-seconds=15 \
   --offer-config-gslb-http-healthcheck-min-threshold-editable="true" \
   --offer-features="team-management" --offer-features="geo-steering" \
@@ -165,6 +167,7 @@ main() {
   --offer-quotas-domains="10" \
   --offer-quotas-alert-triggers="5" \
   --offer-quotas-alert-history="10" \
+  --offer-quotas-cross-cluster-services="2" \
   --offer-config-gslb-http-healthcheck-min-interval-seconds=60 \
   --offer-config-gslb-http-healthcheck-min-threshold-editable="false" \
   --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
@@ -189,6 +192,7 @@ main() {
   --offer-quotas-domains="100" \
   --offer-quotas-alert-triggers="100" \
   --offer-quotas-alert-history="200" \
+  --offer-quotas-cross-cluster-services="20" \
   --offer-config-gslb-http-healthcheck-min-interval-seconds=15 \
   --offer-config-gslb-http-healthcheck-min-threshold-editable="true" \
   --offer-features="team-management" --offer-features="geo-steering" \
@@ -220,6 +224,8 @@ main() {
   # Wait for Hub agent to start
   kubectl -n hub-agent wait --for condition=available --timeout=180s deployment/hub-agent-controller
   kubectl -n hub-agent wait --for condition=available --timeout=180s deployment/hub-agent-auth-server
+  # TODO: once agent PR for cross-cluster will be merged
+  # kubectl -n hub-agent wait --for condition=available --timeout=180s deployment/hub-agent-gateway
 
   # Install PoP
   echo "Deploying PoP services."
@@ -343,7 +349,7 @@ setup-k3s() {
     k3d cluster start k3s-default-hub
   else
     echo "Setting up k3s cluster."
-    k3d cluster create k3s-default-hub --agents=2 --k3s-arg "--no-deploy=traefik@servers:*" --image="rancher/k3s:v1.21.5-k3s1" --port 80:80@loadbalancer --port 443:443@loadbalancer --port 8000:8000@loadbalancer --port 8443:8443@loadbalancer --port 9000:9000@loadbalancer --port 9443:9443@loadbalancer
+    k3d cluster create k3s-default-hub --agents=2 --k3s-arg "--no-deploy=traefik@servers:*" --image="rancher/k3s:v1.21.5-k3s1" --port 80:80@loadbalancer --port 443:443@loadbalancer --port 8000:8000@loadbalancer --port 8443:8443@loadbalancer --port 9000:9000@loadbalancer --port 9443:9443@loadbalancer --port 9090:9090@loadbalancer
   fi
 
   # Wait until cluster is ready

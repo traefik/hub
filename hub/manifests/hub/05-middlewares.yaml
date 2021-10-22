@@ -20,16 +20,18 @@ metadata:
 spec:
   stripPrefix:
     prefixes:
-      - /workspace
-      - /topology
-      - /cluster
-      - /token
-      - /notification
       - /alert
       - /certificates
-      - /metrics
-      - /invitation
       - /check
+      - /cluster
       - /gslb
+      - /invitation
+      - /metrics
+      - /notification
       - /offer
       - /user
+      - /token
+      - /topology-indexer  # the order of strip prefixes is important ! :-/
+      - /topology
+      - /workspace
+

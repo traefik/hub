@@ -91,25 +91,31 @@
         }
       ],
       "updatedAt": {
-        "$date": {
-          "$numberLong": "1617374276060"
-        }
+        "$date": "2021-04-02T14:37:56.060Z"
       },
       "createdAt": {
-        "$date": {
-          "$numberLong": "1617374276060"
-        }
+        "$date": "2021-04-02T14:37:56.060Z"
       }
     }
   ],
   "updatedAt": {
-    "$date": {
-      "$numberLong": "1618583876060"
-    }
+    "$date": "2021-10-22T10:08:54.406Z"
   },
   "createdAt": {
-    "$date": {
-      "$numberLong": "1618583876060"
+    "$date": "2021-04-16T14:37:56.060Z"
+  },
+  "clusterCreatedCount": 1,
+  "ca": {
+    "certificate": {
+      "$binary": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJwakNDQVZpZ0F3SUJBZ0lRSDF4SndxOTR5VDJyNjUrUFZzRnlXREFGQmdNclpYQXdVekVMTUFrR0ExVUUKQmhNQ1JsSXhGVEFUQmdOVkJBb1RERlJ5WVdWbWFXc2dUR0ZpY3pFdE1Dc0dBMVVFQXhNa05qQmpPVEZqWlRRMgpOV0k0WW1ObVl6ZGlaakpsTXpWa0xuUnlZV1ZtYVdzdWFIVmlNQjRYRFRJeE1UQXlNakV3TURnMU5Gb1hEVEkyCk1UQXlNVEV3TURnMU5Gb3dVekVMTUFrR0ExVUVCaE1DUmxJeEZUQVRCZ05WQkFvVERGUnlZV1ZtYVdzZ1RHRmkKY3pFdE1Dc0dBMVVFQXhNa05qQmpPVEZqWlRRMk5XSTRZbU5tWXpkaVpqSmxNelZrTG5SeVlXVm1hV3N1YUhWaQpNQ293QlFZREsyVndBeUVBbUJKRUZ3czF2dk9wM2d6ZWJ1dzF1MUw5RkQraENiRnRPRGdhcnRBd3I3U2pRakJBCk1BNEdBMVVkRHdFQi93UUVBd0lDQkRBUEJnTlZIUk1CQWY4RUJUQURBUUgvTUIwR0ExVWREZ1FXQkJTNitNbXcKbDFCbWJVbTh3bDgraG02QzlXdVR6akFGQmdNclpYQURRUUNGSnZMU0d2aGoxM3hBakVOMXYrQVFoMHBVQmZwOApReDdteURwMHl2Sk0wbytta3IvVzJyRkFWZkFVLzNvS2dWMkEzTGIrL0xYUWdkMm1KTkIxenhrQQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==",
+      "$type": "0"
+    },
+    "privateKey": {
+      "$binary": "eBbH3LbyTTVXb1lJynu15gUUARTAmFN/R/lFeeQs4N/0SnOPOGyhlzJegrlZj+t6RiyC+/JTSvelk72aFUypYjbaY8DUZfPFLHim5Q==",
+      "$type": "0"
+    },
+    "updatedAt": {
+      "$date": "2021-10-22T10:08:54.406Z"
     }
   }
 }
