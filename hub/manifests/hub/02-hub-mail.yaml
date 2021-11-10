@@ -1,0 +1,76 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hub-mail-unverified-email-job
+  namespace: hub
+spec:
+  schedule: "@daily"
+  jobTemplate:
+    spec:
+      parallelism: 1
+      template:
+        metadata:
+          labels:
+            app: hub-mail-unverified-email-job
+        spec:
+          restartPolicy: Never
+          imagePullSecrets:
+            - name: gcr-access-token
+          containers:
+            - name: hub-mail-unverified-email-job
+              image: hub-mail:dev
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: MONGODB_URI
+                  value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/?authSource=admin
+                - name: NOTIFICATION_SERVICE_URL
+                  value: http://notification.hub.svc.cluster.local
+                - name: USERS_CREATED_AFTER
+                  value: 24h
+                - name: USERS_CREATED_BEFORE
+                  value: 1h
+              args:
+                - send-unverified-email-reminder
+              resources:
+                limits:
+                  cpu: 50m
+                  memory: 128Mi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hub-mail-no-cluster-job
+  namespace: hub
+spec:
+  schedule: "@daily"
+  jobTemplate:
+    spec:
+      parallelism: 1
+      template:
+        metadata:
+          labels:
+            app: hub-mail-no-cluster-job
+        spec:
+          restartPolicy: Never
+          imagePullSecrets:
+            - name: gcr-access-token
+          containers:
+            - name: hub-mail-no-cluster-job
+              image: hub-mail:dev
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: MONGODB_URI
+                  value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/?authSource=admin
+                - name: NOTIFICATION_SERVICE_URL
+                  value: http://notification.hub.svc.cluster.local
+                - name: WORKSPACES_CREATED_AFTER
+                  value: 24h
+                - name: WORKSPACES_CREATED_BEFORE
+                  value: 1h
+              args:
+                - send-no-cluster-reminder
+              resources:
+                limits:
+                  cpu: 50m
+                  memory: 128Mi
