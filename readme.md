@@ -1,7 +1,7 @@
 # UI team dev env
 
 ```bash
-k3d cluster create --k3s-server-arg "--no-deploy=traefik" \
+k3d cluster create --k3s-arg "--disable=traefik@server:*" \
 --agents="2" \
 --port 80:80@loadbalancer \
 --port 443:443@loadbalancer \
