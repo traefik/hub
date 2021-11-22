@@ -38,7 +38,7 @@ spec:
             periodSeconds: 5
             failureThreshold: 2
           env:
-            - name: ALERT_SERVICE_TOKEN
+            - name: SERVICE_TOKEN
               valueFrom:
                 secretKeyRef:
                   name: service-token
@@ -47,6 +47,10 @@ spec:
               value: http://platform.docker.localhost/alert/service
             - name: POP_NAME
               value: k3d
+            - name: POP_LATITUDE
+              value: "48.858906"
+            - name: POP_LONGITUDE
+              value: "2.3120158"
             - name: RETENTION_FILE
               value: /var/run/retention.json
             - name: UPDATE_INTERVAL

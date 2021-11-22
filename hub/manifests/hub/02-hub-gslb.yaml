@@ -60,6 +60,8 @@ spec:
               value: "http://jaeger.jaeger.svc.cluster.local:14268"
             - name: WORKSPACE_SERVICE_URL
               value: http://hub-workspace.hub.svc.cluster.local/internal
+            - name: CLUSTER_SERVICE_URL
+              value: http://hub-cluster.hub.svc.cluster.local/internal
             - name: OFFER_SERVICE_URL
               value: http://hub-offer.hub.svc.cluster.local/internal
             - name: TRACING_PROBABILITY
@@ -80,7 +82,7 @@ metadata:
   name: hub-gslb-check-job
   namespace: hub
 spec:
-  schedule: "0 * * * *"
+  schedule: "*/5 * * * *"
   jobTemplate:
     spec:
       parallelism: 1
