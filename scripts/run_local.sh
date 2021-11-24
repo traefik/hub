@@ -115,6 +115,7 @@ main() {
   --offer-config-access-control-max-secured-routes="3" \
   --offer-quotas-users="2" \
   --offer-quotas-domains="10" \
+  --offer-quotas-gslb-bandwidth="1000000000" \
   --offer-quotas-alert-triggers="5" \
   --offer-quotas-alert-history="10" \
   --offer-quotas-cross-cluster-services="2" \
@@ -140,6 +141,7 @@ main() {
   --offer-config-access-control-max-secured-routes="50" \
   --offer-quotas-users="20" \
   --offer-quotas-domains="100" \
+  --offer-quotas-gslb-bandwidth="50000000000" \
   --offer-quotas-alert-triggers="100" \
   --offer-quotas-alert-history="200" \
   --offer-quotas-cross-cluster-services="20" \
@@ -165,6 +167,7 @@ main() {
   --offer-config-access-control-max-secured-routes="3" \
   --offer-quotas-users="2" \
   --offer-quotas-domains="10" \
+  --offer-quotas-gslb-bandwidth="50000000000" \
   --offer-quotas-alert-triggers="5" \
   --offer-quotas-alert-history="10" \
   --offer-quotas-cross-cluster-services="2" \
@@ -190,6 +193,7 @@ main() {
   --offer-config-access-control-max-secured-routes="50" \
   --offer-quotas-users="20" \
   --offer-quotas-domains="100" \
+  --offer-quotas-gslb-bandwidth="1000000000" \
   --offer-quotas-alert-triggers="100" \
   --offer-quotas-alert-history="200" \
   --offer-quotas-cross-cluster-services="20" \
