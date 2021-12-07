@@ -3021,24 +3021,6 @@
 					"name": "/external",
 					"item": [
 						{
-							"name": "/me - Get user infos",
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{USER_URL}}/external/me",
-									"host": [
-										"{{USER_URL}}"
-									],
-									"path": [
-										"external",
-										"me"
-									]
-								}
-							},
-							"response": []
-						},
-						{
 							"name": "/me/tos - Accept ToS",
 							"request": {
 								"method": "POST",
@@ -3061,6 +3043,25 @@
 										"external",
 										"me",
 										"tos"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/tos/current - Check current ToS are accepted",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{USER_URL}}/external/tos/current",
+									"host": [
+										"{{USER_URL}}"
+									],
+									"path": [
+										"external",
+										"tos",
+										"current"
 									]
 								}
 							},
@@ -3139,6 +3140,30 @@
 									""
 								]
 							}
+						}
+					]
+				},
+				{
+					"name": "/public",
+					"item": [
+						{
+							"name": "/tos/current - Get current ToS",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{USER_URL}}/public/tos/current",
+									"host": [
+										"{{USER_URL}}"
+									],
+									"path": [
+										"public",
+										"tos",
+										"current"
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				}

@@ -66,9 +66,11 @@ main() {
   kubectl -n pebble wait --for condition=available --timeout=180s deployment/pebble
 
   # Populate Mongo
-  for db in workspace user ; do
-    kubectl cp "$PROJECT_DIR"/hub/documents/${db}.json -n mongo $(kubectl get pods -n mongo -l app=mongodb --output=jsonpath={.items..metadata.name}):/tmp/${db}.json
-    kubectl exec -it -n mongo $(kubectl get pods -n mongo -l app=mongodb --output=jsonpath={.items..metadata.name}) -- bash -c "mongoimport --db ${db}s --collection ${db}s --file /tmp/${db}.json --username root --password admin  --authenticationDatabase admin"
+  for dbcol in workspaces_workspaces users_users users_tos ; do
+    db=$(echo $dbcol | awk -F '_' '{print $1}')
+    col=$(echo $dbcol | awk -F '_' '{print $2}')
+    kubectl cp "$PROJECT_DIR"/hub/documents/${dbcol}.json -n mongo $(kubectl get pods -n mongo -l app=mongodb --output=jsonpath={.items..metadata.name}):/tmp/${dbcol}.json
+    kubectl exec -it -n mongo $(kubectl get pods -n mongo -l app=mongodb --output=jsonpath={.items..metadata.name}) -- bash -c "mongoimport --db ${db} --collection ${col} --file /tmp/${dbcol}.json --username root --password admin  --authenticationDatabase admin"
   done
 
   # Install Jaeger
