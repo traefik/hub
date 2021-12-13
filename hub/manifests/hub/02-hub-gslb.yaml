@@ -110,6 +110,42 @@ spec:
                   memory: 128Mi
 
 ---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: hub-gslb-sync-clustertargets
+  namespace: hub
+spec:
+  schedule: "*/15 * * * *"
+  jobTemplate:
+    spec:
+      parallelism: 1
+      template:
+        metadata:
+          labels:
+            app: hub-gslb-sync-clustertargets
+        spec:
+          restartPolicy: Never
+          imagePullSecrets:
+            - name: gcr-access-token
+          containers:
+            - name: hub-gslb-sync-clustertargets
+              image: gcr.io/traefiklabs/hub-gslb:latest
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: MONGODB_URI
+                  value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/gslb?authSource=admin
+                - name: CLUSTER_SERVICE_URL
+                  value: http://hub-cluster.hub.svc.cluster.local/internal
+              args:
+                - sync
+                - cluster-targets
+              resources:
+                limits:
+                  cpu: 50m
+                  memory: 128Mi
+
+---
 apiVersion: v1
 kind: Service
 metadata:

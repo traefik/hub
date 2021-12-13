@@ -62,6 +62,8 @@ spec:
               value: http://hub-token.hub.svc.cluster.local/internal
             - name: TOPOLOGY_SERVICE_URL
               value: http://hub-topology.hub.svc.cluster.local/internal
+            - name: GSLB_SERVICE_URL
+              value: http://hub-gslb.hub.svc.cluster.local/internal
             - name: TOPOLOGY_GIT_PROXY_HOST
               value: platform.docker.localhost
             - name: TOPOLOGY_GIT_ORG_NAME
