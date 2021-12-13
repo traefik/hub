@@ -96,6 +96,9 @@ spec:
             - pebble
             - -config
             - /config/pebble-config.json
+          env:
+            - name: PEBBLE_VA_ALWAYS_VALID
+              value: "1"
           ports:
             - name: acme-dir
               containerPort: 14000

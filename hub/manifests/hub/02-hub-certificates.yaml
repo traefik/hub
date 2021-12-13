@@ -97,6 +97,14 @@ spec:
               value: JUMqRi1KYU5jUmZValhuMnI1dTh4L0E/RChHK0tiUGU=
             - name: LOG_LEVEL
               value: debug
+            - name: HUB_DOMAIN_SUFFIX
+              value: hub.traefik.io
+            - name: CLOUDFLARE_EMAIL
+              value: "email"
+            - name: CLOUDFLARE_KEY
+              value: "key"
+            - name: DEV_MODE
+              value: "true"
           args:
             - serve
             - --addr=:80
@@ -176,6 +184,44 @@ spec:
   routes:
     - kind: Rule
       match: Host(`platform.docker.localhost`) && PathPrefix(`/certificates/external`)
+      services:
+        - name: hub-certificates
+          port: 80
+      middlewares:
+        - name: stripprefix
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: certificates-internal-tls
+  namespace: hub
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/certificates/internal`)
+      services:
+        - name: hub-certificates
+          port: 80
+      middlewares:
+        - name: stripprefix
+  tls:
+    certResolver: default
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: certificates-internal
+  namespace: hub
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/certificates/internal`)
       services:
         - name: hub-certificates
           port: 80
