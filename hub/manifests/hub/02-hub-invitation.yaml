@@ -119,3 +119,21 @@ spec:
           port: 80
       middlewares:
         - name: stripprefix
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: invitation-auth0
+  namespace: hub
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/invitation/auth0`)
+      services:
+        - name: hub-invitation
+          port: 80
+      middlewares:
+        - name: stripprefix

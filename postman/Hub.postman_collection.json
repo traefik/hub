@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "dfee09f2-2984-4a97-92ad-cb2c4c99fd50",
+		"_postman_id": "7d40e0bd-63a7-4ece-befb-e6db930f4e42",
 		"name": "Hub",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -174,7 +174,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "[\n    {\n        \"ruleId\": \"60a6302d9309f8789c68cd13\",\n        \"ingress\": \"app-traefik@whoami\",\n        \"service\": \"whoami@whoami\",\n        \"points\": [\n        {\n            \"ts\": 1618842352,\n            \"value\": 10\n        }\n        ],\n        \"state\": 1,\n        \"logs\": \"H4sIAAAAAAAAA8vJT1fIycxL5QIARxHSvAkAAAA=\"\n    }\n  ]",
+									"raw": "[\n    {\n        \"ruleId\": \"60a6302d9309f8789c68cd13\",\n        \"ingress\": \"app-traefik@whoami\",\n        \"service\": \"whoami@whoami\",\n        \"points\": [\n            {\n                \"ts\": 1618842352,\n                \"value\": 10\n            }\n        ],\n        \"state\": 1,\n        \"logs\": \"H4sIAAAAAAAAA8vJT1fIycxL5QIARxHSvAkAAAA=\"\n    }\n]",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -201,7 +201,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "[\n    {\n        \"id\": 0,\n        \"ruleId\": \"60a6302d9309f8789c68cd13\",\n        \"ingress\": \"whoami@whoami\"\n    }\n  ]",
+									"raw": "[\n    {\n        \"id\": 0,\n        \"ruleId\": \"60a6302d9309f8789c68cd13\",\n        \"ingress\": \"whoami@whoami\"\n    }\n]",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -258,6 +258,17 @@
 					"item": [
 						{
 							"name": "/rules - List rules",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.environment.set(\"ALERT_RULE_ID\", pm.response.json()[0].id);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "GET",
 								"header": [],
@@ -276,6 +287,17 @@
 						},
 						{
 							"name": "/alerts - List alerts",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.environment.set(\"ALERT_ALERT_ID\", pm.response.json()[0].id);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "GET",
 								"header": [],
@@ -354,7 +376,7 @@
 									"variable": [
 										{
 											"key": "id",
-											"value": "",
+											"value": "{{ALERT_ALERT_ID}}",
 											"description": "Enter your alert ID"
 										}
 									]
@@ -418,6 +440,17 @@
 						},
 						{
 							"name": "/rules - Create a rule",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.environment.set(\"ALERT_RULE_ID\", pm.response.json().id);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "POST",
 								"header": [],
@@ -439,35 +472,6 @@
 										"alert",
 										"external",
 										"rules"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "/rules/test - Test a rule",
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"type\": \"threshold\",\n    \"cluster\": \"0ce50f00-54d7-4a2d-8e14-0a46c0b16dfa\",\n    \"annotation\": \"test:foo\",\n    \"emails\": [\n        \"nick.wiersma@traefik.io\",\n        \"remi.buisson@traefik.io\"\n    ],\n    \"threshold\": {\n        \"metric\": \"requestsPerSecond\",\n        \"condition\": {\n            \"above\": true,\n            \"value\": 0.5\n        },\n        \"occurrence\": 3,\n        \"timeRange\": \"10m\"\n    }\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{PLATFORM_URL}}/alert/external/rules/test",
-									"host": [
-										"{{PLATFORM_URL}}"
-									],
-									"path": [
-										"alert",
-										"external",
-										"rules",
-										"test"
 									]
 								}
 							},
@@ -497,10 +501,17 @@
 										"rules",
 										":id"
 									],
+									"query": [
+										{
+											"key": null,
+											"value": "",
+											"disabled": true
+										}
+									],
 									"variable": [
 										{
 											"key": "id",
-											"value": "",
+											"value": "{{ALERT_RULE_ID}}",
 											"description": "Enter your rule ID"
 										}
 									]
@@ -526,7 +537,7 @@
 									"variable": [
 										{
 											"key": "id",
-											"value": "",
+											"value": "{{ALERT_RULE_ID}}",
 											"description": "Enter your rule ID"
 										}
 									]
@@ -552,7 +563,7 @@
 									"variable": [
 										{
 											"key": "id",
-											"value": "",
+											"value": "{{ALERT_RULE_ID}}",
 											"description": "Enter your rule ID"
 										}
 									]
@@ -587,7 +598,7 @@
 									"variable": [
 										{
 											"key": "id",
-											"value": "",
+											"value": "{{ALERT_RULE_ID}}",
 											"description": "Enter your rule ID"
 										}
 									]
@@ -637,7 +648,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"max\": 50,\n    \"scope\": \"{{AG_WORKSPACE_ID}}\",\n    \"name\": \"history\",\n    \"effectiveFrom\": \"2021-06-18T16:35:08+02:00\"\n}",
+									"raw": "{\n    \"max\": 50,\n    \"scope\": \"{{AG_WORKSPACE_ID}}\",\n    \"name\": \"alert-history\",\n    \"effectiveFrom\": \"2021-06-18T16:35:08+02:00\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -692,7 +703,7 @@
 										},
 										{
 											"key": "name",
-											"value": "triggers"
+											"value": "alert-triggers"
 										}
 									]
 								}
@@ -929,16 +940,6 @@
 								}
 							],
 							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{AG_JWT_EXTERNAL}}",
-											"type": "string"
-										}
-									]
-								},
 								"method": "POST",
 								"header": [],
 								"body": {
@@ -970,23 +971,20 @@
 									"listen": "test",
 									"script": {
 										"exec": [
-											""
+											"let body = pm.response.json();",
+											"",
+											"if (body.length >= 1) {",
+											"    pm.environment.set(\"AG_CLUSTER_ID\", body[0].id)",
+											"}",
+											"if (body.length >= 2) {",
+											"    pm.environment.set(\"AG_CLUSTER_ID2\",body[1].id)",
+											"}"
 										],
 										"type": "text/javascript"
 									}
 								}
 							],
 							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{AG_JWT_EXTERNAL}}",
-											"type": "string"
-										}
-									]
-								},
 								"method": "GET",
 								"header": [],
 								"url": {
@@ -1016,16 +1014,6 @@
 								}
 							],
 							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{AG_JWT_EXTERNAL}}",
-											"type": "string"
-										}
-									]
-								},
 								"method": "GET",
 								"header": [],
 								"url": {
@@ -1062,16 +1050,6 @@
 								}
 							],
 							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{AG_JWT_EXTERNAL}}",
-											"type": "string"
-										}
-									]
-								},
 								"method": "PUT",
 								"header": [],
 								"body": {
@@ -1117,16 +1095,6 @@
 								}
 							],
 							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{AG_JWT_EXTERNAL}}",
-											"type": "string"
-										}
-									]
-								},
 								"method": "DELETE",
 								"header": [],
 								"url": {
@@ -1148,6 +1116,36 @@
 								}
 							},
 							"response": []
+						}
+					],
+					"auth": {
+						"type": "bearer",
+						"bearer": [
+							{
+								"key": "token",
+								"value": "{{AG_JWT_EXTERNAL}}",
+								"type": "string"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
 						}
 					]
 				},
@@ -1230,7 +1228,7 @@
 							"response": []
 						},
 						{
-							"name": "/clusters/:id/config - Get config",
+							"name": "/quotas/scope/quota - Get quotas",
 							"event": [
 								{
 									"listen": "test",
@@ -1246,21 +1244,63 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{CLUSTER_URL}}/internal/clusters/:id/config",
+									"raw": "{{CLUSTER_URL}}/internal/quotas/:scope/:quota",
 									"host": [
 										"{{CLUSTER_URL}}"
 									],
 									"path": [
 										"internal",
-										"clusters",
-										":id",
-										"config"
+										"quotas",
+										":scope",
+										":quota"
 									],
 									"variable": [
 										{
-											"key": "id",
-											"value": "{{AG_CLUSTER_ID}}"
+											"key": "scope",
+											"value": "{{AG_WORKSPACE_ID}}"
+										},
+										{
+											"key": "quota",
+											"value": "clusters"
 										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/quotas - Set quotas",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"clusters\",\n    \"scope\": \"{{AG_WORKSPACE_ID}}\",\n    \"max\": 5\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{CLUSTER_URL}}/internal/quotas",
+									"host": [
+										"{{CLUSTER_URL}}"
+									],
+									"path": [
+										"internal",
+										"quotas"
 									]
 								}
 							},
@@ -1360,7 +1400,7 @@
 			]
 		},
 		{
-			"name": "Config Provider",
+			"name": "GSLB - Config Provider",
 			"item": [
 				{
 					"name": "/internal",
@@ -1391,62 +1431,119 @@
 			"name": "GSLB",
 			"item": [
 				{
+					"name": "/agent",
+					"item": [
+						{
+							"name": "/verified-domains - List verified domains",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"kubeId\": \"toto\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{PLATFORM_URL}}/agent/verified-domains",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"agent",
+										"verified-domains"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"auth": {
+						"type": "bearer",
+						"bearer": [
+							{
+								"key": "token",
+								"value": "{{AG_HUB_TOKEN}}",
+								"type": "string"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				},
+				{
 					"name": "/external",
 					"item": [
 						{
-							"name": "/gslb - Get GSLB",
+							"name": "/gslb/:id - Get GSLB",
 							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{AG_JWT_EXTERNAL}}",
-											"type": "string"
-										}
-									]
-								},
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{GSLB_URL}}/external/gslbs/{{AG_HUB_GSLB}}",
+									"raw": "{{GSLB_URL}}/external/gslbs/:id",
 									"host": [
 										"{{GSLB_URL}}"
 									],
 									"path": [
 										"external",
 										"gslbs",
-										"{{AG_HUB_GSLB}}"
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_HUB_GSLB}}"
+										}
 									]
 								}
 							},
 							"response": []
 						},
 						{
-							"name": "/gslb - Get GSLB Status",
+							"name": "/gslbs/:id/status - Get GSLB Status",
 							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{AG_JWT_EXTERNAL}}",
-											"type": "string"
-										}
-									]
-								},
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{GSLB_URL}}/external/gslbs/{{AG_HUB_GSLB}}/status",
+									"raw": "{{GSLB_URL}}/external/gslbs/:id/status",
 									"host": [
 										"{{GSLB_URL}}"
 									],
 									"path": [
 										"external",
 										"gslbs",
-										"{{AG_HUB_GSLB}}",
+										":id",
 										"status"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_HUB_GSLB}}"
+										}
 									]
 								}
 							},
@@ -1454,17 +1551,18 @@
 						},
 						{
 							"name": "/gslb - List GSLBs",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.environment.set(\"AG_HUB_GSLB\", pm.response.json()[0].id)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{AG_JWT_EXTERNAL}}",
-											"type": "string"
-										}
-									]
-								},
 								"method": "GET",
 								"header": [],
 								"url": {
@@ -1483,20 +1581,37 @@
 						{
 							"name": "/gslbs/:id/domains/verify - Verify domains",
 							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{AG_JWT_EXTERNAL}}",
-											"type": "string"
-										}
-									]
-								},
 								"method": "POST",
 								"header": [],
 								"url": {
-									"raw": "{{GSLB_URL}}/external/gslbs/{{AG_HUB_GSLB}}/domains/verify",
+									"raw": "{{GSLB_URL}}/external/gslbs/:id/domains/verify",
+									"host": [
+										"{{GSLB_URL}}"
+									],
+									"path": [
+										"external",
+										"gslbs",
+										":id",
+										"domains",
+										"verify"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_HUB_GSLB}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/gslbs/:id/checktcp - Check targets",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{GSLB_URL}}/external/gslbs/{{AG_HUB_GSLB}}/checktcp",
 									"host": [
 										"{{GSLB_URL}}"
 									],
@@ -1504,56 +1619,7 @@
 										"external",
 										"gslbs",
 										"{{AG_HUB_GSLB}}",
-										"domains",
-										"verify"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "/gslbs - Create GSLB (blue/green)",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.environment.set(\"AG_HUB_GSLB\", pm.response.json().id)"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{AG_JWT_EXTERNAL}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"name\": \"test\",\n    \"domains\": [\n        \"toto.localhost\"\n    ],\n    \"strategy\": \"blue-green\",\n    \"strategyParameters\": {\n        \"clusterId\": \"pouet\",\n        \"targets\": [\n            \"8.8.8.8:443\"\n        ]\n    }\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{GSLB_URL}}/external/gslbs",
-									"host": [
-										"{{GSLB_URL}}"
-									],
-									"path": [
-										"external",
-										"gslbs"
+										"checktcp"
 									]
 								}
 							},
@@ -1573,21 +1639,11 @@
 								}
 							],
 							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{AG_JWT_EXTERNAL}}",
-											"type": "string"
-										}
-									]
-								},
 								"method": "POST",
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"test\",\n    \"domains\": [\n        \"toto.localhost\"\n    ],\n    \"strategy\": \"blue-green\",\n    \"strategyParameters\": {\n        \"blue\": {\n            \"clusterId\": \"pouet\",\n            \"targets\": [\n                \"8.8.8.8:443\"\n            ]\n        },\n        \"green\": {\n            \"clusterId\": \"pouetvert\",\n            \"targets\": [\n                \"8.8.8.8:443\"\n            ]\n        }\n    }\n}",
+									"raw": "{\n    \"name\": \"test\",\n    \"domains\": [\n        \"toto.localhost\"\n    ],\n    \"strategy\": \"blue-green\",\n    \"clusterId\": \"{{AG_CLUSTER_ID}}\",\n    \"targets\": [\n        \"8.8.8.8:443\"\n    ]\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -1608,18 +1664,46 @@
 							"response": []
 						},
 						{
-							"name": "/gslb - Update GSLB",
+							"name": "/gslbs - Create GSLB (blue-green)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.environment.set(\"AG_HUB_GSLB\", pm.response.json().id)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{AG_JWT_EXTERNAL}}",
-											"type": "string"
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"test\",\n    \"domains\": [\n        \"toto.localhost\"\n    ],\n    \"strategy\": \"blue-green\",\n    \"blue\": {\n        \"clusterId\": \"{{AG_CLUSTER_ID}}\",\n        \"targets\": [\n            \"8.8.8.8:443\"\n        ]\n    },\n    \"green\": {\n        \"clusterId\": \"{{AG_CLUSTER_ID2}}\",\n        \"targets\": [\n            \"8.8.8.8:443\"\n        ]\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
 										}
-									]
+									}
 								},
+								"url": {
+									"raw": "{{GSLB_URL}}/external/gslbs",
+									"host": [
+										"{{GSLB_URL}}"
+									],
+									"path": [
+										"external",
+										"gslbs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/gslb/:id - Update GSLB",
+							"request": {
 								"method": "PUT",
 								"header": [],
 								"body": {
@@ -1646,18 +1730,8 @@
 							"response": []
 						},
 						{
-							"name": "/gslb - Delete GSLB",
+							"name": "/gslb/:id - Delete GSLB",
 							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{AG_JWT_EXTERNAL}}",
-											"type": "string"
-										}
-									]
-								},
 								"method": "DELETE",
 								"header": [],
 								"url": {
@@ -1674,6 +1748,36 @@
 							},
 							"response": []
 						}
+					],
+					"auth": {
+						"type": "bearer",
+						"bearer": [
+							{
+								"key": "token",
+								"value": "{{AG_JWT_EXTERNAL}}",
+								"type": "string"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
 					]
 				},
 				{
@@ -1685,7 +1789,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{GSLB_URL}}/internal/workspaces/:id/domains?domains=",
+									"raw": "{{GSLB_URL}}/internal/workspaces/:id/domains?domains=toto.localhost",
 									"host": [
 										"{{GSLB_URL}}"
 									],
@@ -1698,7 +1802,7 @@
 									"query": [
 										{
 											"key": "domains",
-											"value": ""
+											"value": "toto.localhost"
 										}
 									],
 									"variable": [
@@ -1712,7 +1816,7 @@
 							"response": []
 						},
 						{
-							"name": "/gslbs - List unhealthy GSLBs",
+							"name": "/gslbs - List GSLBs",
 							"request": {
 								"method": "GET",
 								"header": [],
@@ -1734,6 +1838,499 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "/quotas - Set quotas",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"domains\",\n    \"scope\": \"{{AG_WORKSPACE_ID}}\",\n    \"max\": 5\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{GSLB_URL}}/internal/quotas",
+									"host": [
+										"{{GSLB_URL}}"
+									],
+									"path": [
+										"internal",
+										"quotas"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/quotas/scope/quota - Get quotas",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{GSLB_URL}}/internal/quotas/:scope/:quota",
+									"host": [
+										"{{GSLB_URL}}"
+									],
+									"path": [
+										"internal",
+										"quotas",
+										":scope",
+										":quota"
+									],
+									"variable": [
+										{
+											"key": "scope",
+											"value": "{{AG_WORKSPACE_ID}}"
+										},
+										{
+											"key": "quota",
+											"value": "domains"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/gslbs - Check if targets is used",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{GSLB_URL}}/internal/targets/:id/used?workspace-id={{AG_WORKSPACE_ID}}&cluster-id={{AG_CLUSTER_ID}}",
+									"host": [
+										"{{GSLB_URL}}"
+									],
+									"path": [
+										"internal",
+										"targets",
+										":id",
+										"used"
+									],
+									"query": [
+										{
+											"key": "workspace-id",
+											"value": "{{AG_WORKSPACE_ID}}"
+										},
+										{
+											"key": "cluster-id",
+											"value": "{{AG_CLUSTER_ID}}"
+										}
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_CLUSTER_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/targets - Bulk update endpoints",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"workspaceId\": \"{{AG_WORKSPACE_ID}}\",\n    \"clusterId\": \"{{AG_CLUSTER_ID}}\",\n    \"updates\": [\n        {\n            \"id\": \"{{AG_CLUSTER_ID}}\",\n            \"address\": \"8.8.8.8\"\n        }\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{GSLB_URL}}/internal/targets",
+									"host": [
+										"{{GSLB_URL}}"
+									],
+									"path": [
+										"internal",
+										"targets"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/targets - List cluster targets",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{GSLB_URL}}/internal/targets",
+									"host": [
+										"{{GSLB_URL}}"
+									],
+									"path": [
+										"internal",
+										"targets"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Invitation",
+			"item": [
+				{
+					"name": "auth0",
+					"item": [
+						{
+							"name": "/invite/:email/access - Invite email",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{INVITATION_URL}}/auth0/invites/:email/access",
+									"host": [
+										"{{INVITATION_URL}}"
+									],
+									"path": [
+										"auth0",
+										"invites",
+										":email",
+										"access"
+									],
+									"variable": [
+										{
+											"key": "email",
+											"value": "john.doe@example.org"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"auth": {
+						"type": "bearer",
+						"bearer": [
+							{
+								"key": "token",
+								"value": "{{AG_JWT_SERVICES}}",
+								"type": "string"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "external",
+					"item": [
+						{
+							"name": "/link-invitations",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"teamId\": \"{{AG_TEAM_ID}}\",\n    \"maxAge\": 10000,\n    \"maxUses\": 1\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{INVITATION_URL}}/external/link-invitations",
+									"host": [
+										"{{INVITATION_URL}}"
+									],
+									"path": [
+										"external",
+										"link-invitations"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/email-invitations - Create email invitation",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"teamId\": \"{{AG_TEAM_ID}}\",\n    \"emails\": [\n        \"remi.buisson@traefik.io\"\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{INVITATION_URL}}/external/email-invitations",
+									"host": [
+										"{{INVITATION_URL}}"
+									],
+									"path": [
+										"external",
+										"email-invitations"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/beta-email-invitations - Create email invitation",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[\n    \"remi.buisson@traefik.io\"\n]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{INVITATION_URL}}/external/beta-email-invitations",
+									"host": [
+										"{{INVITATION_URL}}"
+									],
+									"path": [
+										"external",
+										"beta-email-invitations"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/link-invitations - List link invitations",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.environment.set(\"AG_INVITATION_ID\", pm.response.json()[0].id)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{INVITATION_URL}}/external/link-invitations",
+									"host": [
+										"{{INVITATION_URL}}"
+									],
+									"path": [
+										"external",
+										"link-invitations"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/email-invitations - List email invitations",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{INVITATION_URL}}/external/email-invitations",
+									"host": [
+										"{{INVITATION_URL}}"
+									],
+									"path": [
+										"external",
+										"email-invitations"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/invites/:id/accept - Accept invitation",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{INVITATION_URL}}/external/invites/:id/accept",
+									"host": [
+										"{{INVITATION_URL}}"
+									],
+									"path": [
+										"external",
+										"invites",
+										":id",
+										"accept"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_INVITATION_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/invites/:id - Delete an invitation",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{INVITATION_URL}}/external/invites/:id",
+									"host": [
+										"{{INVITATION_URL}}"
+									],
+									"path": [
+										"external",
+										"invites",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_INVITATION_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"auth": {
+						"type": "bearer",
+						"bearer": [
+							{
+								"key": "token",
+								"value": "{{AG_JWT_EXTERNAL}}",
+								"type": "string"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
 						}
 					]
 				}
@@ -1742,6 +2339,130 @@
 		{
 			"name": "Metrics",
 			"item": [
+				{
+					"name": "agent",
+					"item": [
+						{
+							"name": "/data - Get previous metrics data",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"accept": true
+								}
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "avro/binary;v2",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{PLATFORM_URL}}/agent/data",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"agent",
+										"data"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/metrics - Send metrics",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {
+									"accept-encoding": true
+								}
+							},
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "avro/binary;v2",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "text"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{PLATFORM_URL}}/agent/metrics",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"agent",
+										"metrics"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"auth": {
+						"type": "bearer",
+						"bearer": [
+							{
+								"key": "token",
+								"value": "{{AG_HUB_TOKEN}}",
+								"type": "string"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				},
 				{
 					"name": "/external",
 					"item": [
@@ -1789,12 +2510,12 @@
 							"response": []
 						},
 						{
-							"name": "/query/:id/:ic/:ing - Query ingress metrics",
+							"name": "/query/:id/ingresses/:ing - Query ingress metrics",
 							"request": {
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{METRICS_URL}}/external/query/:id/:ic/:ing?dur=1m&from=",
+									"raw": "{{METRICS_URL}}/external/query/:id/ingresses/:ing?dur=1m&from=",
 									"host": [
 										"{{METRICS_URL}}"
 									],
@@ -1802,7 +2523,7 @@
 										"external",
 										"query",
 										":id",
-										":ic",
+										"ingresses",
 										":ing"
 									],
 									"query": [
@@ -1820,17 +2541,15 @@
 									"variable": [
 										{
 											"key": "id",
-											"value": "{{AG_CLUSTER_ID}}"
-										},
-										{
-											"key": "ic",
-											"value": "ingress-nginx-controller@ingress-nginx",
-											"description": "Enter the ingress controller you want to get"
+											"value": "{{AG_CLUSTER_ID}}",
+											"type": "text",
+											"enabled": true
 										},
 										{
 											"key": "ing",
-											"value": "app-nginx@whoami",
-											"description": "Enter the ingress you want to get"
+											"value": "app-traefik@whoami.ingress.networking.k8s.io",
+											"type": "text",
+											"enabled": true
 										}
 									]
 								}
@@ -1838,12 +2557,12 @@
 							"response": []
 						},
 						{
-							"name": "/query/:id/:ic/:ing/services - Query services metrics",
+							"name": "/query/:id/services/:ing - Query services metrics",
 							"request": {
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{METRICS_URL}}/external/query/:id/:ic/:ing/services?dur=1m&from=",
+									"raw": "{{METRICS_URL}}/external/query/:id/services/:svc?dur=1m&from=",
 									"host": [
 										"{{METRICS_URL}}"
 									],
@@ -1851,9 +2570,8 @@
 										"external",
 										"query",
 										":id",
-										":ic",
-										":ing",
-										"services"
+										"services",
+										":svc"
 									],
 									"query": [
 										{
@@ -1873,14 +2591,8 @@
 											"value": "{{AG_CLUSTER_ID}}"
 										},
 										{
-											"key": "ic",
-											"value": "ingress-nginx-controller@ingress-nginx",
-											"description": "Enter the ingress controller you want to get"
-										},
-										{
-											"key": "ing",
-											"value": "app-nginx@whoami",
-											"description": "Enter the ingress you want to get"
+											"key": "svc",
+											"value": "whoami@whoami"
 										}
 									]
 								}
@@ -1952,64 +2664,6 @@
 								}
 							},
 							"response": []
-						},
-						{
-							"name": "/workspaces/:workspaceId/clusters/:id/count - Count points given options",
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{METRICS_URL}}/internal/workspaces/:workspaceId/clusters/:id/count?metric=requestsPerSecond&dur=1m&services=whoami@whoami&ingress=app-traefik@whoami.ingress.networking.k8s.io&above=true&value=0.5",
-									"host": [
-										"{{METRICS_URL}}"
-									],
-									"path": [
-										"internal",
-										"workspaces",
-										":workspaceId",
-										"clusters",
-										":id",
-										"count"
-									],
-									"query": [
-										{
-											"key": "metric",
-											"value": "requestsPerSecond"
-										},
-										{
-											"key": "dur",
-											"value": "1m"
-										},
-										{
-											"key": "services",
-											"value": "whoami@whoami"
-										},
-										{
-											"key": "ingress",
-											"value": "app-traefik@whoami.ingress.networking.k8s.io"
-										},
-										{
-											"key": "above",
-											"value": "true"
-										},
-										{
-											"key": "value",
-											"value": "0.5"
-										}
-									],
-									"variable": [
-										{
-											"key": "workspaceId",
-											"value": "{{AG_WORKSPACE_ID}}"
-										},
-										{
-											"key": "id",
-											"value": "{{AG_CLUSTER_ID}}"
-										}
-									]
-								}
-							},
-							"response": []
 						}
 					]
 				}
@@ -2043,13 +2697,13 @@
 					"name": "/internal",
 					"item": [
 						{
-							"name": "/alerts",
+							"name": "/welcome - Send welcome email",
 							"request": {
 								"method": "POST",
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "[{\n    \"id\": \"123\",\n    \"type\": \"threshold\",\n    \"clusterID\": \"456\",\n    \"cluster\": \"my_cluster\",\n    \"ingress\": \"ing@app\",\n    \"service\": \"svc@app\",\n    \"time\": \"2018-09-22T12:42:31Z\",\n    \"emails\": [\n        \"baptiste.mayelle@traefik.io\"\n    ],\n    \"threshold\": {\n        \"metric\": \"requestPerSecond\",\n        \"points\": [\n            {\n                \"timestamp\": 123,\n                \"value\": 2.3\n            },\n            {\n                \"timestamp\": 456,\n                \"value\": 3.4\n            }\n        ],\n        \"condition\": {\n            \"above\": true,\n            \"value\": 23.4\n        }\n    }\n}]",
+									"raw": "{\n    \"firstName\": \"You\",\n    \"email\": \"remi.buisson@traefik.io\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -2057,13 +2711,148 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost/internal/alerts",
-									"protocol": "http",
+									"raw": "{{NOTIFICATION_URL}}/internal/welcome",
 									"host": [
-										"localhost"
+										"{{NOTIFICATION_URL}}"
 									],
 									"path": [
 										"internal",
+										"welcome"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/invitations - Send invitations",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"workspaceName\": \"{{AG_WORKSPACE_ID}}\",\n    \"invitations\": [\n        {\n            \"email\": \"remi.buisson@traefik.io\",\n            \"link\": \"https://google.fr\"\n        }\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{NOTIFICATION_URL}}/internal/invitations",
+									"host": [
+										"{{NOTIFICATION_URL}}"
+									],
+									"path": [
+										"internal",
+										"invitations"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/invitations - Send beta-invitations",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": " [\n    {\n        \"displayName\": \"You\",\n        \"invitedBy\": \"Me\",\n        \"email\": \"remi.buisson@traefik.io\",\n         \"link\": \"https://google.fr\"\n    }\n]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{NOTIFICATION_URL}}/internal/beta-invitations",
+									"host": [
+										"{{NOTIFICATION_URL}}"
+									],
+									"path": [
+										"internal",
+										"beta-invitations"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/unverified-email-reminder - Send a reminder email when email is not verified",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"firstName\": \"You\",\n    \"email\": \"remi.buisson@traefik.io\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{NOTIFICATION_URL}}/internal/unverified-email-reminder",
+									"host": [
+										"{{NOTIFICATION_URL}}"
+									],
+									"path": [
+										"internal",
+										"unverified-email-reminder"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/unverified-email-reminder - Send a reminder email when no cluster has been created",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"firstName\": \"You\",\n    \"email\": \"remi.buisson@traefik.io\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{NOTIFICATION_URL}}/internal/no-cluster-reminder",
+									"host": [
+										"{{NOTIFICATION_URL}}"
+									],
+									"path": [
+										"internal",
+										"no-cluster-reminder"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/events/alerts - Send a threshold alert",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[\n    {\n        \"workspaceId\": \"{{AG_WORKSPACE_ID}}\",\n        \"type\": \"raised\",\n        \"alert\": {\n            \"id\": \"123\",\n            \"type\": \"threshold\",\n            \"clusterID\": \"456\",\n            \"cluster\": \"my_cluster\",\n            \"ingress\": \"ing@app\",\n            \"service\": \"svc@app\",\n            \"time\": \"2018-09-22T12:42:31Z\",\n            \"emails\": [\n                \"remi.buisson@traefik.io\"\n            ],\n            \"threshold\": {\n                \"metric\": \"requestPerSecond\",\n                \"points\": [\n                    {\n                        \"timestamp\": 123,\n                        \"value\": 2.3\n                    },\n                    {\n                        \"timestamp\": 456,\n                        \"value\": 3.4\n                    }\n                ],\n                \"condition\": {\n                    \"above\": true,\n                    \"value\": 23.4\n                }\n            }\n        }\n    }\n]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{NOTIFICATION_URL}}/internal/events/alerts",
+									"host": [
+										"{{NOTIFICATION_URL}}"
+									],
+									"path": [
+										"internal",
+										"events",
 										"alerts"
 									]
 								}
@@ -2071,13 +2860,13 @@
 							"response": []
 						},
 						{
-							"name": "/invitations",
+							"name": "/events/alerts - Send a certificate alert",
 							"request": {
 								"method": "POST",
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"workspaceName\": \"toto\",\n    \"invitations\": [\n        {\n            \"email\": \"baptiste.mayelle@traefik.io\",\n            \"link\": \"https://google.fr\"\n        }\n    ]\n}",
+									"raw": "{\n    \"workspaceId\": \"{{AG_WORKSPACE_ID}}\",\n    \"type\": \"issuing\",\n    \"createdAt\": \"2018-09-22T12:42:31Z\",\n    \"domains\": [\n        \"toto.localhost\"\n    ]\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -2085,14 +2874,623 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost/internal/invitations",
-									"protocol": "http",
+									"raw": "{{NOTIFICATION_URL}}/internal/events/certificate",
 									"host": [
-										"localhost"
+										"{{NOTIFICATION_URL}}"
 									],
 									"path": [
 										"internal",
-										"invitations"
+										"events",
+										"certificate"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "external",
+					"item": [
+						{
+							"name": "/notifications - List notifications",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let body = pm.response.json();",
+											"",
+											"if (body.length >= 1) {",
+											"    pm.environment.set(\"AG_NOTIFICATION_ID\", body[0].id)",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{NOTIFICATION_URL}}/external/notifications",
+									"host": [
+										"{{NOTIFICATION_URL}}"
+									],
+									"path": [
+										"external",
+										"notifications"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/notifications/clear - Clear notifications",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"notificationIds\": [\"{{AG_NOTIFICATION_ID}}\"]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{NOTIFICATION_URL}}/external/notifications/clear",
+									"host": [
+										"{{NOTIFICATION_URL}}"
+									],
+									"path": [
+										"external",
+										"notifications",
+										"clear"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"auth": {
+						"type": "bearer",
+						"bearer": [
+							{
+								"key": "token",
+								"value": "{{AG_JWT_EXTERNAL}}",
+								"type": "string"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Offer",
+			"item": [
+				{
+					"name": "agent",
+					"item": [
+						{
+							"name": "/config - Get agent config",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PLATFORM_URL}}/agent/config",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"agent",
+										"config"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"auth": {
+						"type": "bearer",
+						"bearer": [
+							{
+								"key": "token",
+								"value": "{{AG_HUB_TOKEN}}",
+								"type": "string"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "external",
+					"item": [
+						{
+							"name": "/subscriptions/:id - Get subscription",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{OFFER_URL}}/external/subscriptions/:id",
+									"host": [
+										"{{OFFER_URL}}"
+									],
+									"path": [
+										"external",
+										"subscriptions",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_WORKSPACE_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/subscriptions/:id/quotas - Get subscription qutoas",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{OFFER_URL}}/external/subscriptions/:id/quotas",
+									"host": [
+										"{{OFFER_URL}}"
+									],
+									"path": [
+										"external",
+										"subscriptions",
+										":id",
+										"quotas"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_WORKSPACE_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/subscriptions/:id  - Update subscription",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"countryCode\": \"FR\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{OFFER_URL}}/external/subscriptions/:id",
+									"host": [
+										"{{OFFER_URL}}"
+									],
+									"path": [
+										"external",
+										"subscriptions",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_WORKSPACE_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/subscriptions/:id/portal-sessions - Create a portal session",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{OFFER_URL}}/external/subscriptions/:id/portal-sessions",
+									"host": [
+										"{{OFFER_URL}}"
+									],
+									"path": [
+										"external",
+										"subscriptions",
+										":id",
+										"portal-sessions"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_WORKSPACE_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"auth": {
+						"type": "bearer",
+						"bearer": [
+							{
+								"key": "token",
+								"value": "{{AG_JWT_EXTERNAL}}",
+								"type": "string"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "internal",
+					"item": [
+						{
+							"name": "/offers - List offers",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{OFFER_URL}}/internal/offers?countryCode=FR",
+									"host": [
+										"{{OFFER_URL}}"
+									],
+									"path": [
+										"internal",
+										"offers"
+									],
+									"query": [
+										{
+											"key": "countryCode",
+											"value": "FR",
+											"description": "optionnal"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/offers - Create an offer",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"myWonderfullOffer\",\n    \"zoneName\": \"eu\",\n    \"priceId\": \"xxx\",\n    \"config\": {\n        \"topology\": {\n            \"gitProxyHost\": \"platform.docker.localhost\",\n            \"gitOrgName\": \"darkweaver87\",\n            \"gitRepoName\": \"60c91ce465b8bcfc7bf2e35d\"\n        },\n        \"metrics\": {\n            \"interval\": \"5m\",\n            \"tables\": [\n                \"1m\",\n                \"10m\",\n                \"1h\"\n            ]\n        },\n        \"accessControl\": {\n            \"maxSecuredRoutes\": 3\n        },\n        \"gslb\": {\n            \"httpHealthcheckConfig\": {\n                \"minIntervalSeconds\": 0,\n                \"thresholdEditable\": false\n            }\n        }\n    },\n    \"quotas\": {\n        \"clusters\": 5,\n        \"crossClusterServices\": 20,\n        \"users\": 20,\n        \"domains\": 100,\n        \"gslbBandwidth\": 1000000000,\n        \"alertTriggers\": 100,\n        \"alertHistory\": 200\n    },\n    \"features\": [\n        \"team-management\",\n        \"geo-steering\",\n        \"blue-green\",\n        \"canary\",\n        \"active-active\",\n        \"active-passive\"\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{OFFER_URL}}/internal/offers",
+									"host": [
+										"{{OFFER_URL}}"
+									],
+									"path": [
+										"internal",
+										"offers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/offers - Update an offer",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"myWonderfullOffer\",\n    \"zoneName\": \"eu\",\n    \"priceId\": \"xxx\",\n    \"config\": {\n        \"topology\": {\n            \"gitProxyHost\": \"platform.docker.localhost\",\n            \"gitOrgName\": \"darkweaver87\",\n            \"gitRepoName\": \"60c91ce465b8bcfc7bf2e35d\"\n        },\n        \"metrics\": {\n            \"interval\": \"5m\",\n            \"tables\": [\n                \"1m\",\n                \"10m\",\n                \"1h\"\n            ]\n        },\n        \"accessControl\": {\n            \"maxSecuredRoutes\": 3\n        },\n        \"gslb\": {\n            \"httpHealthcheckConfig\": {\n                \"minIntervalSeconds\": 0,\n                \"thresholdEditable\": false\n            }\n        }\n    },\n    \"quotas\": {\n        \"clusters\": 5,\n        \"crossClusterServices\": 20,\n        \"users\": 20,\n        \"domains\": 100,\n        \"gslbBandwidth\": 1000000000,\n        \"alertTriggers\": 100,\n        \"alertHistory\": 200\n    },\n    \"features\": [\n        \"team-management\",\n        \"geo-steering\",\n        \"blue-green\",\n        \"canary\",\n        \"active-active\",\n        \"active-passive\"\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{OFFER_URL}}/internal/offers/:id",
+									"host": [
+										"{{OFFER_URL}}"
+									],
+									"path": [
+										"internal",
+										"offers",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "xxx",
+											"description": "Price ID"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/subscriptions - Create a subscription",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"workspaceId\": \"{{AG_WORKSPACE_ID}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{OFFER_URL}}/internal/subscriptions",
+									"host": [
+										"{{OFFER_URL}}"
+									],
+									"path": [
+										"internal",
+										"subscriptions"
+									],
+									"query": [
+										{
+											"key": "",
+											"value": null,
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/subscriptions/:id/config - Get subscription config",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"workspaceId\": \"{{AG_WOKRSPACE_ID}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{OFFER_URL}}/internal/subscriptions/:id/config",
+									"host": [
+										"{{OFFER_URL}}"
+									],
+									"path": [
+										"internal",
+										"subscriptions",
+										":id",
+										"config"
+									],
+									"query": [
+										{
+											"key": "",
+											"value": null,
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_WORKSPACE_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/quotas - Create subscription features",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"workspaceId\": \"{{AG_WOKRSPACE_ID}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{OFFER_URL}}/internal/quotas",
+									"host": [
+										"{{OFFER_URL}}"
+									],
+									"path": [
+										"internal",
+										"quotas"
+									],
+									"query": [
+										{
+											"key": "",
+											"value": null,
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/quotas - Delete",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"clusterId\": \"{{AG_WOKRSPACE_ID}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{OFFER_URL}}/internal/quotas",
+									"host": [
+										"{{OFFER_URL}}"
+									],
+									"path": [
+										"internal",
+										"quotas"
+									],
+									"query": [
+										{
+											"key": "",
+											"value": null,
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "stripe",
+					"item": [
+						{
+							"name": "/webhooks/:zone - Stripe callback on subscription change",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"let ts = Math.floor(Date.now() / 1000)",
+											"let body = pm.environment.replaceIn(pm.request.body.toString())",
+											"",
+											"let sha256sig = CryptoJS.HmacSHA256(ts + \".\" + body, pm.environment.get(\"STRIPE_KEY\"));",
+											"let hex = CryptoJS.enc.Hex.stringify(sha256sig);",
+											"pm.request.headers.add({key:\"Stripe-Signature\", value: \"t=\" + ts + \",v1=\" + hex})"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"account\": \"\",\n    \"created\": 0,\n    \"data\": {\n        \"object\": {\n            \"id\": \"plop\",\n            \"status\": \"active\",\n            \"customer\": {\n                \"id\": \"{{STRIPE_CUSTOMER_ID}}\"\n            },\n            \"items\": {\n                \"data\": [\n                    {\n                        \"price\": {\n                            \"id\": \"42\"\n                        }\n                    }\n                ]\n            }\n        }\n    },\n    \"id\": \"evt_123\",\n    \"livemode\": false,\n    \"pending_webhooks\": 0,\n    \"request\": null,\n    \"type\": \"customer.subscription.updated\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{OFFER_URL}}/stripe/webhooks/:zone",
+									"host": [
+										"{{OFFER_URL}}"
+									],
+									"path": [
+										"stripe",
+										"webhooks",
+										":zone"
+									],
+									"variable": [
+										{
+											"key": "zone",
+											"value": "eu",
+											"description": "Zone name"
+										}
 									]
 								}
 							},
@@ -2173,6 +3571,47 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "/workspaces/:workspaceId/clusters/:id - Delete cluster data",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_HUB_TOKEN}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{TOKEN_URL}}/internal/workspaces/:workspaceId/clusters/:id",
+									"host": [
+										"{{TOKEN_URL}}"
+									],
+									"path": [
+										"internal",
+										"workspaces",
+										":workspaceId",
+										"clusters",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "{{AG_WORKSPACE_ID}}"
+										},
+										{
+											"key": "id",
+											"value": "{{AG_CLUSTER_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				}
@@ -2182,21 +3621,65 @@
 			"name": "Topology",
 			"item": [
 				{
+					"name": "agent",
+					"item": [
+						{
+							"name": "/cross-cluster/services - List cross cluster services",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{PLATFORM_URL}}/agent/cross-cluster/services",
+									"host": [
+										"{{PLATFORM_URL}}"
+									],
+									"path": [
+										"agent",
+										"cross-cluster",
+										"services"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"auth": {
+						"type": "bearer",
+						"bearer": [
+							{
+								"key": "token",
+								"value": "{{AG_HUB_TOKEN}}",
+								"type": "string"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				},
+				{
 					"name": "/external",
 					"item": [
 						{
 							"name": "/clusters - List clusters",
 							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{AG_JWT_EXTERNAL}}",
-											"type": "string"
-										}
-									]
-								},
 								"method": "GET",
 								"header": [],
 								"url": {
@@ -2214,17 +3697,18 @@
 						},
 						{
 							"name": "/ingresses - List ingresses",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{AG_JWT_EXTERNAL}}",
-											"type": "string"
-										}
-									]
-								},
 								"method": "GET",
 								"header": [],
 								"url": {
@@ -2247,18 +3731,52 @@
 							"response": []
 						},
 						{
-							"name": "/access-control-policies - List ACP",
+							"name": "/ingresses/filters - List ingresses filters",
 							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{TOPOLOGY_URL}}/external/ingresses/filters?clusterId={{AG_CLUSTER_ID}}&ingressControllerType=traefik",
+									"host": [
+										"{{TOPOLOGY_URL}}"
+									],
+									"path": [
+										"external",
+										"ingresses",
+										"filters"
+									],
+									"query": [
 										{
-											"key": "token",
-											"value": "{{AG_JWT_EXTERNAL}}",
-											"type": "string"
+											"key": "clusterId",
+											"value": "{{AG_CLUSTER_ID}}"
+										},
+										{
+											"key": "ingressControllerType",
+											"value": "traefik"
 										}
 									]
-								},
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/access-control-policies - List ACP",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let body = pm.response.json();",
+											"",
+											"if (body.length >= 1) {",
+											"    pm.environment.set(\"AG_ACP_ID\", body[0].name+\"@\"+body[0].namespace)",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
 								"method": "GET",
 								"header": [],
 								"url": {
@@ -2339,6 +3857,17 @@
 						},
 						{
 							"name": "/clusters/:id/ingress-controllers - List ingress Controllers for cluster",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"auth": {
 									"type": "bearer",
@@ -2362,6 +3891,57 @@
 										"clusters",
 										":id",
 										"ingress-controllers"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_CLUSTER_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/clusters/:id/ingresses- List ingress for cluster",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let body = pm.response.json();",
+											"",
+											"if (body.length >= 1) {",
+											"    pm.environment.set(\"AG_INGRESS_ID\", body[0].name+\"@\"+body[0].namespace+\".\"+body[0].kind.toLowerCase()+\".\"+body[0].group)",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{TOPOLOGY_URL}}/external/clusters/:id/ingresses",
+									"host": [
+										"{{TOPOLOGY_URL}}"
+									],
+									"path": [
+										"external",
+										"clusters",
+										":id",
+										"ingresses"
 									],
 									"variable": [
 										{
@@ -2407,7 +3987,7 @@
 										},
 										{
 											"key": "ing",
-											"value": "app-haproxy@whoami",
+											"value": "{{AG_INGRESS_ID}}",
 											"description": "Fill the name of the ingress who want to get."
 										}
 									]
@@ -2449,7 +4029,7 @@
 										},
 										{
 											"key": "acp",
-											"value": "my-acp@whoami",
+											"value": "{{AG_ACP_ID}}",
 											"description": "Fill the name of the acp who want to get."
 										}
 									]
@@ -2493,13 +4073,43 @@
 							},
 							"response": []
 						}
+					],
+					"auth": {
+						"type": "bearer",
+						"bearer": [
+							{
+								"key": "token",
+								"value": "{{AG_JWT_EXTERNAL}}",
+								"type": "string"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
 					]
 				},
 				{
 					"name": "/internal",
 					"item": [
 						{
-							"name": "/auth",
+							"name": "/auth - Authorize git requests for a user",
 							"request": {
 								"auth": {
 									"type": "basic",
@@ -2550,7 +4160,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{TOPOLOGY_URL}}/internal/repos/:id/clusters/:cluster_id/services?annotation=test:foo",
+									"raw": "{{TOPOLOGY_URL}}/internal/repos/:id/clusters/:cluster_id/services",
 									"host": [
 										"{{TOPOLOGY_URL}}"
 									],
@@ -2566,7 +4176,8 @@
 										{
 											"key": "annotation",
 											"value": "test:foo",
-											"description": "Enter the service annotation."
+											"description": "Enter the service annotation.",
+											"disabled": true
 										}
 									],
 									"variable": [
@@ -2584,7 +4195,56 @@
 							"response": []
 						},
 						{
-							"name": "/repos",
+							"name": "repos/:id/clusters/:cluster_id - Delete a cluster",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "{{AG_HUB_TOKEN}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{TOPOLOGY_URL}}/internal/repos/:id/clusters/:cluster_id",
+									"host": [
+										"{{TOPOLOGY_URL}}"
+									],
+									"path": [
+										"internal",
+										"repos",
+										":id",
+										"clusters",
+										":cluster_id"
+									],
+									"query": [
+										{
+											"key": "annotation",
+											"value": "test:foo",
+											"description": "Enter the service annotation.",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{TRAEFIKLABS_WORKSPACE}}"
+										},
+										{
+											"key": "cluster_id",
+											"value": "{{AG_CLUSTER_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/repos - Create repository for a user",
 							"request": {
 								"auth": {
 									"type": "basic",
@@ -2600,7 +4260,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"id\": \"pouet\"\n}",
+									"raw": "{\n    \"id\": \"{{AG_CLUSTER_ID}}\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -2625,13 +4285,197 @@
 			]
 		},
 		{
+			"name": "User",
+			"item": [
+				{
+					"name": "/auth0",
+					"item": [
+						{
+							"name": "/users - Sync a user",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"9204c8f8-703f-4bc5-a0f8-50400d769b7c\",\n    \"auth0Id\": \"auth0|60c91cdab86b450070b73d75\",\n    \"displayName\": \"John Doe\",\n    \"email\": \"john.doe@example.org\",\n    \"emailVerified\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{USER_URL}}/auth0/users",
+									"host": [
+										"{{USER_URL}}"
+									],
+									"path": [
+										"auth0",
+										"users"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"auth": {
+						"type": "bearer",
+						"bearer": [
+							{
+								"key": "token",
+								"value": "{{AG_JWT_SERVICES}}",
+								"type": "string"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "/external",
+					"item": [
+						{
+							"name": "/me/tos - Accept ToS",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"version\": \"{{AG_TOS_VERSION}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{USER_URL}}/external/me/tos",
+									"host": [
+										"{{USER_URL}}"
+									],
+									"path": [
+										"external",
+										"me",
+										"tos"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/tos/current - Check current ToS are accepted",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{USER_URL}}/external/tos/current",
+									"host": [
+										"{{USER_URL}}"
+									],
+									"path": [
+										"external",
+										"tos",
+										"current"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"auth": {
+						"type": "bearer",
+						"bearer": [
+							{
+								"key": "token",
+								"value": "{{AG_JWT_EXTERNAL}}",
+								"type": "string"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "/public",
+					"item": [
+						{
+							"name": "/tos/current - Get current ToS",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.environment.set(\"AG_TOS_VERSION\", pm.response.json().version)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{USER_URL}}/public/tos/current",
+									"host": [
+										"{{USER_URL}}"
+									],
+									"path": [
+										"public",
+										"tos",
+										"current"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
 			"name": "Workspace",
 			"item": [
 				{
 					"name": "/auth0",
 					"item": [
 						{
-							"name": "/workspaces - Create a new user workspace",
+							"name": "/workspaces - List user workspaces",
 							"event": [
 								{
 									"listen": "test",
@@ -2643,22 +4487,15 @@
 									}
 								}
 							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
 							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{AG_JWT_SERVICES}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "POST",
+								"method": "GET",
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"userID\": \"plop\"\n}",
+									"raw": "",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -2666,13 +4503,19 @@
 									}
 								},
 								"url": {
-									"raw": "{{WORKSPACE_URL}}/auth0/workspaces",
+									"raw": "{{WORKSPACE_URL}}/auth0/workspaces?userId={{AG_USER_ID}}",
 									"host": [
 										"{{WORKSPACE_URL}}"
 									],
 									"path": [
 										"auth0",
 										"workspaces"
+									],
+									"query": [
+										{
+											"key": "userId",
+											"value": "{{AG_USER_ID}}"
+										}
 									]
 								}
 							},
@@ -2692,16 +4535,6 @@
 								}
 							],
 							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{AG_JWT_SERVICES}}",
-											"type": "string"
-										}
-									]
-								},
 								"method": "GET",
 								"header": [],
 								"url": {
@@ -2723,6 +4556,36 @@
 								}
 							},
 							"response": []
+						}
+					],
+					"auth": {
+						"type": "bearer",
+						"bearer": [
+							{
+								"key": "token",
+								"value": "{{AG_JWT_SERVICES}}",
+								"type": "string"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
 						}
 					]
 				},
@@ -2785,7 +4648,11 @@
 									"listen": "test",
 									"script": {
 										"exec": [
-											""
+											"let body = pm.response.json();",
+											"",
+											"if (body.length >= 1) {",
+											"    pm.environment.set(\"AG_WORKSPACE_ID\", body[0].id)",
+											"}"
 										],
 										"type": "text/javascript"
 									}
@@ -2818,7 +4685,7 @@
 							"response": []
 						},
 						{
-							"name": "/workspaces/:id - Get workspaces",
+							"name": "/workspaces/:id - Get workspace",
 							"event": [
 								{
 									"listen": "test",
@@ -2963,6 +4830,190 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "/workspaces/:id/owner - Swap owner",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"userId\": \"newOwner\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{WORKSPACE_URL}}/external/workspaces/:id/owner",
+									"host": [
+										"{{WORKSPACE_URL}}"
+									],
+									"path": [
+										"external",
+										"workspaces",
+										":id",
+										"owner"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_WORKSPACE_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "workspaces/:id/team/:team_id/users/:user_id - Delete a user from a  team of a workspace",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"teamId\": \"{{AG_TEAM_ID}}\",\n    \"invitedBy\": \"{{AG_USER_ID}}\",\n    \"userId\": \"You\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{WORKSPACE_URL}}/external/workspaces/:id/teams/:team_id/users/:user_id",
+									"host": [
+										"{{WORKSPACE_URL}}"
+									],
+									"path": [
+										"external",
+										"workspaces",
+										":id",
+										"teams",
+										":team_id",
+										"users",
+										":user_id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_WORKSPACE_ID}}"
+										},
+										{
+											"key": "team_id",
+											"value": "{{AG_TEAM_ID}}"
+										},
+										{
+											"key": "user_id",
+											"value": "You"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/workspaces/:id/users/:user_id - Delete a user from a workspace",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"teamId\": \"{{AG_TEAM_ID}}\",\n    \"invitedBy\": \"{{AG_USER_ID}}\",\n    \"userId\": \"You\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{WORKSPACE_URL}}/external/workspaces/:id/users/:user_id",
+									"host": [
+										"{{WORKSPACE_URL}}"
+									],
+									"path": [
+										"external",
+										"workspaces",
+										":id",
+										"users",
+										":user_id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_WORKSPACE_ID}}"
+										},
+										{
+											"key": "user_id",
+											"value": "You"
+										}
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				},
@@ -3009,25 +5060,179 @@
 								}
 							},
 							"response": []
-						}
-					]
-				}
-			]
-		},
-		{
-			"name": "User",
-			"item": [
-				{
-					"name": "/external",
-					"item": [
+						},
 						{
-							"name": "/me/tos - Accept ToS",
+							"name": "/workspaces - List workspaces",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let body = pm.response.json();",
+											"",
+											"if (body.length >= 1) {",
+											"    pm.environment.set(\"AG_WORKSPACE_ID\", body[0].id)",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{WORKSPACE_URL}}/internal/workspaces",
+									"host": [
+										"{{WORKSPACE_URL}}"
+									],
+									"path": [
+										"internal",
+										"workspaces"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/workspaces/:id - Get workspace",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let body = pm.response.json();",
+											"",
+											"for (const t of body.teams) {",
+											"    if (t.type != \"owner\") {",
+											"        pm.environment.set(\"AG_TEAM_ID\", t.id)",
+											"        break",
+											"    }",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{WORKSPACE_URL}}/internal/workspaces/:id",
+									"host": [
+										"{{WORKSPACE_URL}}"
+									],
+									"path": [
+										"internal",
+										"workspaces",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_WORKSPACE_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/workspaces/:id/users - List workspaces users",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{WORKSPACE_URL}}/internal/workspaces/:id/users",
+									"host": [
+										"{{WORKSPACE_URL}}"
+									],
+									"path": [
+										"internal",
+										"workspaces",
+										":id",
+										"users"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_WORKSPACE_ID}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/workspaces/:id/users - Add user to a workspace Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
 								"method": "POST",
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"version\": \"v1\"\n}",
+									"raw": "{\n    \"teamId\": \"{{AG_TEAM_ID}}\",\n    \"invitedBy\": \"{{AG_USER_ID}}\",\n    \"userId\": \"You\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3035,131 +5240,218 @@
 									}
 								},
 								"url": {
-									"raw": "{{USER_URL}}/external/me/tos",
+									"raw": "{{WORKSPACE_URL}}/internal/workspaces/:id/users",
 									"host": [
-										"{{USER_URL}}"
+										"{{WORKSPACE_URL}}"
 									],
 									"path": [
-										"external",
-										"me",
-										"tos"
+										"internal",
+										"workspaces",
+										":id",
+										"users"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_WORKSPACE_ID}}"
+										}
 									]
 								}
 							},
 							"response": []
 						},
 						{
-							"name": "/tos/current - Check current ToS are accepted",
+							"name": "/workspaces/:id/incr-cluster-created-count - Increment cluster count",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
-								"method": "GET",
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
 								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"teamId\": \"{{AG_TEAM_ID}}\",\n    \"invitedBy\": \"Me\",\n    \"userId\": \"You\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
 								"url": {
-									"raw": "{{USER_URL}}/external/tos/current",
+									"raw": "{{WORKSPACE_URL}}/internal/workspaces/:id/incr-cluster-created-count",
 									"host": [
-										"{{USER_URL}}"
+										"{{WORKSPACE_URL}}"
 									],
 									"path": [
-										"external",
-										"tos",
-										"current"
+										"internal",
+										"workspaces",
+										":id",
+										"incr-cluster-created-count"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_WORKSPACE_ID}}"
+										}
 									]
 								}
 							},
 							"response": []
-						}
-					],
-					"auth": {
-						"type": "bearer",
-						"bearer": [
-							{
-								"key": "token",
-								"value": "{{AG_JWT_EXTERNAL}}",
-								"type": "string"
-							}
-						]
-					},
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									""
-								]
-							}
 						},
 						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									""
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "/auth0",
-					"item": [
-						{
-							"name": "/users - Sync a user",
+							"name": "/workspaces/:id/users/:user_id/check-permissions- Check user permissions",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
-								"method": "GET",
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{AG_JWT_EXTERNAL}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
 								"header": [],
-								"url": null
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"permission\": \"edit:workspace\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{WORKSPACE_URL}}/internal/workspaces/:id/users/:user_id/check-permissions",
+									"host": [
+										"{{WORKSPACE_URL}}"
+									],
+									"path": [
+										"internal",
+										"workspaces",
+										":id",
+										"users",
+										":user_id",
+										"check-permissions"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "{{AG_WORKSPACE_ID}}"
+										},
+										{
+											"key": "user_id",
+											"value": "{{AG_USER_ID}}"
+										}
+									]
+								}
 							},
 							"response": []
-						}
-					],
-					"auth": {
-						"type": "bearer",
-						"bearer": [
-							{
-								"key": "token",
-								"value": "{{AG_JWT_SERVICES}}",
-								"type": "string"
-							}
-						]
-					},
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									""
-								]
-							}
 						},
 						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									""
-								]
-							}
-						}
-					]
-				},
-				{
-					"name": "/public",
-					"item": [
+							"name": "/quotas - Set quotas",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"users\",\n    \"scope\": \"{{AG_WORKSPACE_ID}}\",\n    \"max\": 5\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{WORKSPACE_URL}}/internal/quotas",
+									"host": [
+										"{{WORKSPACE_URL}}"
+									],
+									"path": [
+										"internal",
+										"quotas"
+									]
+								}
+							},
+							"response": []
+						},
 						{
-							"name": "/tos/current - Get current ToS",
+							"name": "/quotas/scope/quota - Get quotas",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{USER_URL}}/public/tos/current",
+									"raw": "{{WORKSPACE_URL}}/internal/quotas/:scope/:quota",
 									"host": [
-										"{{USER_URL}}"
+										"{{WORKSPACE_URL}}"
 									],
 									"path": [
-										"public",
-										"tos",
-										"current"
+										"internal",
+										"quotas",
+										":scope",
+										":quota"
+									],
+									"variable": [
+										{
+											"key": "scope",
+											"value": "{{AG_WORKSPACE_ID}}"
+										},
+										{
+											"key": "quota",
+											"value": "users"
+										}
 									]
 								}
 							},
