@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: mongodb
-          image: bitnami/mongodb:4.2.11
+          image: bitnami/mongodb:5.0
           imagePullPolicy: IfNotPresent
           env:
             - name: MONGODB_ROOT_PASSWORD
