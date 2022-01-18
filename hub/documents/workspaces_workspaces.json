@@ -47,6 +47,25 @@
           "scope": "*"
         },
         {
+          "action": "create",
+          "resource": "acp"
+        },
+        {
+          "action": "view",
+          "resource": "acp",
+          "scope": "*"
+        },
+        {
+          "action": "edit",
+          "resource": "acp",
+          "scope": "*"
+        },
+        {
+          "action": "delete",
+          "resource": "acp",
+          "scope": "*"
+        },
+        {
           "action": "delete",
           "resource": "cluster",
           "scope": "*"
