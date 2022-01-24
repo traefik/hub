@@ -12,6 +12,7 @@
         "$oid": "60672c44dea2196293ae5604"
       },
       "name": "admin",
+      "type": "admin",
       "users": [
         "9204c8f8-703f-4bc5-a0f8-50400d769b7c"
       ],
