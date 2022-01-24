@@ -95,6 +95,7 @@ main() {
   kubectl rollout status deploy -n hub hub-topology
   kubectl rollout status deploy -n hub hub-cluster
   kubectl rollout status deploy -n hub hub-token
+  kubectl rollout status deploy -n hub hub-offer
   sleep 2
 
   renew-jwt
