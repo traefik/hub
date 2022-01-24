@@ -39,6 +39,7 @@ spec:
             - --api.dashboard
             - --api.insecure
             - --metrics.prometheus
+            - --metrics.prometheus.addrouterslabels
             - --log.level=debug
           ports:
             - name: web
