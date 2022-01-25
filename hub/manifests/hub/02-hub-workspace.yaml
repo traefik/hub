@@ -69,6 +69,8 @@ spec:
               value: "http://hub-offer.hub.svc.cluster.local/internal"
             - name: CERTIFICATE_SERVICE_URL
               value: "http://hub-certificates.hub.svc.cluster.local/internal"
+            - name: NOTIFICATION_SERVICE_URL
+              value: "http://hub-notification.hub.svc.cluster.local/internal"
             - name: MONGODB_ENCRYPTION_KEY
               value: JUMqRi1KYU5jUmZValhuMnI1dTh4L0E/RChHK0tiUGU=
             - name: MONGODB_URI

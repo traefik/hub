@@ -9,13 +9,125 @@
   "teams": [
     {
       "_id": {
-        "$oid": "60672c44dea2196293ae5604"
+        "$oid": "60b91ce465b8bafc7bf2e36d"
       },
-      "name": "admin",
-      "type": "admin",
+      "name": "Owner",
+      "type": "owner",
       "users": [
         "9204c8f8-703f-4bc5-a0f8-50400d769b7c"
       ],
+      "permissions": [
+        {
+          "action": "view",
+          "resource": "workspace"
+        },
+        {
+          "action": "edit",
+          "resource": "workspace"
+        },
+        {
+          "action": "delete",
+          "resource": "workspace"
+        },
+        {
+          "action": "edit",
+          "resource": "subscription"
+        },
+        {
+          "action": "create",
+          "resource": "cluster"
+        },
+        {
+          "action": "view",
+          "resource": "cluster",
+          "scope": "*"
+        },
+        {
+          "action": "edit",
+          "resource": "cluster",
+          "scope": "*"
+        },
+        {
+          "action": "create",
+          "resource": "acp"
+        },
+        {
+          "action": "view",
+          "resource": "acp",
+          "scope": "*"
+        },
+        {
+          "action": "edit",
+          "resource": "acp",
+          "scope": "*"
+        },
+        {
+          "action": "delete",
+          "resource": "acp",
+          "scope": "*"
+        },
+        {
+          "action": "delete",
+          "resource": "cluster",
+          "scope": "*"
+        },
+        {
+          "action": "create",
+          "resource": "invitation"
+        },
+        {
+          "action": "view",
+          "resource": "invitation",
+          "scope": "*"
+        },
+        {
+          "action": "delete",
+          "resource": "invitation",
+          "scope": "*"
+        },
+        {
+          "action": "delete",
+          "resource": "user",
+          "scope": "*"
+        },
+        {
+          "action": "create",
+          "resource": "gslb"
+        },
+        {
+          "action": "view",
+          "resource": "gslb",
+          "scope": "*"
+        },
+        {
+          "action": "edit",
+          "resource": "gslb",
+          "scope": "*"
+        },
+        {
+          "action": "delete",
+          "resource": "gslb",
+          "scope": "*"
+        },
+        {
+          "action": "edit",
+          "resource": "owner"
+        }
+      ],
+      "updatedAt": {
+        "$date": "2021-04-02T14:37:56.060Z"
+      },
+      "createdAt": {
+        "$date": "2021-04-02T14:37:56.060Z"
+      }
+    },
+    {
+      "_id": {
+        "$oid": "60672c44dea2196293ae5604"
+      },
+      "name": "Admin",
+      "type": "admin",
+      "users": [],
       "permissions": [
         {
           "action": "view",
