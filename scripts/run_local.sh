@@ -394,6 +394,11 @@ clean() {
   echo "Undeploying Hub services."
   kubectl delete -f "$PROJECT_DIR"/hub/manifests/hub/ 2> /dev/null || true
 
+  # uninstall PoP
+  echo "Undeploying PoP services."
+  kubectl delete -f "$PROJECT_DIR"/hub/manifests/pop/secrets 2> /dev/null || true
+  kubectl delete -f "$PROJECT_DIR"/hub/manifests/pop 2> /dev/null || true
+
   # Uninstall Traefik
   echo "Undeploying Traefik."
   kubectl delete -f "$PROJECT_DIR"/hub/manifests/traefik/ 2> /dev/null || true
