@@ -22,8 +22,9 @@ main() {
   kubectl cluster-info
 
   [[ "x$GCLOUD_EMAIL" == "x" ]] && read -p "Enter gcloud email: " GCLOUD_EMAIL
-  [[ "x$GITHUB_ORG" == "x" ]] && read -p "Enter github organization: " GITHUB_ORG
-  [[ "x$GITHUB_TOKEN" == "x" ]] && read -p "Enter github token: " GITHUB_TOKEN
+  [[ "x$GITEA_URL" == "x" ]] && read -p "Enter the Gitea URL: " GITEA_URL
+  [[ "x$GITEA_ORG" == "x" ]] && read -p "Enter Gitea organization: " GITEA_ORG
+  [[ "x$GITEA_TOKEN" == "x" ]] && read -p "Enter Gitea token: " GITEA_TOKEN
   [[ "x$AWS_CLIENT_ID" == "x" ]] && read -p "Enter aws client id: " AWS_CLIENT_ID
   [[ "x$AWS_CLIENT_SECRET" == "x" ]] && read -p "Enter aws client secret: " AWS_CLIENT_SECRET
   [[ "x$HUB_USERNAME" == "x" ]] && read -p "Enter your hub username: " HUB_USERNAME
@@ -38,9 +39,9 @@ main() {
 
   # Create secrets
   renew-gcr-token
-  kubectl delete secret -n hub github || true
+  kubectl delete secret -n hub gitea || true
   kubectl delete secret -n aws-secret-operator aws-secret || true
-  kubectl create secret -n hub generic github --from-literal="token=$GITHUB_TOKEN" --from-literal="org=$GITHUB_ORG"
+  kubectl create secret -n hub generic gitea --from-literal="token=$GITEA_TOKEN" --from-literal="org=$GITEA_ORG" --from-literal="url=$GITEA_URL"
   kubectl create secret -n aws-secret-operator generic aws-secret --from-literal="api_key=$AWS_CLIENT_ID" --from-literal="api_secret_key=$AWS_CLIENT_SECRET"
 
   # Install AWS Secret Operator
@@ -81,11 +82,13 @@ main() {
   # Install Hub
   echo "Deploying Hub services."
 
-  export GITHUB_TOKEN_B64=$(echo -n "${GITHUB_TOKEN}:" | base64)
-  envsubst < "$PROJECT_DIR"/hub/manifests/hub/templates/github-token.yaml > "$PROJECT_DIR"/hub/manifests/hub/01-github-token.yaml
+  export GITEA_TOKEN_B64=$(echo -n "${GITEA_TOKEN}:" | base64)
+  envsubst < "$PROJECT_DIR"/hub/manifests/hub/templates/gitea-token.yaml > "$PROJECT_DIR"/hub/manifests/hub/01-gitea-token.yaml
 
-  export GITHUB_ORG
-  envsubst < "$PROJECT_DIR"/hub/manifests/hub/templates/hub-cluster.yaml > "$PROJECT_DIR"/hub/manifests/hub/01-hub-cluster.yaml
+  export GITEA_HOSTNAME=$(echo "${GITEA_URL}" | awk -F/ '{print $3}')
+  envsubst < "$PROJECT_DIR"/hub/manifests/hub/templates/gitea-proxy.yaml > "$PROJECT_DIR"/hub/manifests/hub/04-gitea-proxy.yaml
+
+  export GITEA_ORG
   envsubst < "$PROJECT_DIR"/hub/manifests/hub/templates/hub-offer.yaml > "$PROJECT_DIR"/hub/manifests/hub/01-hub-offer.yaml
 
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/hub/secrets/

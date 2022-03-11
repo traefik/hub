@@ -7,10 +7,10 @@ ssl/*.csr
 venv
 
 ## Generated templates
-01-hub-cluster.yaml
 01-hub-offer.yaml
 01-awssecret.yaml
-01-github-token.yaml
+01-gitea-token.yaml
+04-gitea-proxy.yaml
 01-values.yaml
 
 # generated for diagrams

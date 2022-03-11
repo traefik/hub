@@ -2,9 +2,9 @@
 apiVersion: traefik.containo.us/v1alpha1
 kind: Middleware
 metadata:
-  name: github-token
+  name: gitea-token
   namespace: hub
 spec:
   headers:
     customRequestHeaders:
-      Authorization: "Basic ${GITHUB_TOKEN_B64}"
+      Authorization: "Basic ${GITEA_TOKEN_B64}"

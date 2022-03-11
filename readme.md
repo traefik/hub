@@ -14,9 +14,6 @@
 **You can run the full stack of Hub with K3D or by manually install every piece of the puzzle.
 We hardly recommend the K3D way of course.**
 
-**You have to use a Github organization and not your personal account for the topology repository.
-So the `GITHUB_ORG` should not be set to your personal account anymore.**
-
 ## K3D
 
 ### Prerequisites
@@ -39,8 +36,9 @@ Before running the script, you need a `.env` file in the `hub` folder.
 `Just copy the `.env.example` and fill it with your own credentials.
 
 - `GCLOUD_EMAIL` => Your email address to connect to gcr.
-- `GITHUB_ORG` => The organization where the repository will be created by the topology service.
-- `GITHUB_TOKEN` => A github token with `repo:*` permissions.
+- `GITEA_URL` => URL of the Gitea server (e.g https://git.example.com)
+- `GITEA_ORG` => The organization where the repository will be created by the topology service.
+- `GITEA_TOKEN` => A Gitea token.
 - `AWS_CLIENT_ID` => A client ID for connection to AWS
 - `AWS_CLIENT_SECRET` => A client secret ID for AWS
 - `HUB_USERNAME` => Your username on Hub
@@ -48,7 +46,6 @@ Before running the script, you need a `.env` file in the `hub` folder.
 
 The AWS secrets can be found in `keybase://team/containous.dev/hub/k3d.md`.
 The Hub account can be found in `keybase://team/containous.dev/hub/auth0.md` (`JWT_PASSWORD` and `JWT_USER`).
-The `GITHUB_TOKEN` need the following `repo` scope.
 
 #### Mac User
 

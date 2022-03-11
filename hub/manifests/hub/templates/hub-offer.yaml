@@ -49,7 +49,7 @@ spec:
                   key: stripe-eu-webhook-key-test
                   name: hub-secret
             - name: TOPOLOGY_GIT_ORG_NAME
-              value: "${GITHUB_ORG}"
+              value: "${GITEA_ORG}"
             - name: TOPOLOGY_GIT_PROXY_HOST
               value: platform.docker.localhost
             - name: ALERT_QUOTA_ENFORCER_URL

@@ -86,7 +86,7 @@ func overview() {
 	d.Connect(podx, collx)
 
 	d.Connect(podx, oci.Monitoring.Email(diagram.NodeLabel("Sendgrid")))
-	d.Connect(podx, apps.Vcs.Github(diagram.NodeLabel("GitHub")))
+	d.Connect(podx, apps.Vcs.Git(diagram.NodeLabel("Gitea")))
 
 	if err := d.Render(); err != nil {
 		log.Fatal(err)

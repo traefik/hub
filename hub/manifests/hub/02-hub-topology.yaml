@@ -54,15 +54,20 @@ spec:
                 secretKeyRef:
                   key: jwt-sub
                   name: hub-secret
-            - name: GITHUB_TOKEN
+            - name: GITEA_URL
               valueFrom:
                 secretKeyRef:
-                  name: github
+                  name: gitea
+                  key: url
+            - name: GITEA_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: gitea
                   key: token
-            - name: GITHUB_ORG
+            - name: GITEA_ORG
               valueFrom:
                 secretKeyRef:
-                  name: github
+                  name: gitea
                   key: org
             - name: TRACING_ENDPOINT
               value: "http://jaeger.jaeger.svc.cluster.local:14268"

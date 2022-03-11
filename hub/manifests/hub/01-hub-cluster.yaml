@@ -64,10 +64,6 @@ spec:
               value: http://hub-topology.hub.svc.cluster.local/internal
             - name: GSLB_SERVICE_URL
               value: http://hub-gslb.hub.svc.cluster.local/internal
-            - name: TOPOLOGY_GIT_PROXY_HOST
-              value: platform.docker.localhost
-            - name: TOPOLOGY_GIT_ORG_NAME
-              value: "${GITHUB_ORG}"
             - name: TRACING_ENDPOINT
               value: "http://jaeger.jaeger.svc.cluster.local:14268"
             - name: TRACING_PROBABILITY

@@ -11,12 +11,12 @@ spec:
     - kind: Rule
       match: Host(`platform.docker.localhost`)
       services:
-        - name: github
+        - name: gitea
           passHostHeader: false
           port: 443
       middlewares:
         - name: auth
-        - name: github-token
+        - name: gitea-token
 
 ---
 apiVersion: traefik.containo.us/v1alpha1
@@ -31,12 +31,12 @@ spec:
     - kind: Rule
       match: Host(`platform.docker.localhost`)
       services:
-        - name: github
+        - name: gitea
           passHostHeader: false
           port: 443
       middlewares:
         - name: auth
-        - name: github-token
+        - name: gitea-token
   tls:
     certResolver: default
 
@@ -54,8 +54,8 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: github
+  name: gitea
   namespace: hub
 spec:
   type: ExternalName
-  externalName: github.com
+  externalName: "${GITEA_HOSTNAME}"

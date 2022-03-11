@@ -4124,12 +4124,12 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{PLATFORM_URL}}/{{GITHUB_ORG}}/{{TRAEFIKLABS_WORKSPACE}}.git/info/refs?service=git-receive-pack",
+									"raw": "{{PLATFORM_URL}}/{{GITEA_ORG}}/{{TRAEFIKLABS_WORKSPACE}}.git/info/refs?service=git-receive-pack",
 									"host": [
 										"{{PLATFORM_URL}}"
 									],
 									"path": [
-										"{{GITHUB_ORG}}",
+										"{{GITEA_ORG}}",
 										"{{TRAEFIKLABS_WORKSPACE}}.git",
 										"info",
 										"refs"

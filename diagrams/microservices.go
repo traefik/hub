@@ -51,7 +51,7 @@ func microservices() {
 	workspace := k8s.Compute.Pod(diagram.NodeLabel("workspace"))
 	token := k8s.Compute.Pod(diagram.NodeLabel("token"))
 	topology := k8s.Compute.Pod(diagram.NodeLabel("topology"))
-	github_proxy := k8s.Compute.Pod(diagram.NodeLabel("github_proxy"))
+	gitea_proxy := k8s.Compute.Pod(diagram.NodeLabel("gitea_proxy"))
 	traefik := k8s.Network.Ing(diagram.NodeLabel("traefik proxy"))
 
 	d.Connect(hub_agent, traefik, RESTEdgeOption)
@@ -73,8 +73,8 @@ func microservices() {
 	d.Connect(workspace, saas.Identity.Auth0(diagram.NodeLabel("\"sso.traefik.io\"")), RESTEdgeOption)
 
 	d.Connect(topology, token, RESTEdgeOption)
-	d.Connect(topology, github_proxy, RESTEdgeOption)
-	d.Connect(github_proxy, apps.Vcs.Github(diagram.NodeLabel("GitHub")), RESTEdgeOption)
+	d.Connect(topology, gitea_proxy, RESTEdgeOption)
+	d.Connect(gitea_proxy, apps.Vcs.Git(diagram.NodeLabel("Gitea")), RESTEdgeOption)
 
 	d.Connect(webapp, token, RESTEdgeOption)
 	d.Connect(webapp, alert, RESTEdgeOption)
