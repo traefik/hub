@@ -31,6 +31,7 @@ main() {
   [[ "x$HUB_PASSWORD" == "x" ]] && read -p "Enter your hub password: " HUB_PASSWORD
 
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/hub/00-namespace.yaml
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/broker/00-namespace.yaml
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/hub-agent/00-namespace.yaml
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/aws-secret-operator/00-namespace.yaml
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/pop/00-namespace.yaml
@@ -100,6 +101,11 @@ main() {
   kubectl rollout status deploy -n hub hub-token
   kubectl rollout status deploy -n hub hub-offer
   sleep 2
+
+  # Install Broker
+  echo "Deploying Broker service."
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/broker/
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/broker/secrets
 
   renew-jwt
   sleep 5
@@ -396,6 +402,11 @@ clean() {
   # Uninstall Hub
   echo "Undeploying Hub services."
   kubectl delete -f "$PROJECT_DIR"/hub/manifests/hub/ 2> /dev/null || true
+
+  # Uninstall Broker
+  echo "Undeploying Broker service"
+  kubectl delete -f "$PROJECT_DIR"/hub/manifests/broker/secrets 2> /dev/null || true
+  kubectl delete -f "$PROJECT_DIR"/hub/manifests/broker 2> /dev/null || true
 
   # uninstall PoP
   echo "Undeploying PoP services."

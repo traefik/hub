@@ -1,0 +1,104 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hub-tunnel-broker
+  namespace: broker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hub-tunnel-broker
+  template:
+    metadata:
+      labels:
+        app: hub-tunnel-broker
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "80"
+    spec:
+      imagePullSecrets:
+        - name: gcr-access-token
+      containers:
+        - name: hub-tunnel-broker
+          image: gcr.io/traefiklabs/hub-tunnel-broker:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: INBOUND_ADDR
+              value: 127.0.0.1
+            - name: OUTBOUND_ADDR
+              value: :80
+            - name: ORCHESTRATOR_SERVICE_URL
+              value: http://platform.docker.localhost/tunnel/brokers
+            - name: PUBLIC_INBOUND_ADDR
+              value: 127.0.0.1
+            - name: PUBLIC_OUTBOUND_ADDR
+              value: ws://platform.docker.localhost:80/broker
+            - name: SERVICE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: service-token
+                  key: token
+            - name: LOG_LEVEL
+              value: debug
+          args:
+            - serve
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hub-tunnel-broker
+  namespace: broker
+  labels:
+    app: hub-tunnel-broker
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      name: hub-tunnel-broker
+    - port: 40000
+      targetPort: 40000
+      name: hub-tunnel-broker-debug
+  selector:
+    app: hub-tunnel-broker
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: brokers-tls
+  namespace: broker
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/broker`)
+      services:
+        - name: hub-tunnel-broker
+          port: 80
+      middlewares:
+        - name: stripprefix
+          namespace: hub
+  tls:
+    certResolver: default
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: brokers
+  namespace: broker
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/broker`)
+      services:
+        - name: hub-tunnel-broker
+          port: 80
+      middlewares:
+        - name: stripprefix
+          namespace: hub

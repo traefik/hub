@@ -3,6 +3,7 @@
   - [K3D](#k3d)
     - [Prerequisites](#prerequisites)
     - [Installation](#installation)
+    - [Using Tunneling](#using-tunneling)
   - [Postman](#postman)
   - [Manual installation](#manual-installation)
     - [Create the cluster](#create-the-cluster)
@@ -139,6 +140,61 @@ You have to reapply the coredns configuration with `make apply-coredns-conf`.
 
 `make run-adsl` allows docker to pull the images before starting the cluster.
 We recommend running it instead of `make run` if your internet connection is a bit slow.
+
+### Using Tunneling
+To have a complete view at the tunneling functionality, you can read this 
+[doc](https://notion.so/containous/10-01-22-Tunneling-8bc7a7451abe4679afa8c24a4456ee36).
+
+To be used with the k3d cluster, we have deployed the broker to a new namespace (like we used to do with the pop).
+The broker opens port on the fly so exposing it is quite difficult. For now, we choose to use port forward.
+
+Once your agent is running and you GSLB configured with a private connection, a tunnel group should be available in the
+database.
+
+Example:
+```
+replicaset:PRIMARY> use tunnels
+switched to db tunnels
+replicaset:PRIMARY> db.tunnelgroups.find().pretty()
+{
+	"_id" : ObjectId("620bb99d8616ee3e267c596d"),
+	"workspaceId" : "60c91ce465b8bcfc7bf2e35d",
+	"clusterId" : "d992ed12-e160-472e-ad14-20e6ec7150c9",
+	"clusterEndpoint" : ":11002",
+	"tunnels" : [
+		{
+			"id" : "ba4d0618-65b0-487f-b362-a0cc082efe47",
+			"brokerId" : "1b285347-f06e-4985-817e-a1db0a5e8886",
+			"inboundPort" : 36717
+		}
+	],
+	"tunnelCount" : 1,
+	"tunnelsUpdatedAt" : ISODate("2022-02-15T15:14:04.252Z"),
+	"subscriptionCount" : 1,
+	"subscriptionCountUpdatedAt" : ISODate("2022-02-15T14:32:04.228Z")
+}
+```
+You can also find the port in the broker logs if you want.
+
+The inboundPort is the port you need to expose with the port-forward:
+```
+kubectl port-forward -n broker hub-tunnel-broker-5bb8446c58-2qmfq 36717:36717
+```
+
+Then, you can call the broker and access the private endpoint:
+```
+curl http://127.0.0.1:36717 -H 'Host: whoami.localhost'
+Hostname: 70a8e07bcaa9
+IP: 127.0.0.1
+IP: 172.17.0.2
+RemoteAddr: 172.17.0.1:63978
+GET / HTTP/1.1
+Host: whoami.localhost
+User-Agent: curl/7.77.0
+Accept: */*
+Accept-Encoding: gzip
+X-Real-Ip: 127.0.0.1
+```
 
 ### Exposed Endpoints
 

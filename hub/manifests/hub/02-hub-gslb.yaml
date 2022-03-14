@@ -64,6 +64,8 @@ spec:
               value: http://hub-cluster.hub.svc.cluster.local/internal
             - name: OFFER_SERVICE_URL
               value: http://hub-offer.hub.svc.cluster.local/internal
+            - name: TUNNEL_SERVICE_URL
+              value: http://hub-tunnel-orchestrator.hub.svc.cluster.local/internal
             - name: TRACING_PROBABILITY
               value: "1"
             - name: MONGODB_URI

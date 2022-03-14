@@ -31,7 +31,7 @@ spec:
               value: "mongodb.mongo.svc.cluster.local"
           volumeMounts:
             - name: mongodb-storage
-              mountPath: /data/db
+              mountPath: /bitnami/mongodb/data/db
       volumes:
         - name: mongodb-storage
           persistentVolumeClaim:

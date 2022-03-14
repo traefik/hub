@@ -22,6 +22,7 @@ spec:
     prefixes:
       - /acp
       - /alert
+      - /broker
       - /certificates
       - /check
       - /cluster
@@ -34,5 +35,6 @@ spec:
       - /token
       - /topology-indexer  # the order of strip prefixes is important ! :-/
       - /topology
+      - /tunnel
       - /workspace
 

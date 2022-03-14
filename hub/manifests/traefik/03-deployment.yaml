@@ -37,6 +37,7 @@ spec:
             - --entrypoints.websecure.http.tls=true
             - --entrypoints.cluster-proxy.Address=:9090
             - --providers.kubernetescrd.allowexternalnameservices=true
+            - --providers.kubernetescrd.allowcrossnamespace=true
             - --providers.kubernetesingress.ingressclass=traefik-lb
             - --api.dashboard
             - --api.insecure

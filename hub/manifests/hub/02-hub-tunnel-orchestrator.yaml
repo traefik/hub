@@ -1,0 +1,298 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hub-tunnel-orchestrator-sync-gslb-usages
+  namespace: hub
+spec:
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      parallelism: 1
+      template:
+        metadata:
+          labels:
+            app: hub-tunnel-orchestrator-sync-gslb-usages
+        spec:
+          restartPolicy: Never
+          imagePullSecrets:
+            - name: gcr-access-token
+          containers:
+            - name: hub-tunnel-orchestrator-sync-gslb-usages
+              image: gcr.io/traefiklabs/hub-tunnel-orchestrator:latest
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: MONGODB_URI
+                  value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/?authSource=admin
+                - name: GSLB_SERVICE_URL
+                  value: http://hub-gslb.hub.svc.cluster.local/internal
+                - name: MIN_BROKER_FRESHNESS
+                  value: 10m
+                - name: MAX_TUNNELS_PER_BROKER
+                  value: "200"
+                - name: LOG_LEVEL
+                  value: debug
+              args:
+                - sync
+                - gslb-usages
+              resources:
+                limits:
+                  cpu: 50m
+                  memory: 128Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hub-tunnel-orchestrator-orchestrate
+  namespace: hub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hub-tunnel-orchestrator-orchestrate
+  template:
+    metadata:
+      labels:
+        app: hub-tunnel-orchestrator-orchestrate
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "80"
+    spec:
+      imagePullSecrets:
+        - name: gcr-access-token
+      containers:
+        - name: hub-tunnel-orchestrator-orchestrate
+          image: gcr.io/traefiklabs/hub-tunnel-orchestrator:latest
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              port: 80
+              path: /live
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 2
+          readinessProbe:
+            httpGet:
+              port: 80
+              path: /ready
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 2
+          env:
+            - name: MONGODB_URI
+              value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/?authSource=admin
+            - name: GSLB_SERVICE_URL
+              value: http://hub-gslb.hub.svc.cluster.local/internal
+            - name: MIN_BROKER_FRESHNESS
+              value: 10m
+            - name: MAX_TUNNELS_PER_BROKER
+              value: "200"
+            - name: LOG_LEVEL
+              value: debug
+            - name: ORCHESTRATE_INTERVAL
+              value: 10s
+          args:
+            - orchestrate
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hub-tunnel-orchestrator
+  namespace: hub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hub-tunnel-orchestrator
+  template:
+    metadata:
+      labels:
+        app: hub-tunnel-orchestrator
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "80"
+    spec:
+      imagePullSecrets:
+        - name: gcr-access-token
+      containers:
+        - name: hub-tunnel-orchestrator
+          image: gcr.io/traefiklabs/hub-tunnel-orchestrator:latest
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              port: 80
+              path: /live
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 2
+          readinessProbe:
+            httpGet:
+              port: 80
+              path: /ready
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 2
+          env:
+            - name: JWT_CERT
+              valueFrom:
+                secretKeyRef:
+                  key: jwt-cert
+                  name: hub-secret
+            - name: JWT_ISS
+              value: "https://traefiklabs-hub-preview.eu.auth0.com/"
+            - name: JWT_SUB
+              valueFrom:
+                secretKeyRef:
+                  key: jwt-sub
+                  name: hub-secret
+            - name: SUB_SERVICE_TOKEN
+              value: tEmgBDVUg0D3DxLsVJ9eiHIb6gX0fUcd@clients
+            - name: TOKEN_SERVICE_URL
+              value: "http://hub-token.hub.svc.cluster.local/internal"
+            - name: TRACING_ENDPOINT
+              value: "http://jaeger.jaeger.svc.cluster.local:14268"
+            - name: TRACING_USERNAME
+              value: jaeger
+            - name: TRACING_PASSWORD
+              value: "jaeger"
+            - name: TRACING_PROBABILITY
+              value: "1"
+            - name: MONGODB_URI
+              value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/tunnels?authSource=admin
+            - name: LOG_LEVEL
+              value: debug
+          args:
+            - serve
+            - --addr=:80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hub-tunnel-orchestrator
+  namespace: hub
+  labels:
+    app: hub-tunnel-orchestrator
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      name: hub-tunnel-orchestrator
+    - port: 40000
+      targetPort: 40000
+      name: hub-tunnel-orchestrator-debug
+  selector:
+    app: hub-tunnel-orchestrator
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: tunnel-brokers-tls
+  namespace: hub
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/tunnel/brokers`)
+      services:
+        - name: hub-tunnel-orchestrator
+          port: 80
+      middlewares:
+        - name: stripprefix
+  tls:
+    certResolver: default
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: tunnel-brokers
+  namespace: hub
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/tunnel/brokers`)
+      services:
+        - name: hub-tunnel-orchestrator
+          port: 80
+      middlewares:
+        - name: stripprefix
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: tunnel-internal-tls
+  namespace: hub
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/tunnel/internal`)
+      services:
+        - name: hub-tunnel-orchestrator
+          port: 80
+      middlewares:
+        - name: stripprefix
+  tls:
+    certResolver: default
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: tunnel-internal
+  namespace: hub
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/tunnel/internal`)
+      services:
+        - name: hub-tunnel-orchestrator
+          port: 80
+      middlewares:
+        - name: stripprefix
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: tunnel-agent
+  namespace: hub
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && Path(`/agent/tunnel-endpoints`)
+      services:
+        - name: hub-tunnel-orchestrator
+          port: 80
+      middlewares:
+        - name: auth-token
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: tunnel-agent-tls
+  namespace: hub
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && Path(`/agent/tunnel-endpoints`)
+      services:
+        - name: hub-tunnel-orchestrator
+          port: 80
+      middlewares:
+        - name: auth-token
+  tls:
+    certResolver: default
