@@ -2,6 +2,134 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: hub-topology-indexer-api
+  namespace: hub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hub-topology-indexer-api
+  template:
+    metadata:
+      labels:
+        app: hub-topology-indexer-api
+        version: "v1"
+        k8s-app: hub-topology-indexer-api
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "80"
+    spec:
+      imagePullSecrets:
+        - name: gcr-access-token
+      containers:
+        - name: hub-topology-indexer-api
+          image: gcr.io/traefiklabs/hub-topology:latest
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              port: 80
+              path: /live
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 2
+          readinessProbe:
+            httpGet:
+              port: 80
+              path: /ready
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 2
+          env:
+            - name: GIT_URL
+              valueFrom:
+                secretKeyRef:
+                  name: gitea
+                  key: url
+            - name: GIT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: gitea
+                  key: token
+            - name: GIT_ORG
+              valueFrom:
+                secretKeyRef:
+                  name: gitea
+                  key: org
+            - name: TOKEN_SERVICE_URL
+              value: http://hub-token.hub.svc.cluster.local/internal
+            - name: TRACING_ENDPOINT
+              value: "http://jaeger.jaeger.svc.cluster.local:14268"
+            - name: TRACING_PROBABILITY
+              value: "1"
+            - name: MONGODB_URI
+              value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/topologies?authSource=admin
+            - name: LOG_LEVEL
+              value: debug
+          args:
+            - serve-indexer
+            - --addr=:80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hub-topology-indexer-api
+  namespace: hub
+  labels:
+    app: hub-topology-indexer-api
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      name: hub-topology-indexer-api
+    - port: 40000
+      targetPort: 40000
+      name: hub-topology-indexer-api-debug
+  selector:
+    app: hub-topology-indexer-api
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: topology-indexer-api-internal
+  namespace: hub
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/topology-indexer-api/internal`)
+      services:
+        - name: hub-topology-indexer-api
+          port: 80
+      middlewares:
+        - name: stripprefix
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: topology-indexer-api-internal-tls
+  namespace: hub
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/topology-indexer-api/internal`)
+      services:
+        - name: hub-topology-indexer-api
+          port: 80
+      middlewares:
+        - name: stripprefix
+  tls:
+    certResolver: default
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
   name: hub-topology-indexer
   namespace: hub
 spec:
@@ -40,106 +168,47 @@ spec:
             periodSeconds: 5
             failureThreshold: 2
           env:
-            - name: CLUSTER_SERVICE_URL
-              value: http://hub-cluster.hub.svc.cluster.local/internal
-            - name: GITEA_URL
+            - name: GIT_URL
               valueFrom:
                 secretKeyRef:
                   name: gitea
                   key: url
-            - name: GITEA_TOKEN
+            - name: GIT_TOKEN
               valueFrom:
                 secretKeyRef:
                   name: gitea
                   key: token
-            - name: GITEA_ORG
+            - name: GIT_ORG
               valueFrom:
                 secretKeyRef:
                   name: gitea
                   key: org
+            - name: WORKERS
+              value: "10"
+            - name: JOB_TIMEOUT
+              value: 2m
+            - name: JOB_RETRY_INTERVAL
+              value: 10s
+            - name: JOB_RETRY_EXPONENTIAL_RATE
+              value: "2"
+            - name: JOB_MAX_RETRY_INTERVAL
+              value: 10m
+            - name: JOB_STALE_THRESHOLD
+              value: 3m
             - name: TRACING_ENDPOINT
               value: "http://jaeger.jaeger.svc.cluster.local:14268"
             - name: TRACING_PROBABILITY
               value: "1"
-            - name: MONGODB_URI
+            - name: INDEX_MONGODB_URI
               value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/topologies?authSource=admin
+            - name: INDEX_MONGODB_SOCKET_TIMEOUT
+              value: 30s
+            - name: JOB_SPEC_MONGODB_URI
+              value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/topologies?authSource=admin
+            - name: JOB_SPEC_MONGODB_SOCKET_TIMEOUT
+              value: 2s
             - name: LOG_LEVEL
               value: debug
           args:
             - index
             - --addr=:80
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: hub-topology-indexer
-  namespace: hub
-  labels:
-    app: hub-topology-indexer
-spec:
-  type: ClusterIP
-  ports:
-    - port: 80
-      targetPort: 80
-      name: hub-topology-indexer
-    - port: 40000
-      targetPort: 40000
-      name: hub-topology-indexer-debug
-  selector:
-    app: hub-topology-indexer
-
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: topology-indexer-agent
-  namespace: hub
-spec:
-  entryPoints:
-    - web
-  routes:
-    - kind: Rule
-      match: Host(`platform.docker.localhost`) && Path(`/agent/index`)
-      services:
-        - name: hub-topology-indexer
-          port: 80
-      middlewares:
-        - name: auth-token
-
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: topology-indexer-internal
-  namespace: hub
-spec:
-  entryPoints:
-    - web
-  routes:
-    - kind: Rule
-      match: Host(`platform.docker.localhost`) && PathPrefix(`/topology-indexer/internal`)
-      services:
-        - name: hub-topology-indexer
-          port: 80
-      middlewares:
-        - name: stripprefix
-
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: topology-indexer-internal-tls
-  namespace: hub
-spec:
-  entryPoints:
-    - websecure
-  routes:
-    - kind: Rule
-      match: Host(`platform.docker.localhost`) && PathPrefix(`/topology-indexer/internal`)
-      services:
-        - name: hub-topology-indexer
-          port: 80
-      middlewares:
-        - name: stripprefix
-  tls:
-    certResolver: default

@@ -2,6 +2,46 @@
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
+  name: platform-index-push
+  namespace: hub
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && Method(`POST`) && Path(`/{repo:.+}/git-receive-pack`)
+      services:
+        - name: hub-topology-indexer-api
+          passHostHeader: false
+          port: 80
+      middlewares:
+        - name: push-indexer-prefix
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: platform-index-push-tls
+  namespace: hub
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && Method(`POST`) && Path(`/{repo:.+}/git-receive-pack`)
+      services:
+        - name: hub-topology-indexer-api
+          passHostHeader: false
+          port: 80
+      middlewares:
+        - name: push-indexer-prefix
+  tls:
+    certResolver: default
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
   name: platform
   namespace: hub
 spec:

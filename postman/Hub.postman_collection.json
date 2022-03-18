@@ -3617,60 +3617,6 @@
 			"name": "Topology",
 			"item": [
 				{
-					"name": "agent",
-					"item": [
-						{
-							"name": "/cross-cluster/services - List cross cluster services",
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{PLATFORM_URL}}/agent/cross-cluster/services",
-									"host": [
-										"{{PLATFORM_URL}}"
-									],
-									"path": [
-										"agent",
-										"cross-cluster",
-										"services"
-									]
-								}
-							},
-							"response": []
-						}
-					],
-					"auth": {
-						"type": "bearer",
-						"bearer": [
-							{
-								"key": "token",
-								"value": "{{AG_HUB_TOKEN}}",
-								"type": "string"
-							}
-						]
-					},
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									""
-								]
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									""
-								]
-							}
-						}
-					]
-				},
-				{
 					"name": "/external",
 					"item": [
 						{

@@ -130,7 +130,6 @@ main() {
   --offer-quotas-gslb-bandwidth="1000000000" \
   --offer-quotas-alert-triggers="5" \
   --offer-quotas-alert-history="10" \
-  --offer-quotas-cross-cluster-services="2" \
   --offer-config-gslb-http-healthcheck-min-interval-seconds=60 \
   --offer-config-gslb-http-healthcheck-min-threshold-editable="false" \
   --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
@@ -156,7 +155,6 @@ main() {
   --offer-quotas-gslb-bandwidth="50000000000" \
   --offer-quotas-alert-triggers="100" \
   --offer-quotas-alert-history="200" \
-  --offer-quotas-cross-cluster-services="20" \
   --offer-config-gslb-http-healthcheck-min-interval-seconds=15 \
   --offer-config-gslb-http-healthcheck-min-threshold-editable="true" \
   --offer-features="team-management" --offer-features="geo-steering" \
@@ -182,7 +180,6 @@ main() {
   --offer-quotas-gslb-bandwidth="50000000000" \
   --offer-quotas-alert-triggers="5" \
   --offer-quotas-alert-history="10" \
-  --offer-quotas-cross-cluster-services="2" \
   --offer-config-gslb-http-healthcheck-min-interval-seconds=60 \
   --offer-config-gslb-http-healthcheck-min-threshold-editable="false" \
   --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
@@ -208,7 +205,6 @@ main() {
   --offer-quotas-gslb-bandwidth="1000000000" \
   --offer-quotas-alert-triggers="100" \
   --offer-quotas-alert-history="200" \
-  --offer-quotas-cross-cluster-services="20" \
   --offer-config-gslb-http-healthcheck-min-interval-seconds=15 \
   --offer-config-gslb-http-healthcheck-min-threshold-editable="true" \
   --offer-features="team-management" --offer-features="geo-steering" \
@@ -240,8 +236,6 @@ main() {
   # Wait for Hub agent to start
   kubectl -n hub-agent wait --for condition=available --timeout=180s deployment/hub-agent-controller
   kubectl -n hub-agent wait --for condition=available --timeout=180s deployment/hub-agent-auth-server
-  # TODO: once agent PR for cross-cluster will be merged
-  # kubectl -n hub-agent wait --for condition=available --timeout=180s deployment/hub-agent-gateway
 
   # Install PoP
   echo "Deploying PoP services."

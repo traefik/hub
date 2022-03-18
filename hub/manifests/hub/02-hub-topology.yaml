@@ -69,6 +69,8 @@ spec:
                 secretKeyRef:
                   name: gitea
                   key: org
+            - name: INDEXER_API_URL
+              value: http://hub-topology-indexer-api.hub.svc.cluster.local/internal
             - name: TRACING_ENDPOINT
               value: "http://jaeger.jaeger.svc.cluster.local:14268"
             - name: TRACING_PROBABILITY
@@ -80,7 +82,6 @@ spec:
           args:
             - serve
             - --addr=:80
-            - --git-proxy-host=platform.docker.localhost
 ---
 apiVersion: v1
 kind: Service
@@ -176,21 +177,3 @@ spec:
           port: 80
       middlewares:
         - name: stripprefix
-
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: topology-agent
-  namespace: hub
-spec:
-  entryPoints:
-    - web
-  routes:
-    - kind: Rule
-      match: Host(`platform.docker.localhost`) && Path(`/agent/cross-cluster/services`)
-      services:
-        - name: hub-topology
-          port: 80
-      middlewares:
-        - name: auth-token

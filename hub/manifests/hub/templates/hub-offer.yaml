@@ -65,8 +65,6 @@ spec:
             # This is kept to avoid breaking production as we renamed a flag. This needs to be removed once the new version of offer is shipped.
             - name: DOMAIN_QUOTA_ENFORCER_URL
               value: http://hub-gslb.hub.svc.cluster.local/internal/quotas
-            - name: CROSS_CLUSTER_SERVICES_QUOTA_ENFORCER_URL
-              value: http://hub-topology-indexer.hub.svc.cluster.local/internal/quotas
             - name: JWT_CERT
               valueFrom:
                 secretKeyRef:
