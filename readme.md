@@ -309,7 +309,7 @@ deployment:
 Add Hub's chart repository to Helm:
 
 ```bash
-helm repo add hub https://helm.traefik.io/hub
+helm repo add traefik-hub https://helm.traefik.io/hub
 ```
 
 You can update the chart repository by running:
@@ -321,19 +321,19 @@ helm repo update
 #### Deploying Hub
 
 ```bash
-helm install hub hub/hub
+helm install hub-agent traefik-hub/hub-agent
 ```
 
 ##### Deploying Hub by overwriting values.yaml
 
 ```bash
-helm install hub hub/hub --values=./values.yaml
+helm install hub-agent traefik-hub/hub-agent --values=./values.yaml
 ```
 
 ##### Deploying Hub in a specific namespace
 
 ```bash
-helm install hub hub/hub --namespace hub
+helm install hub-agent traefik-hub/hub-agent --namespace hub
 ```
 
 ##### Deploying Hub with a full-yaml

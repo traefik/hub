@@ -225,9 +225,9 @@ main() {
   envsubst < "$PROJECT_DIR"/hub/manifests/hub-agent/templates/values.yaml > "$PROJECT_DIR"/hub/manifests/hub-agent/01-values.yaml
 
   # Install Hub Agent
-  helm repo add hub https://helm.traefik.io/hub
+  helm repo add traefik-hub https://helm.traefik.io/hub
   helm repo update
-  helm upgrade --install hub hub/hub --values="$PROJECT_DIR"/hub/manifests/hub-agent/01-values.yaml --namespace hub-agent
+  helm upgrade --install hub-agent traefik-hub/hub-agent --values="$PROJECT_DIR"/hub/manifests/hub-agent/01-values.yaml --namespace hub-agent
 
   # Patch Hub agent to expose debugging port
   kubectl patch svc -n hub-agent hub-agent-controller -p '{"spec":{"ports":[{"name":"hub-agent-debug","port":40000}]}}'
@@ -391,7 +391,7 @@ clean() {
   kubectl delete -f "$PROJECT_DIR"/hub/manifests/jaeger/ 2> /dev/null || true
 
   # Uninstall Hub Agent
-  helm uninstall hub --namespace hub-agent 2> /dev/null || true
+  helm uninstall hub-agent --namespace hub-agent 2> /dev/null || true
 
   # Uninstall Hub
   echo "Undeploying Hub services."
