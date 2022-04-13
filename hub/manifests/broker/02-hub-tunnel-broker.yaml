@@ -24,10 +24,12 @@ spec:
           image: gcr.io/traefiklabs/hub-tunnel-broker:latest
           imagePullPolicy: IfNotPresent
           env:
+            - name: ADDR
+              value: :80
             - name: INBOUND_ADDR
               value: 127.0.0.1
             - name: OUTBOUND_ADDR
-              value: :80
+              value: :8080
             - name: ORCHESTRATOR_SERVICE_URL
               value: http://platform.docker.localhost/tunnel/brokers
             - name: PUBLIC_INBOUND_ADDR
