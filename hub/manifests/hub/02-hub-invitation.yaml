@@ -58,6 +58,8 @@ spec:
               value: http://hub-workspace.hub.svc.cluster.local/internal
             - name: NOTIFICATION_SERVICE_URL
               value: http://hub-notification.hub.svc.cluster.local/internal
+            - name: USER_SERVICE_URL
+              value: http://hub-user.hub.svc.cluster.local/internal
             - name: INVITATION_LINK_BASE_URL
               value: https://webapp.docker.io/r
             - name: MONGODB_URI
