@@ -148,6 +148,10 @@ spec:
               value: tEmgBDVUg0D3DxLsVJ9eiHIb6gX0fUcd@clients
             - name: TOKEN_SERVICE_URL
               value: "http://hub-token.hub.svc.cluster.local/internal"
+            - name: GSLB_SERVICE_URL
+              value: "http://hub-gslb.hub.svc.cluster.local/internal"
+            - name: WORKSPACE_SERVICE_URL
+              value: "http://hub-workspace.hub.svc.cluster.local/internal"
             - name: TRACING_ENDPOINT
               value: "http://jaeger.jaeger.svc.cluster.local:14268"
             - name: TRACING_USERNAME

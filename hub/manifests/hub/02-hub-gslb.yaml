@@ -75,7 +75,6 @@ spec:
           args:
             - serve
             - --addr=:80
-            - --dev-mode
 
 ---
 apiVersion: batch/v1beta1
