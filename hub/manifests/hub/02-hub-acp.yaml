@@ -94,7 +94,7 @@ spec:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && Path(`/agent/acps`)
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/agent/acps`)
       services:
         - name: hub-acp
           port: 80
@@ -114,7 +114,7 @@ spec:
     - web
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && Path(`/agent/acps`)
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/agent/acps`)
       services:
         - name: hub-acp
           port: 80
