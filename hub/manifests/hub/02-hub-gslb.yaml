@@ -38,10 +38,6 @@ spec:
             periodSeconds: 5
             failureThreshold: 2
           env:
-            - name: CNAME_DOMAIN
-              value: "unused.localhost"
-            - name: GA_NAME
-              value: gslb-ga.docker.localhost
             - name: JWT_CERT
               valueFrom:
                 secretKeyRef:
@@ -54,18 +50,8 @@ spec:
                 secretKeyRef:
                   key: jwt-sub
                   name: hub-secret
-            - name: POP_BASE_URL
-              value: http://hub-check.pop.svc.cluster.local/internal
             - name: TRACING_ENDPOINT
               value: "http://jaeger.jaeger.svc.cluster.local:14268"
-            - name: WORKSPACE_SERVICE_URL
-              value: http://hub-workspace.hub.svc.cluster.local/internal
-            - name: CLUSTER_SERVICE_URL
-              value: http://hub-cluster.hub.svc.cluster.local/internal
-            - name: OFFER_SERVICE_URL
-              value: http://hub-offer.hub.svc.cluster.local/internal
-            - name: TUNNEL_SERVICE_URL
-              value: http://hub-tunnel-orchestrator.hub.svc.cluster.local/internal
             - name: TRACING_PROBABILITY
               value: "1"
             - name: MONGODB_URI
@@ -102,45 +88,10 @@ spec:
               env:
                 - name: MONGODB_URI
                   value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/gslb?authSource=admin
+                - name: DEV_MODE
+                  value: "true"
               args:
                 - check
-                - --dev-mode
-              resources:
-                limits:
-                  cpu: 50m
-                  memory: 128Mi
-
----
-apiVersion: batch/v1beta1
-kind: CronJob
-metadata:
-  name: hub-gslb-sync-clustertargets
-  namespace: hub
-spec:
-  schedule: "*/15 * * * *"
-  jobTemplate:
-    spec:
-      parallelism: 1
-      template:
-        metadata:
-          labels:
-            app: hub-gslb-sync-clustertargets
-        spec:
-          restartPolicy: Never
-          imagePullSecrets:
-            - name: gcr-access-token
-          containers:
-            - name: hub-gslb-sync-clustertargets
-              image: gcr.io/traefiklabs/hub-gslb:latest
-              imagePullPolicy: IfNotPresent
-              env:
-                - name: MONGODB_URI
-                  value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/gslb?authSource=admin
-                - name: CLUSTER_SERVICE_URL
-                  value: http://hub-cluster.hub.svc.cluster.local/internal
-              args:
-                - sync
-                - cluster-targets
               resources:
                 limits:
                   cpu: 50m
@@ -165,44 +116,6 @@ spec:
       name: hub-gslb-debug
   selector:
     app: hub-gslb
-
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: gslb-external-tls
-  namespace: hub
-spec:
-  entryPoints:
-    - websecure
-  routes:
-    - kind: Rule
-      match: Host(`platform.docker.localhost`) && PathPrefix(`/gslb/external`)
-      services:
-        - name: hub-gslb
-          port: 80
-      middlewares:
-        - name: stripprefix
-  tls:
-    certResolver: default
-
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: gslb-external
-  namespace: hub
-spec:
-  entryPoints:
-    - web
-  routes:
-    - kind: Rule
-      match: Host(`platform.docker.localhost`) && PathPrefix(`/gslb/external`)
-      services:
-        - name: hub-gslb
-          port: 80
-      middlewares:
-        - name: stripprefix
 
 ---
 apiVersion: traefik.containo.us/v1alpha1
@@ -239,40 +152,3 @@ spec:
           port: 80
       middlewares:
         - name: stripprefix
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: gslb-agent-tls
-  namespace: hub
-spec:
-  entryPoints:
-    - websecure
-  routes:
-    - kind: Rule
-      match: Host(`platform.docker.localhost`) && Path(`/agent/verified-domains`)
-      services:
-        - name: hub-gslb
-          port: 80
-      middlewares:
-        - name: auth-token
-  tls:
-    certResolver: default
-
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: gslb-agent
-  namespace: hub
-spec:
-  entryPoints:
-    - web
-  routes:
-    - kind: Rule
-      match: Host(`platform.docker.localhost`) && Path(`/agent/verified-domains`)
-      services:
-        - name: hub-gslb
-          port: 80
-      middlewares:
-        - name: auth-token

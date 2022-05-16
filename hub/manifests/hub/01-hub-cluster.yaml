@@ -64,6 +64,8 @@ spec:
               value: http://hub-topology.hub.svc.cluster.local/internal
             - name: GSLB_SERVICE_URL
               value: http://hub-gslb.hub.svc.cluster.local/internal
+            - name: TUNNEL_SERVICE_URL
+              value: http://hub-tunnel-orchestrator.hub.svc.cluster.local/internal
             - name: TRACING_ENDPOINT
               value: "http://jaeger.jaeger.svc.cluster.local:14268"
             - name: TRACING_PROBABILITY

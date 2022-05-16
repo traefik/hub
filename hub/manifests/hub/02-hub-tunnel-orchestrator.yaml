@@ -1,44 +1,3 @@
-apiVersion: batch/v1
-kind: CronJob
-metadata:
-  name: hub-tunnel-orchestrator-sync-gslb-usages
-  namespace: hub
-spec:
-  schedule: "*/5 * * * *"
-  jobTemplate:
-    spec:
-      parallelism: 1
-      template:
-        metadata:
-          labels:
-            app: hub-tunnel-orchestrator-sync-gslb-usages
-        spec:
-          restartPolicy: Never
-          imagePullSecrets:
-            - name: gcr-access-token
-          containers:
-            - name: hub-tunnel-orchestrator-sync-gslb-usages
-              image: gcr.io/traefiklabs/hub-tunnel-orchestrator:latest
-              imagePullPolicy: IfNotPresent
-              env:
-                - name: MONGODB_URI
-                  value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/?authSource=admin
-                - name: GSLB_SERVICE_URL
-                  value: http://hub-gslb.hub.svc.cluster.local/internal
-                - name: MIN_BROKER_FRESHNESS
-                  value: 10m
-                - name: MAX_TUNNELS_PER_BROKER
-                  value: "200"
-                - name: LOG_LEVEL
-                  value: debug
-              args:
-                - sync
-                - gslb-usages
-              resources:
-                limits:
-                  cpu: 50m
-                  memory: 128Mi
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -152,6 +111,8 @@ spec:
               value: "http://hub-gslb.hub.svc.cluster.local/internal"
             - name: WORKSPACE_SERVICE_URL
               value: "http://hub-workspace.hub.svc.cluster.local/internal"
+            - name: CERTIFICATES_SERVICE_URL
+              value: "http://hub-certificates.hub.svc.cluster.local/internal"
             - name: TRACING_ENDPOINT
               value: "http://jaeger.jaeger.svc.cluster.local:14268"
             - name: TRACING_USERNAME
@@ -229,6 +190,44 @@ spec:
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
+  name: tunnel-external-tls
+  namespace: hub
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/tunnel/external`)
+      services:
+        - name: hub-tunnel-orchestrator
+          port: 80
+      middlewares:
+        - name: stripprefix
+  tls:
+    certResolver: default
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: tunnel-external
+  namespace: hub
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/tunnel/external`)
+      services:
+        - name: hub-tunnel-orchestrator
+          port: 80
+      middlewares:
+        - name: stripprefix
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
   name: tunnel-internal-tls
   namespace: hub
 spec:
@@ -274,13 +273,12 @@ spec:
     - web
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && Path(`/agent/tunnel-endpoints`)
+      match: Host(`platform.docker.localhost`) && (Path(`/agent/tunnel-endpoints`) || PathPrefix(`/agent/edge-ingresses`))
       services:
         - name: hub-tunnel-orchestrator
           port: 80
       middlewares:
         - name: auth-token
-
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
@@ -292,7 +290,7 @@ spec:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && Path(`/agent/tunnel-endpoints`)
+      match: Host(`platform.docker.localhost`) && (Path(`/agent/tunnel-endpoints`) || PathPrefix(`/agent/edge-ingresses`))
       services:
         - name: hub-tunnel-orchestrator
           port: 80

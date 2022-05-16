@@ -97,6 +97,12 @@ spec:
               value: JUMqRi1KYU5jUmZValhuMnI1dTh4L0E/RChHK0tiUGU=
             - name: LOG_LEVEL
               value: debug
+            - name: GSLB_SERVICE_URL
+              value: http://hub-gslb.hub.svc.cluster.local/internal
+            - name: NOTIFICATION_SERVICE_URL
+              value: http://hub-notification.hub.svc.cluster.local/internal
+            - name: WORKSPACE_SERVICE_URL
+              value: http://hub-workspace.hub.svc.cluster.local/internal
             - name: HUB_DOMAIN_SUFFIX
               value: hub.traefik.io
             - name: CLOUDFLARE_EMAIL
@@ -108,8 +114,6 @@ spec:
           args:
             - serve
             - --addr=:80
-            - --gslb-service-url=http://hub-gslb.hub.svc.cluster.local/internal
-            - --notification-service-url=http://hub-notification.hub.svc.cluster.local/internal
       volumes:
         - name: config-volume
           configMap:
@@ -146,6 +150,24 @@ spec:
   routes:
     - kind: Rule
       match: Host(`platform.docker.localhost`) && Path(`/agent/certificates`)
+      services:
+        - name: hub-certificates
+          port: 80
+      middlewares:
+        - name: auth-token
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: certificates-agent
+  namespace: hub
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && Path(`/agent/wildcard-certificate`)
       services:
         - name: hub-certificates
           port: 80
