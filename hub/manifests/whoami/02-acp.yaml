@@ -2,7 +2,6 @@ apiVersion: hub.traefik.io/v1alpha1
 kind: AccessControlPolicy
 metadata:
   name: my-acp
-  namespace: whoami
 spec:
   jwt:
     signingSecret: secret

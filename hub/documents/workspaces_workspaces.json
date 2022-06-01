@@ -1,10 +1,10 @@
 {
   "_id": {
-    "$oid": "60c91ce465b8bcfc7bf2e35d"
+    "$oid": "62863db38cd4ff5cfe9986bd"
   },
   "name": "Traefik Labs",
   "users": [
-    "9204c8f8-703f-4bc5-a0f8-50400d769b7c"
+    "fd016582-3e6a-4951-a9c5-e03e81d63761"
   ],
   "domain": "abcdef.traefik-hub.app",
   "teams": [
@@ -15,7 +15,7 @@
       "name": "Owner",
       "type": "owner",
       "users": [
-        "9204c8f8-703f-4bc5-a0f8-50400d769b7c"
+        "fd016582-3e6a-4951-a9c5-e03e81d63761"
       ],
       "permissions": [
         {

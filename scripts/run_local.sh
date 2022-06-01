@@ -130,6 +130,7 @@ main() {
   --offer-quotas-gslb-bandwidth="1000000000" \
   --offer-quotas-alert-triggers="5" \
   --offer-quotas-alert-history="10" \
+  --offer-quotas-edge-ingresses="10" \
   --offer-config-gslb-http-healthcheck-min-interval-seconds=60 \
   --offer-config-gslb-http-healthcheck-min-threshold-editable="false" \
   --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
@@ -155,6 +156,7 @@ main() {
   --offer-quotas-gslb-bandwidth="50000000000" \
   --offer-quotas-alert-triggers="100" \
   --offer-quotas-alert-history="200" \
+  --offer-quotas-edge-ingresses="10" \
   --offer-config-gslb-http-healthcheck-min-interval-seconds=15 \
   --offer-config-gslb-http-healthcheck-min-threshold-editable="true" \
   --offer-features="team-management" --offer-features="geo-steering" \
@@ -180,6 +182,7 @@ main() {
   --offer-quotas-gslb-bandwidth="50000000000" \
   --offer-quotas-alert-triggers="5" \
   --offer-quotas-alert-history="10" \
+  --offer-quotas-edge-ingresses="10" \
   --offer-config-gslb-http-healthcheck-min-interval-seconds=60 \
   --offer-config-gslb-http-healthcheck-min-threshold-editable="false" \
   --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
@@ -205,6 +208,7 @@ main() {
   --offer-quotas-gslb-bandwidth="1000000000" \
   --offer-quotas-alert-triggers="100" \
   --offer-quotas-alert-history="200" \
+  --offer-quotas-edge-ingresses="10" \
   --offer-config-gslb-http-healthcheck-min-interval-seconds=15 \
   --offer-config-gslb-http-healthcheck-min-threshold-editable="true" \
   --offer-features="team-management" --offer-features="geo-steering" \
@@ -213,7 +217,7 @@ main() {
   # Create subscription
   curl --silent --location --request POST 'http://platform.docker.localhost/offer/internal/subscriptions' \
   --header 'Content-Type: application/json' \
-  --data-raw "{\"countryCode\": \"FR\", \"workspaceId\": \"60c91ce465b8bcfc7bf2e35d\", \"priceId\": \"price_1J05YJAYmbimY05BpjcSne7V\"}"
+  --data-raw "{\"countryCode\": \"FR\", \"workspaceId\": \"62863db38cd4ff5cfe9986bd\", \"priceId\": \"price_1J05YJAYmbimY05BpjcSne7V\"}"
 
   CLUSTER_NAME=$(date +%s | sha256sum | base64 | head -c 32 ; echo)
 
@@ -330,7 +334,7 @@ renew-jwt() {
     --data-urlencode "client_secret=${JWT_CLIENT_SECRET}" \
     --data-urlencode 'scope=openid' \
     --data-urlencode 'realm=Username-Password-Authentication' \
-    --data-urlencode 'workspaceId=60c91ce465b8bcfc7bf2e35d' | jq -r '.access_token' | tr -d '\n')
+    --data-urlencode 'workspaceId=62863db38cd4ff5cfe9986bd' | jq -r '.access_token' | tr -d '\n')
 
   echo $JWT_EXTERNAL
 }
