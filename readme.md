@@ -11,6 +11,8 @@
     - [Install Hub Agent](#install-hub-agent)
     - [Install demo application](#install-demo-application)
     - [Test application](#test-application)
+  - [API](./api/api.md)
+    - [Hub agent traefik](./api/api.md#hub-agent-traefik)
     
 **You can run the full stack of Hub with K3D or by manually install every piece of the puzzle.
 We hardly recommend the K3D way of course.**
