@@ -1,0 +1,32 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: hub-git
+  namespace: git
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`hub-git.docker.localhost`)
+      services:
+        - name: hub-git
+          port: 80
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: hub-git-tls
+  namespace: git
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`hub-git.docker.localhost`)
+      services:
+        - name: hub-git
+          port: 80
+  tls:
+    certResolver: default

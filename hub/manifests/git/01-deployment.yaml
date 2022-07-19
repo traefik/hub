@@ -1,0 +1,94 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hub-git
+  namespace: git
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: git
+      app.kubernetes.io/name: hub-git
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        prometheus.io/port: "8080"
+        prometheus.io/scrape: "true"
+      labels:
+        app.kubernetes.io/component: git
+        app.kubernetes.io/name: hub-git
+    spec:
+      imagePullSecrets:
+        - name: gcr-access-token
+      containers:
+        # https://github.com/traefik/infra-tooling/tree/master/hub-git
+        - image: gcr.io/traefiklabs/hub-git:v0.1.15
+          imagePullPolicy: IfNotPresent
+          name: hub-git
+          env:
+            - name: GIT_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: git-private-config
+                  key: git-admin-password
+            - name: GIT_HUB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: git-private-config
+                  key: git-hub-password
+          ports:
+            - containerPort: 8080
+              name: http
+          livenessProbe:
+            failureThreshold: 2
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            failureThreshold: 2
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            limits:
+              cpu: 300m
+              memory: 768Mi
+            requests:
+              cpu: 200m
+              memory: 512Mi
+          volumeMounts:
+            - mountPath: /etc/nginx/conf.d
+              name: nginx-confd
+            - mountPath: /tmp
+              name: tmp
+            - mountPath: /var/run/nginx
+              name: nginx-run
+            - mountPath: /var/log/nginx
+              name: nginx-log
+            - mountPath: /var/lib/nginx
+              name: nginx-var
+            - mountPath: /srv/git
+              name: hub-git
+      volumes:
+        - name: hub-git
+          persistentVolumeClaim:
+            claimName: hub-git
+        - name: nginx-confd
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+        - name: nginx-run
+          emptyDir: {}
+        - name: nginx-log
+          emptyDir: {}
+        - name: nginx-var
+          emptyDir: {}

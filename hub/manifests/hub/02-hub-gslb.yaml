@@ -63,41 +63,6 @@ spec:
             - --addr=:80
 
 ---
-apiVersion: batch/v1beta1
-kind: CronJob
-metadata:
-  name: hub-gslb-check-job
-  namespace: hub
-spec:
-  schedule: "*/5 * * * *"
-  jobTemplate:
-    spec:
-      parallelism: 1
-      template:
-        metadata:
-          labels:
-            app: hub-gslb-check-job
-        spec:
-          restartPolicy: Never
-          imagePullSecrets:
-            - name: gcr-access-token
-          containers:
-            - name: hub-gslb-check-job
-              image: gcr.io/traefiklabs/hub-gslb:latest
-              imagePullPolicy: IfNotPresent
-              env:
-                - name: MONGODB_URI
-                  value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/gslb?authSource=admin
-                - name: DEV_MODE
-                  value: "true"
-              args:
-                - check
-              resources:
-                limits:
-                  cpu: 50m
-                  memory: 128Mi
-
----
 apiVersion: v1
 kind: Service
 metadata:

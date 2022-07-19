@@ -40,21 +40,14 @@ spec:
             periodSeconds: 5
             failureThreshold: 2
           env:
-            - name: GIT_URL
-              valueFrom:
-                secretKeyRef:
-                  name: gitea
-                  key: url
-            - name: GIT_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: gitea
-                  key: token
             - name: GIT_ORG
-              valueFrom:
-                secretKeyRef:
-                  name: gitea
-                  key: org
+              value: traefiklabs
+            - name: GERRIT_URL
+              value: http://hub-git.git
+            - name: GERRIT_USER
+              value: hub
+            - name: GERRIT_PASSWORD
+              value: hub
             - name: TOKEN_SERVICE_URL
               value: http://hub-token.hub.svc.cluster.local/internal
             - name: TRACING_ENDPOINT
@@ -168,21 +161,12 @@ spec:
             periodSeconds: 5
             failureThreshold: 2
           env:
-            - name: GIT_URL
-              valueFrom:
-                secretKeyRef:
-                  name: gitea
-                  key: url
-            - name: GIT_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: gitea
-                  key: token
-            - name: GIT_ORG
-              valueFrom:
-                secretKeyRef:
-                  name: gitea
-                  key: org
+            - name: GERRIT_URL
+              value: http://hub-git.git
+            - name: GERRIT_USER
+              value: hub
+            - name: GERRIT_PASSWORD
+              value: hub
             - name: WORKERS
               value: "10"
             - name: JOB_TIMEOUT

@@ -107,6 +107,8 @@ spec:
               value: hub.traefik.io
             - name: CLOUDFLARE_EMAIL
               value: "email"
+            - name: CLOUDFLARE_TOKEN
+              value: token
             - name: CLOUDFLARE_KEY
               value: "key"
             - name: DEV_MODE

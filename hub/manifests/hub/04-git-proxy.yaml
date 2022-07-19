@@ -50,13 +50,15 @@ spec:
   routes:
     - kind: Rule
       match: Host(`platform.docker.localhost`)
-      services:
-        - name: gitea
-          passHostHeader: false
-          port: 443
       middlewares:
         - name: auth
-        - name: gitea-token
+        - name: git-strip-prefix
+        - name: git-token
+      services:
+        - name: hub-git
+          namespace: git
+          passHostHeader: false
+          port: 80
 
 ---
 apiVersion: traefik.containo.us/v1alpha1
@@ -71,31 +73,13 @@ spec:
     - kind: Rule
       match: Host(`platform.docker.localhost`)
       services:
-        - name: gitea
+        - name: hub-git
+          namespace: git
           passHostHeader: false
-          port: 443
+          port: 80
       middlewares:
         - name: auth
-        - name: gitea-token
+        - name: git-strip-prefix
+        - name: git-token
   tls:
     certResolver: default
-
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: Middleware
-metadata:
-  name: auth
-  namespace: hub
-spec:
-  forwardAuth:
-    address: http://hub-topology.hub.svc.cluster.local:80/internal/auth
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: gitea
-  namespace: hub
-spec:
-  type: ExternalName
-  externalName: "${GITEA_HOSTNAME}"

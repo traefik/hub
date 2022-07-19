@@ -49,7 +49,7 @@ spec:
                   key: stripe-eu-webhook-key-test
                   name: hub-secret
             - name: TOPOLOGY_GIT_ORG_NAME
-              value: "${GITEA_ORG}"
+              value: "traefiklabs"
             - name: TOPOLOGY_GIT_PROXY_HOST
               value: platform.docker.localhost
             - name: ALERT_QUOTA_ENFORCER_URL
@@ -63,7 +63,7 @@ spec:
             - name: GSLB_QUOTA_ENFORCER_URL
               value: http://hub-gslb.hub.svc.cluster.local/internal/quotas
             - name: EDGE_INGRESS_QUOTA_ENFORCER_URL
-              value: http://hub-gslb.hub.svc.tunnel.local/internal/quotas
+              value: http://hub-gslb.hub.svc.cluster.local/internal/quotas
             # This is kept to avoid breaking production as we renamed a flag. This needs to be removed once the new version of offer is shipped.
             - name: DOMAIN_QUOTA_ENFORCER_URL
               value: http://hub-gslb.hub.svc.cluster.local/internal/quotas

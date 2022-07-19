@@ -39,9 +39,6 @@ Before running the script, you need a `.env` file in the `hub` folder.
 `Just copy the `.env.example` and fill it with your own credentials.
 
 - `GCLOUD_EMAIL` => Your email address to connect to gcr.
-- `GITEA_URL` => URL of the Gitea server (e.g https://git.example.com)
-- `GITEA_ORG` => The organization where the repository will be created by the topology service.
-- `GITEA_TOKEN` => A Gitea token.
 - `AWS_CLIENT_ID` => A client ID for connection to AWS
 - `AWS_CLIENT_SECRET` => A client secret ID for AWS
 - `HUB_USERNAME` => Your username on Hub
@@ -61,6 +58,7 @@ To resolve `*.docker.localhost`, you also need to add these hosts in your `/etc/
 127.0.0.1 jaeger-ui.docker.localhost
 127.0.0.1 prometheus.docker.localhost
 127.0.0.1 grafana.docker.localhost
+127.0.0.1 hub-git.docker.localhost
 ```
 
 ### Installation
@@ -86,6 +84,8 @@ The local installation can be done with `make run`. The script will create a k3d
     - notification
     - gslb
     - offer
+    - acp
+    - tunnel
     - (+ an ingress to access to all the services)
 - Hub-agent
 - Jaeger

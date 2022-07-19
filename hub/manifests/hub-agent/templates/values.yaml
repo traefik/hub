@@ -1,10 +1,5 @@
 # Default values for hub-helm-chart.
 image:
-  name: ghcr.io/traefik/hub-agent
-  pullSecrets:
-    - name: gcr-access-token
-  pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
   tag: "experimental"
 # User token to access to hub
 token: "${TOKEN_CLUSTER}"

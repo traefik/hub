@@ -40,13 +40,19 @@ spec:
             periodSeconds: 5
             failureThreshold: 2
           env:
+            - name: GIT_ORG
+              value: traefiklabs
+            - name: GERRIT_URL
+              value: http://hub-git.git
+            - name: GERRIT_USER
+              value: hub
+            - name: GERRIT_PASSWORD
+              value: hub
             - name: JWT_CERT
               valueFrom:
                 secretKeyRef:
                   key: jwt-cert
                   name: hub-secret
-            - name: TOKEN_SERVICE_URL
-              value: http://hub-token.hub.svc.cluster.local/internal
             - name: JWT_ISS
               value: "https://traefiklabs-hub-preview.eu.auth0.com/"
             - name: JWT_SUB
@@ -54,21 +60,8 @@ spec:
                 secretKeyRef:
                   key: jwt-sub
                   name: hub-secret
-            - name: GITEA_URL
-              valueFrom:
-                secretKeyRef:
-                  name: gitea
-                  key: url
-            - name: GITEA_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: gitea
-                  key: token
-            - name: GITEA_ORG
-              valueFrom:
-                secretKeyRef:
-                  name: gitea
-                  key: org
+            - name: TOKEN_SERVICE_URL
+              value: http://hub-token.hub.svc.cluster.local/internal
             - name: INDEXER_API_URL
               value: http://hub-topology-indexer-api.hub.svc.cluster.local/internal
             - name: TRACING_ENDPOINT

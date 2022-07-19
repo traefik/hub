@@ -298,3 +298,46 @@ spec:
         - name: auth-token
   tls:
     certResolver: default
+
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hub-tunnel-check-job
+  namespace: hub
+spec:
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 5
+      parallelism: 1
+      template:
+        metadata:
+          labels:
+            cronjob: hub-tunnel-check-job
+        spec:
+          containers:
+            - args:
+                - check
+              env:
+                - name: DEV_MODE
+                  value: "true"
+                - name: LOG_LEVEL
+                  value: debug
+                - name: GSLB_SERVICE_URL
+                  value: "http://hub-gslb/internal"
+                - name: CERTIFICATES_SERVICE_URL
+                  value: "http://hub-certificates/internal"
+                - name: MONGODB_URI
+                  value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/tunnels?authSource=admin
+                - name: MONGODB_MINPOOL
+                  value: "1"
+                - name: MONGODB_MAXPOOL
+                  value: "3"
+              image: gcr.io/traefiklabs/hub-tunnel-orchestrator:latest
+              name: hub-tunnel-check-job
+          imagePullSecrets:
+            - name: gcr-access-token
+          restartPolicy: Never
+  schedule: '* * * * *'
+

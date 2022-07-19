@@ -48,3 +48,35 @@ spec:
       - /tunnel
       - /workspace
 
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: git-strip-prefix
+  namespace: hub
+spec:
+  stripPrefix:
+    prefixes:
+      - /traefiklabs
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: git-token
+  namespace: hub
+spec:
+  headers:
+    customRequestHeaders:
+      Authorization: Basic aHViOmh1Yg==
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: auth
+  namespace: hub
+spec:
+  forwardAuth:
+    address: http://hub-topology.hub.svc.cluster.local:80/internal/auth
+

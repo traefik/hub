@@ -22,9 +22,6 @@ main() {
   kubectl cluster-info
 
   [[ "x$GCLOUD_EMAIL" == "x" ]] && read -p "Enter gcloud email: " GCLOUD_EMAIL
-  [[ "x$GITEA_URL" == "x" ]] && read -p "Enter the Gitea URL: " GITEA_URL
-  [[ "x$GITEA_ORG" == "x" ]] && read -p "Enter Gitea organization: " GITEA_ORG
-  [[ "x$GITEA_TOKEN" == "x" ]] && read -p "Enter Gitea token: " GITEA_TOKEN
   [[ "x$AWS_CLIENT_ID" == "x" ]] && read -p "Enter aws client id: " AWS_CLIENT_ID
   [[ "x$AWS_CLIENT_SECRET" == "x" ]] && read -p "Enter aws client secret: " AWS_CLIENT_SECRET
   [[ "x$HUB_USERNAME" == "x" ]] && read -p "Enter your hub username: " HUB_USERNAME
@@ -35,14 +32,13 @@ main() {
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/hub-agent/00-namespace.yaml
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/aws-secret-operator/00-namespace.yaml
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/pop/00-namespace.yaml
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/git/00-namespace.yaml
 
   apply-coredns-conf
 
   # Create secrets
   renew-gcr-token
-  kubectl delete secret -n hub gitea || true
   kubectl delete secret -n aws-secret-operator aws-secret || true
-  kubectl create secret -n hub generic gitea --from-literal="token=$GITEA_TOKEN" --from-literal="org=$GITEA_ORG" --from-literal="url=$GITEA_URL"
   kubectl create secret -n aws-secret-operator generic aws-secret --from-literal="api_key=$AWS_CLIENT_ID" --from-literal="api_secret_key=$AWS_CLIENT_SECRET"
 
   # Install AWS Secret Operator
@@ -80,17 +76,13 @@ main() {
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/jaeger/
   kubectl -n jaeger wait --for condition=available --timeout=600s deployment/jaeger
 
+  # Install Git
+  echo "Deploying Git."
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/git/
+  kubectl -n git wait --for condition=available --timeout=600s deployment/hub-git
+
   # Install Hub
   echo "Deploying Hub services."
-
-  export GITEA_TOKEN_B64=$(echo -n "${GITEA_TOKEN}:" | base64)
-  envsubst < "$PROJECT_DIR"/hub/manifests/hub/templates/gitea-token.yaml > "$PROJECT_DIR"/hub/manifests/hub/01-gitea-token.yaml
-
-  export GITEA_HOSTNAME=$(echo "${GITEA_URL}" | awk -F/ '{print $3}')
-  envsubst < "$PROJECT_DIR"/hub/manifests/hub/templates/gitea-proxy.yaml > "$PROJECT_DIR"/hub/manifests/hub/04-gitea-proxy.yaml
-
-  export GITEA_ORG
-  envsubst < "$PROJECT_DIR"/hub/manifests/hub/templates/hub-offer.yaml > "$PROJECT_DIR"/hub/manifests/hub/01-hub-offer.yaml
 
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/hub/secrets/
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/hub/
@@ -219,14 +211,19 @@ main() {
   --header 'Content-Type: application/json' \
   --data-raw "{\"countryCode\": \"FR\", \"workspaceId\": \"62863db38cd4ff5cfe9986bd\", \"priceId\": \"price_1J05YJAYmbimY05BpjcSne7V\"}"
 
-  CLUSTER_NAME=$(date +%s | sha256sum | base64 | head -c 32 ; echo)
+  # Create topology
+    curl --silent --location --request POST 'http://platform.docker.localhost/topology/internal/workspaces' \
+    --header 'Content-Type: application/json' \
+    --data-raw "{\"id\": \"62863db38cd4ff5cfe9986bd\"}"
 
   export TOKEN_CLUSTER=$(curl --silent --location --request POST 'http://platform.docker.localhost/cluster/external/clusters' \
   --header "Authorization: Bearer ${JWT_EXTERNAL}" \
   --header 'Content-Type: application/json' \
-  --data-raw "{\"name\": \"${CLUSTER_NAME}\"}" | jq -r '.token' | tr -d '\n')
+  --data-raw "{\"name\": \"cluster\"}" | jq -r '.token' | tr -d '\n')
 
-  envsubst < "$PROJECT_DIR"/hub/manifests/hub-agent/templates/values.yaml > "$PROJECT_DIR"/hub/manifests/hub-agent/01-values.yaml
+  if [ $TOKEN_CLUSTER != "null" ]; then
+    envsubst < "$PROJECT_DIR"/hub/manifests/hub-agent/templates/values.yaml > "$PROJECT_DIR"/hub/manifests/hub-agent/01-values.yaml
+  fi
 
   # Install Hub Agent
   helm repo add traefik-hub https://helm.traefik.io/hub
@@ -243,8 +240,8 @@ main() {
 
   # Install PoP
   echo "Deploying PoP services."
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/pop
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/pop/secrets
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/pop
 
   # Install Ingress-nginx
   echo "Deploying nginx."
@@ -302,7 +299,7 @@ apply-coredns-conf() {
 }
 
 renew-gcr-token() {
-    for namespace in hub hub-agent pop; do
+    for namespace in hub hub-agent pop git broker; do
         set +o errexit
         kubectl delete secret -n $namespace gcr-access-token
         set -o errexit
