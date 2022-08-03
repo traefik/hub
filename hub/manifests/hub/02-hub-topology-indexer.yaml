@@ -55,7 +55,7 @@ spec:
             - name: TRACING_PROBABILITY
               value: "1"
             - name: MONGODB_URI
-              value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/topologies?authSource=admin
+              value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/?authSource=admin
             - name: LOG_LEVEL
               value: debug
           args:
@@ -184,11 +184,11 @@ spec:
             - name: TRACING_PROBABILITY
               value: "1"
             - name: INDEX_MONGODB_URI
-              value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/topologies?authSource=admin
+              value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/?authSource=admin
             - name: INDEX_MONGODB_SOCKET_TIMEOUT
               value: 30s
             - name: JOB_SPEC_MONGODB_URI
-              value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/topologies?authSource=admin
+              value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/?authSource=admin
             - name: JOB_SPEC_MONGODB_SOCKET_TIMEOUT
               value: 2s
             - name: LOG_LEVEL

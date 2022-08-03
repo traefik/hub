@@ -70,8 +70,10 @@ spec:
               value: "1"
             - name: LOG_LEVEL
               value: debug
-            - name: MONGODB_URI
-              value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/topologies?authSource=admin
+            - name: INDEX_MONGODB_URI
+              value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/?authSource=admin
+            - name: JOB_SPEC_MONGODB_URI
+              value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/?authSource=admin
           args:
             - serve
             - --addr=:80
@@ -170,3 +172,41 @@ spec:
           port: 80
       middlewares:
         - name: stripprefix
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: topology-agent-tls
+  namespace: hub
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && Path(`/agent/topology`)
+      services:
+        - name: hub-topology
+          port: 80
+      middlewares:
+        - name: auth-token
+  tls:
+    certResolver: default
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: topology-agent
+  namespace: hub
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && Path(`/agent/topology`)
+      services:
+        - name: hub-topology
+          port: 80
+      middlewares:
+        - name: auth-token

@@ -162,11 +162,11 @@ spec:
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: certificates-agent
+  name: certificates-agent-tls
   namespace: hub
 spec:
   entryPoints:
-    - web
+    - websecure
   routes:
     - kind: Rule
       match: Host(`platform.docker.localhost`) && Path(`/agent/wildcard-certificate`)
@@ -175,6 +175,8 @@ spec:
           port: 80
       middlewares:
         - name: auth-token
+      tls:
+        certResolver: default
 
 ---
 apiVersion: traefik.containo.us/v1alpha1
