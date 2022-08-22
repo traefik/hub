@@ -13,7 +13,7 @@
     - [Test application](#test-application)
   - [API](./api/api.md)
     - [Hub agent traefik](./api/api.md#hub-agent-traefik)
-    
+
 **You can run the full stack of Hub with K3D or by manually install every piece of the puzzle.
 We hardly recommend the K3D way of course.**
 
@@ -36,7 +36,7 @@ gcloud auth configure-docker
 ```
 
 Before running the script, you need a `.env` file in the `hub` folder.
-`Just copy the `.env.example` and fill it with your own credentials.
+Just copy the `.env.example` and fill it with your own credentials.
 
 - `GCLOUD_EMAIL` => Your email address to connect to gcr.
 - `AWS_CLIENT_ID` => A client ID for connection to AWS
@@ -91,7 +91,7 @@ The local installation can be done with `make run`. The script will create a k3d
 - Jaeger
 - Monitoring
   - Grafana
-  - Prometheus 
+  - Prometheus
 - Pebble
 
 There are several commands to renew secrets, clean, or speed up the deployment :
@@ -138,13 +138,13 @@ You have to reapply the coredns configuration with `make apply-coredns-conf`.
 
 `make delete` will delete the k3d cluster.
 
-#### --adsl
+#### run-adsl
 
 `make run-adsl` allows docker to pull the images before starting the cluster.
 We recommend running it instead of `make run` if your internet connection is a bit slow.
 
 ### Using Tunneling
-To have a complete view at the tunneling functionality, you can read this 
+To have a complete view at the tunneling functionality, you can read this
 [doc](https://notion.so/containous/10-01-22-Tunneling-8bc7a7451abe4679afa8c24a4456ee36).
 
 To be used with the k3d cluster, we have deployed the broker to a new namespace (like we used to do with the pop).
@@ -203,8 +203,8 @@ X-Real-Ip: 127.0.0.1
 - UI: https://webapp.docker.localhost/
 - Jaeger: https://jaeger-ui.docker.localhost/
 - Hub-APIs: http://platform.docker.localhost/
-    - /agent 
-    - /workspace 
+    - /agent
+    - /workspace
     - /topology
     - /cluster
     - /token
@@ -212,10 +212,10 @@ X-Real-Ip: 127.0.0.1
     - /alert
     - /certificates
     - /invitation
-    
+
 - Grafana: https://grafana.docker.localhost
 - Prometheus: https://prometheus.docker.localhost/
-    
+
 ## Postman
 
 A Postman collection with multiple environments is available in this repo. Check out the dedicated [readme](/postman/readme.md).

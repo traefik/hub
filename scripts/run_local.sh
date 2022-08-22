@@ -4,7 +4,7 @@ set -o errexit
 
 readonly PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" && pwd)/.."
 ENV_FILE=${PROJECT_DIR}/hub/.env
-[[ -f ${ENV_FILE} ]] && source ${ENV_FILE}
+[[ -f "${ENV_FILE}" ]] && source "${ENV_FILE}"
 
 main() {
   check-tools
@@ -20,6 +20,8 @@ main() {
 
   export KUBECONFIG="$(k3d kubeconfig merge k3s-default-hub)"
   kubectl cluster-info
+
+  TIMEOUT="${TIMEOUT:-180s}"
 
   [[ "x$GCLOUD_EMAIL" == "x" ]] && read -p "Enter gcloud email: " GCLOUD_EMAIL
   [[ "x$AWS_CLIENT_ID" == "x" ]] && read -p "Enter aws client id: " AWS_CLIENT_ID
@@ -51,17 +53,17 @@ main() {
   # Install Mongo
   echo "Deploying Mongo"
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/mongo/
-  kubectl -n mongo wait --for condition=available --timeout=180s deployment/mongodb
+  kubectl -n mongo wait --for condition=available --timeout="${TIMEOUT}" deployment/mongodb
 
   # Install Traefik
   echo "Deploying Traefik."
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/traefik/
-  kubectl -n traefik wait --for condition=available --timeout=180s deployment/traefik
+  kubectl -n traefik wait --for condition=available --timeout="${TIMEOUT}" deployment/traefik
 
   # Install Pebble
   echo "Deploying Pebble."
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/pebble/
-  kubectl -n pebble wait --for condition=available --timeout=180s deployment/pebble
+  kubectl -n pebble wait --for condition=available --timeout="${TIMEOUT}" deployment/pebble
 
   # Populate Mongo
   for dbcol in workspaces_workspaces users_users users_tos ; do
@@ -74,12 +76,12 @@ main() {
   # Install Jaeger
   echo "Deploying Jaeger."
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/jaeger/
-  kubectl -n jaeger wait --for condition=available --timeout=600s deployment/jaeger
+  kubectl -n jaeger wait --for condition=available --timeout="${TIMEOUT}" deployment/jaeger
 
   # Install Git
   echo "Deploying Git."
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/git/
-  kubectl -n git wait --for condition=available --timeout=600s deployment/hub-git
+  kubectl -n git wait --for condition=available --timeout="${TIMEOUT}" deployment/hub-git
 
   # Install Hub
   echo "Deploying Hub services."
@@ -88,10 +90,10 @@ main() {
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/hub/
 
   # Create token
-  kubectl rollout status deploy -n hub hub-topology
-  kubectl rollout status deploy -n hub hub-cluster
-  kubectl rollout status deploy -n hub hub-token
-  kubectl rollout status deploy -n hub hub-offer
+  kubectl rollout status deploy --timeout="${TIMEOUT}" -n hub hub-topology
+  kubectl rollout status deploy --timeout="${TIMEOUT}" -n hub hub-cluster
+  kubectl rollout status deploy --timeout="${TIMEOUT}" -n hub hub-token
+  kubectl rollout status deploy --timeout="${TIMEOUT}" -n hub hub-offer
   sleep 2
 
   # Install Broker
@@ -103,7 +105,7 @@ main() {
   sleep 5
 
   ## Freemium US
-  kubectl run --timeout=40s --command=true -it --rm --restart=Never --image=gcr.io/traefiklabs/hub-offer:latest \
+  kubectl run --timeout="${TIMEOUT}" --command=true -it --rm --restart=Never --image=gcr.io/traefiklabs/hub-offer:latest \
   --image-pull-policy=IfNotPresent --namespace=hub \
   --overrides='{"apiVersion": "v1", "spec": {"imagePullSecrets": [{"name": "gcr-access-token"}]}}' -- hub-offer /hub-offer create-offer \
   --mongodb-uri="mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/offers?authSource=admin" \
@@ -128,7 +130,7 @@ main() {
   --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
 
   ## Premium US
-  kubectl run --timeout=40s --command=true -it --rm --restart=Never --image=gcr.io/traefiklabs/hub-offer:latest \
+  kubectl run --timeout="${TIMEOUT}" --command=true -it --rm --restart=Never --image=gcr.io/traefiklabs/hub-offer:latest \
   --image-pull-policy=IfNotPresent --namespace=hub \
   --overrides='{"apiVersion": "v1", "spec": {"imagePullSecrets": [{"name": "gcr-access-token"}]}}' -- hub-offer /hub-offer create-offer \
   --mongodb-uri="mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/offers?authSource=admin" \
@@ -155,7 +157,7 @@ main() {
   --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
 
   ## Freemium EU
-  kubectl run --timeout=40s --command=true -it --rm --restart=Never --image=gcr.io/traefiklabs/hub-offer:latest \
+  kubectl run --timeout="${TIMEOUT}" --command=true -it --rm --restart=Never --image=gcr.io/traefiklabs/hub-offer:latest \
   --image-pull-policy=IfNotPresent --namespace=hub \
   --overrides='{"apiVersion": "v1", "spec": {"imagePullSecrets": [{"name": "gcr-access-token"}]}}' -- hub-offer /hub-offer create-offer \
   --mongodb-uri="mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/offers?authSource=admin" \
@@ -180,7 +182,7 @@ main() {
   --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
 
   ## Premium EU
-  kubectl run --timeout=40s --command=true -it --rm --restart=Never --image=gcr.io/traefiklabs/hub-offer:latest \
+  kubectl run --timeout="${TIMEOUT}" --command=true -it --rm --restart=Never --image=gcr.io/traefiklabs/hub-offer:latest \
   --image-pull-policy=IfNotPresent --namespace=hub \
   --overrides='{"apiVersion": "v1", "spec": {"imagePullSecrets": [{"name": "gcr-access-token"}]}}' -- hub-offer /hub-offer create-offer \
   --mongodb-uri="mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/offers?authSource=admin" \
@@ -235,8 +237,8 @@ main() {
   kubectl patch svc -n hub-agent hub-agent-auth-server -p '{"spec":{"ports":[{"name":"hub-agent-debug","port":40000}]}}'
 
   # Wait for Hub agent to start
-  kubectl -n hub-agent wait --for condition=available --timeout=180s deployment/hub-agent-controller
-  kubectl -n hub-agent wait --for condition=available --timeout=180s deployment/hub-agent-auth-server
+  kubectl -n hub-agent wait --for condition=available --timeout="${TIMEOUT}" deployment/hub-agent-controller
+  kubectl -n hub-agent wait --for condition=available --timeout="${TIMEOUT}" deployment/hub-agent-auth-server
 
   # Install PoP
   echo "Deploying PoP services."
@@ -246,17 +248,17 @@ main() {
   # Install Ingress-nginx
   echo "Deploying nginx."
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/ingress-nginx/
-  kubectl -n ingress-nginx wait --for condition=available --timeout=180s deployment/ingress-nginx-controller
+  kubectl -n ingress-nginx wait --for condition=available --timeout="${TIMEOUT}" deployment/ingress-nginx-controller
 
   # Install HaProxy
   echo "Deploying haproxy."
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/ingress-haproxy/
-  kubectl -n haproxy-ingress-controller wait --for condition=available --timeout=180s deployment/haproxy-ingress
+  kubectl -n haproxy-ingress-controller wait --for condition=available --timeout="${TIMEOUT}" deployment/haproxy-ingress
 
   # Install whoami
   echo "Deploying whoami."
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/whoami/
-  kubectl -n whoami wait --for condition=available --timeout=180s deployment/whoami
+  kubectl -n whoami wait --for condition=available --timeout="${TIMEOUT}" deployment/whoami
 
   # Install monitoring
   echo "Deploying monitoring."

@@ -50,7 +50,7 @@ clean:
 	$(SCRIPT_DIR)/run_local.sh clean
 
 delete:
-	@read -p "This will destroy your k3d cluster. Are you sure? (Y/n): " confirm && [ "$${confirm}" != "$${confirm#[Yy]}" ] || exit 1
+	@read -p "This will destroy your k3d cluster. Are you sure? (y/N): " confirm && [ "$${confirm}" != "$${confirm#[Yy]}" ] || exit 1
 	k3d cluster delete k3s-default-hub
 
 diagrams:

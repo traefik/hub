@@ -30,7 +30,7 @@ spec:
       serviceAccountName: traefik
       containers:
         - name: traefik
-          image: traefik:v2.4
+          image: traefik:v2.8
           args:
             - --entrypoints.web.Address=:80
             - --entrypoints.websecure.Address=:443
@@ -43,6 +43,10 @@ spec:
             - --api.insecure
             - --metrics.prometheus
             - --log.level=debug
+
+            - --experimental.hub
+            - --hub.tls.insecure
+            - --metrics.prometheus.addrouterslabels
           ports:
             - name: web
               containerPort: 80

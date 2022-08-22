@@ -35,6 +35,7 @@ rules:
       - traefik.containo.us
     resources:
       - middlewares
+      - middlewaretcps
       - ingressroutes
       - traefikservices
       - ingressroutetcps
