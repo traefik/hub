@@ -217,7 +217,7 @@ main() {
   # Create topology
     curl --silent --location --request POST 'http://platform.docker.localhost/topology/internal/workspaces' \
     --header 'Content-Type: application/json' \
-    --data-raw "{\"id\": \"${WORKSPACE_ID\"}"
+    --data-raw "{\"id\": \"${WORKSPACE_ID}\"}"
 
   export TOKEN_CLUSTER=$(curl --silent --location --request POST 'http://platform.docker.localhost/cluster/external/clusters' \
   --header "Authorization: Bearer ${JWT_EXTERNAL}" \
