@@ -5,6 +5,7 @@ set -o errexit
 readonly PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" && pwd)/.."
 ENV_FILE=${PROJECT_DIR}/hub/.env
 [[ -f "${ENV_FILE}" ]] && source "${ENV_FILE}"
+WORKSPACE_ID="${WORKSPACE_ID:-6311c90bfce04bd29e473a20}"
 
 main() {
   check-tools
@@ -211,12 +212,12 @@ main() {
   # Create subscription
   curl --silent --location --request POST 'http://platform.docker.localhost/offer/internal/subscriptions' \
   --header 'Content-Type: application/json' \
-  --data-raw "{\"countryCode\": \"FR\", \"workspaceId\": \"62863db38cd4ff5cfe9986bd\", \"priceId\": \"price_1J05YJAYmbimY05BpjcSne7V\"}"
+  --data-raw "{\"countryCode\": \"FR\", \"workspaceId\": \"${WORKSPACE_ID}\", \"priceId\": \"price_1J05YJAYmbimY05BpjcSne7V\"}"
 
   # Create topology
     curl --silent --location --request POST 'http://platform.docker.localhost/topology/internal/workspaces' \
     --header 'Content-Type: application/json' \
-    --data-raw "{\"id\": \"62863db38cd4ff5cfe9986bd\"}"
+    --data-raw "{\"id\": \"${WORKSPACE_ID\"}"
 
   export TOKEN_CLUSTER=$(curl --silent --location --request POST 'http://platform.docker.localhost/cluster/external/clusters' \
   --header "Authorization: Bearer ${JWT_EXTERNAL}" \
@@ -333,9 +334,10 @@ renew-jwt() {
     --data-urlencode "client_secret=${JWT_CLIENT_SECRET}" \
     --data-urlencode 'scope=openid' \
     --data-urlencode 'realm=Username-Password-Authentication' \
-    --data-urlencode 'workspaceId=62863db38cd4ff5cfe9986bd' | jq -r '.access_token' | tr -d '\n')
+    --data-urlencode "workspaceId=${WORKSPACE_ID}" \
+      | jq -r '.access_token' | tr -d '\n')
 
-  echo $JWT_EXTERNAL
+  echo "${JWT_EXTERNAL}"
 }
 
 check-tools() {
