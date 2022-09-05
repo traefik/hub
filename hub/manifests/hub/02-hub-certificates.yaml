@@ -151,7 +151,7 @@ spec:
     - web
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && Path(`/agent/certificates`)
+      match: Host(`platform.docker.localhost`) && Path(`/agent/wildcard-certificate`)
       services:
         - name: hub-certificates
           port: 80

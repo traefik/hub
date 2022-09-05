@@ -4,7 +4,7 @@
   },
   "name": "Traefik Labs",
   "users": [
-    "fd016582-3e6a-4951-a9c5-e03e81d63761"
+    "58626c00-a81a-4e17-8ccb-191022334059"
   ],
   "domain": "abcdef.traefik-hub.app",
   "teams": [
@@ -15,7 +15,7 @@
       "name": "Owner",
       "type": "owner",
       "users": [
-        "fd016582-3e6a-4951-a9c5-e03e81d63761"
+        "58626c00-a81a-4e17-8ccb-191022334059"
       ],
       "permissions": [
         {

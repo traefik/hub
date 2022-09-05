@@ -8,6 +8,7 @@ controllerDeployment:
     - --log-level=debug
     - --log-format=console
     - --platform-url=http://platform.docker.localhost/agent
+    - --traefik.metrics-url=http://traefik-hub.hub-agent.svc.cluster.local:8080/metrics
 tunnelDeployment:
   args:
     - --log-level=debug
