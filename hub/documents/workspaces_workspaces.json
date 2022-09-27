@@ -23,20 +23,29 @@
           "resource": "workspace"
         },
         {
+          "action": "create",
+          "resource": "edge_ingress",
+          "scope": "*"
+        },
+        {
+          "action": "view",
+          "resource": "edge_ingress",
+          "scope": "*"
+        },
+        {
           "action": "edit",
-          "resource": "workspace"
+          "resource": "edge_ingress",
+          "scope": "*"
         },
         {
           "action": "delete",
-          "resource": "workspace"
-        },
-        {
-          "action": "edit",
-          "resource": "subscription"
+          "resource": "edge_ingress",
+          "scope": "*"
         },
         {
           "action": "create",
-          "resource": "cluster"
+          "resource": "cluster",
+          "scope": "*"
         },
         {
           "action": "view",
@@ -49,8 +58,34 @@
           "scope": "*"
         },
         {
+          "action": "delete",
+          "resource": "cluster",
+          "scope": "*"
+        },
+        {
           "action": "create",
-          "resource": "acp"
+          "resource": "gslb",
+          "scope": "*"
+        },
+        {
+          "action": "view",
+          "resource": "gslb",
+          "scope": "*"
+        },
+        {
+          "action": "edit",
+          "resource": "gslb",
+          "scope": "*"
+        },
+        {
+          "action": "delete",
+          "resource": "gslb",
+          "scope": "*"
+        },
+        {
+          "action": "create",
+          "resource": "acp",
+          "scope": "*"
         },
         {
           "action": "view",
@@ -68,9 +103,8 @@
           "scope": "*"
         },
         {
-          "action": "delete",
-          "resource": "cluster",
-          "scope": "*"
+          "action": "edit",
+          "resource": "workspace"
         },
         {
           "action": "create",
@@ -92,27 +126,16 @@
           "scope": "*"
         },
         {
-          "action": "create",
-          "resource": "gslb"
-        },
-        {
-          "action": "view",
-          "resource": "gslb",
-          "scope": "*"
+          "action": "edit",
+          "resource": "owner"
         },
         {
           "action": "edit",
-          "resource": "gslb",
-          "scope": "*"
+          "resource": "subscription"
         },
         {
           "action": "delete",
-          "resource": "gslb",
-          "scope": "*"
-        },
-        {
-          "action": "edit",
-          "resource": "owner"
+          "resource": "workspace"
         }
       ],
       "updatedAt": {
@@ -135,20 +158,29 @@
           "resource": "workspace"
         },
         {
+          "action": "create",
+          "resource": "edge_ingress",
+          "scope": "*"
+        },
+        {
+          "action": "view",
+          "resource": "edge_ingress",
+          "scope": "*"
+        },
+        {
           "action": "edit",
-          "resource": "workspace"
+          "resource": "edge_ingress",
+          "scope": "*"
         },
         {
           "action": "delete",
-          "resource": "workspace"
-        },
-        {
-          "action": "edit",
-          "resource": "subscription"
+          "resource": "edge_ingress",
+          "scope": "*"
         },
         {
           "action": "create",
-          "resource": "cluster"
+          "resource": "cluster",
+          "scope": "*"
         },
         {
           "action": "view",
@@ -161,8 +193,34 @@
           "scope": "*"
         },
         {
+          "action": "delete",
+          "resource": "cluster",
+          "scope": "*"
+        },
+        {
           "action": "create",
-          "resource": "acp"
+          "resource": "gslb",
+          "scope": "*"
+        },
+        {
+          "action": "view",
+          "resource": "gslb",
+          "scope": "*"
+        },
+        {
+          "action": "edit",
+          "resource": "gslb",
+          "scope": "*"
+        },
+        {
+          "action": "delete",
+          "resource": "gslb",
+          "scope": "*"
+        },
+        {
+          "action": "create",
+          "resource": "acp",
+          "scope": "*"
         },
         {
           "action": "view",
@@ -180,9 +238,8 @@
           "scope": "*"
         },
         {
-          "action": "delete",
-          "resource": "cluster",
-          "scope": "*"
+          "action": "edit",
+          "resource": "workspace"
         },
         {
           "action": "create",
@@ -202,10 +259,71 @@
           "action": "delete",
           "resource": "user",
           "scope": "*"
+        }
+      ],
+      "updatedAt": {
+        "$date": "2021-04-02T14:37:56.060Z"
+      },
+      "createdAt": {
+        "$date": "2021-04-02T14:37:56.060Z"
+      }
+    },
+    {
+      "_id": {
+        "$oid": "60672c44dea2196293ae5605"
+      },
+      "name": "Member",
+      "type": "custom",
+      "users": [],
+      "permissions": [
+        {
+          "action": "view",
+          "resource": "workspace"
         },
         {
           "action": "create",
-          "resource": "gslb"
+          "resource": "edge_ingress",
+          "scope": "*"
+        },
+        {
+          "action": "view",
+          "resource": "edge_ingress",
+          "scope": "*"
+        },
+        {
+          "action": "edit",
+          "resource": "edge_ingress",
+          "scope": "*"
+        },
+        {
+          "action": "delete",
+          "resource": "edge_ingress",
+          "scope": "*"
+        },
+        {
+          "action": "create",
+          "resource": "cluster",
+          "scope": "*"
+        },
+        {
+          "action": "view",
+          "resource": "cluster",
+          "scope": "*"
+        },
+        {
+          "action": "edit",
+          "resource": "cluster",
+          "scope": "*"
+        },
+        {
+          "action": "delete",
+          "resource": "cluster",
+          "scope": "*"
+        },
+        {
+          "action": "create",
+          "resource": "gslb",
+          "scope": "*"
         },
         {
           "action": "view",
@@ -220,6 +338,26 @@
         {
           "action": "delete",
           "resource": "gslb",
+          "scope": "*"
+        },
+        {
+          "action": "create",
+          "resource": "acp",
+          "scope": "*"
+        },
+        {
+          "action": "view",
+          "resource": "acp",
+          "scope": "*"
+        },
+        {
+          "action": "edit",
+          "resource": "acp",
+          "scope": "*"
+        },
+        {
+          "action": "delete",
+          "resource": "acp",
           "scope": "*"
         }
       ],

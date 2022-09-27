@@ -339,7 +339,7 @@ spec:
           imagePullSecrets:
             - name: gcr-access-token
           restartPolicy: Never
-  schedule: '* * * * *'
+  schedule: '*/5 * * * *'
 
 ---
 apiVersion: batch/v1

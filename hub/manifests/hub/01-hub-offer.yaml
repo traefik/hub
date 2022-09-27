@@ -21,13 +21,15 @@ spec:
         - name: gcr-access-token
       containers:
         - name: hub-offer
-          image: gcr.io/traefiklabs/hub-offer:latest
+          image: hub-offer:dev
           imagePullPolicy: IfNotPresent
           resources:
             limits:
               cpu: 50m
               memory: 128Mi
           env:
+            - name: DEV_MODE
+              value: "true"
             - name: STRIPE_DEFAULT_KEY
               valueFrom:
                 secretKeyRef:
@@ -38,12 +40,12 @@ spec:
                 secretKeyRef:
                   key: stripe-default-webhook-key-test
                   name: hub-secret
-            - name: STRIPE_EU_KEY
+            - name: STRIPE_EMEA_KEY
               valueFrom:
                 secretKeyRef:
                   key: stripe-eu-key-test
                   name: hub-secret
-            - name: STRIPE_EU_WEBHOOK_KEY
+            - name: STRIPE_EMEA_WEBHOOK_KEY
               valueFrom:
                 secretKeyRef:
                   key: stripe-eu-webhook-key-test
@@ -58,13 +60,16 @@ spec:
               value: http://hub-cluster.hub.svc.cluster.local/internal/quotas
             - name: WORKSPACE_SERVICE_URL
               value: http://hub-workspace.hub.svc.cluster.local/internal
+            - name: USER_SERVICE_URL
+              value: http://hub-user.hub.svc.cluster.local/internal
+            - name: TOKEN_SERVICE_URL
+              value: http://hub-token.hub.svc.cluster.local/internal
             - name: USER_QUOTA_ENFORCER_URL
               value: http://hub-workspace.hub.svc.cluster.local/internal/quotas
             - name: GSLB_QUOTA_ENFORCER_URL
               value: http://hub-gslb.hub.svc.cluster.local/internal/quotas
             - name: EDGE_INGRESS_QUOTA_ENFORCER_URL
               value: http://hub-gslb.hub.svc.cluster.local/internal/quotas
-            # This is kept to avoid breaking production as we renamed a flag. This needs to be removed once the new version of offer is shipped.
             - name: DOMAIN_QUOTA_ENFORCER_URL
               value: http://hub-gslb.hub.svc.cluster.local/internal/quotas
             - name: JWT_CERT
@@ -273,3 +278,95 @@ spec:
           port: 80
       middlewares:
         - name: stripprefix
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: hub-offer-effective-from-update
+  namespace: hub
+spec:
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      parallelism: 1
+      template:
+        metadata:
+          labels:
+            app: hub-offer-effective-from-update
+        spec:
+          restartPolicy: Never
+          imagePullSecrets:
+            - name: gcr-access-token
+          containers:
+            - name: hub-offer-effective-from-update
+              image: hub-offer:dev
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: LOG_LEVEL
+                  value: debug
+                - name: MONGODB_URI
+                  value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/alerts?authSource=admin
+                - name: USER_QUOTA_ENFORCER_URL
+                  value: http://hub-workspace.hub.svc.cluster.local/internal/quotas
+                - name: GSLB_QUOTA_ENFORCER_URL
+                  value: http://hub-gslb.hub.svc.cluster.local/internal/quotas
+                - name: EDGE_INGRESS_QUOTA_ENFORCER_URL
+                  value: http://hub-gslb.hub.svc.cluster.local/internal/quotas
+                - name: DOMAIN_QUOTA_ENFORCER_URL
+                  value: http://hub-gslb.hub.svc.cluster.local/internal/quotas
+                - name: ALERT_QUOTA_ENFORCER_URL
+                  value: http://hub-alert.hub.svc.cluster.local/internal/quotas
+                - name: CLUSTER_QUOTA_ENFORCER_URL
+                  value: http://hub-cluster.hub.svc.cluster.local/internal/quotas
+              args:
+                - effective-from-update
+              resources:
+                limits:
+                  cpu: 50m
+                  memory: 32Mi
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: hub-offer-quotas-update
+  namespace: hub
+spec:
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      parallelism: 1
+      template:
+        metadata:
+          labels:
+            app: hub-offer-quotas-update
+        spec:
+          restartPolicy: Never
+          imagePullSecrets:
+            - name: gcr-access-token
+          containers:
+            - name: hub-offer-quotas-update
+              image: hub-offer:dev
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: LOG_LEVEL
+                  value: debug
+                - name: MONGODB_URI
+                  value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/alerts?authSource=admin
+                - name: USER_QUOTA_ENFORCER_URL
+                  value: http://hub-workspace.hub.svc.cluster.local/internal/quotas
+                - name: GSLB_QUOTA_ENFORCER_URL
+                  value: http://hub-gslb.hub.svc.cluster.local/internal/quotas
+                - name: EDGE_INGRESS_QUOTA_ENFORCER_URL
+                  value: http://hub-gslb.hub.svc.cluster.local/internal/quotas
+                - name: DOMAIN_QUOTA_ENFORCER_URL
+                  value: http://hub-gslb.hub.svc.cluster.local/internal/quotas
+                - name: ALERT_QUOTA_ENFORCER_URL
+                  value: http://hub-alert.hub.svc.cluster.local/internal/quotas
+                - name: CLUSTER_QUOTA_ENFORCER_URL
+                  value: http://hub-cluster.hub.svc.cluster.local/internal/quotas
+              args:
+                - quotas-update
+              resources:
+                limits:
+                  cpu: 50m
+                  memory: 32Mi

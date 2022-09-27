@@ -106,14 +106,12 @@ main() {
   sleep 5
 
   ## Freemium US
-  kubectl run --timeout="${TIMEOUT}" --command=true -it --rm --restart=Never --image=gcr.io/traefiklabs/hub-offer:latest \
+  kubectl run --timeout="${TIMEOUT}" --command=true -it --rm --restart=Never --image=hub-offer:dev\
   --image-pull-policy=IfNotPresent --namespace=hub \
-  --overrides='{"apiVersion": "v1", "spec": {"imagePullSecrets": [{"name": "gcr-access-token"}]}}' -- hub-offer /hub-offer create-offer \
+  --overrides='{"apiVersion": "v1", "spec": {"imagePullSecrets": [{"name": "gcr-access-token"}]}}' -- hub-offer-c /hub-offer create-offer \
   --mongodb-uri="mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/offers?authSource=admin" \
   --log-level="debug" \
   --offer-name="freemium" \
-  --offer-zone-name="default" \
-  --offer-priceid="price_1J05aJEfHpKKvvELtLRaL1xl" \
   --offer-config-metrics-interval="1m" \
   --offer-config-metrics-tables="1m" \
   --offer-config-metrics-tables="10m" \
@@ -131,14 +129,12 @@ main() {
   --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
 
   ## Premium US
-  kubectl run --timeout="${TIMEOUT}" --command=true -it --rm --restart=Never --image=gcr.io/traefiklabs/hub-offer:latest \
+  kubectl run --timeout="${TIMEOUT}" --command=true -it --rm --restart=Never --image=hub-offer:dev \
   --image-pull-policy=IfNotPresent --namespace=hub \
-  --overrides='{"apiVersion": "v1", "spec": {"imagePullSecrets": [{"name": "gcr-access-token"}]}}' -- hub-offer /hub-offer create-offer \
+  --overrides='{"apiVersion": "v1", "spec": {"imagePullSecrets": [{"name": "gcr-access-token"}]}}' -- hub-offer-c /hub-offer create-offer \
   --mongodb-uri="mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/offers?authSource=admin" \
   --log-level="debug" \
   --offer-name="premium" \
-  --offer-zone-name="default" \
-  --offer-priceid="price_1J05awEfHpKKvvELb9boaOxw" \
   --offer-config-metrics-interval="1m" \
   --offer-config-metrics-tables="1m" \
   --offer-config-metrics-tables="10m" \
@@ -158,14 +154,12 @@ main() {
   --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
 
   ## Freemium EU
-  kubectl run --timeout="${TIMEOUT}" --command=true -it --rm --restart=Never --image=gcr.io/traefiklabs/hub-offer:latest \
+  kubectl run --timeout="${TIMEOUT}" --command=true -it --rm --restart=Never --image=hub-offer:dev \
   --image-pull-policy=IfNotPresent --namespace=hub \
-  --overrides='{"apiVersion": "v1", "spec": {"imagePullSecrets": [{"name": "gcr-access-token"}]}}' -- hub-offer /hub-offer create-offer \
+  --overrides='{"apiVersion": "v1", "spec": {"imagePullSecrets": [{"name": "gcr-access-token"}]}}' -- hub-offer-c /hub-offer create-offer \
   --mongodb-uri="mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/offers?authSource=admin" \
   --log-level="debug" \
   --offer-name="freemium" \
-  --offer-zone-name="eu" \
-  --offer-priceid="price_1J05XOAYmbimY05BcwhLKPgB" \
   --offer-config-metrics-interval="1m" \
   --offer-config-metrics-tables="1m" \
   --offer-config-metrics-tables="10m" \
@@ -183,14 +177,12 @@ main() {
   --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
 
   ## Premium EU
-  kubectl run --timeout="${TIMEOUT}" --command=true -it --rm --restart=Never --image=gcr.io/traefiklabs/hub-offer:latest \
+  kubectl run --timeout="${TIMEOUT}" --command=true -it --rm --restart=Never --image=hub-offer:dev \
   --image-pull-policy=IfNotPresent --namespace=hub \
-  --overrides='{"apiVersion": "v1", "spec": {"imagePullSecrets": [{"name": "gcr-access-token"}]}}' -- hub-offer /hub-offer create-offer \
+  --overrides='{"apiVersion": "v1", "spec": {"imagePullSecrets": [{"name": "gcr-access-token"}]}}' -- hub-offer-c /hub-offer create-offer \
   --mongodb-uri="mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/offers?authSource=admin" \
   --log-level="debug" \
   --offer-name="premium" \
-  --offer-zone-name="eu" \
-  --offer-priceid="price_1J05YJAYmbimY05BpjcSne7V" \
   --offer-config-metrics-interval="1m" \
   --offer-config-metrics-tables="1m" \
   --offer-config-metrics-tables="10m" \
@@ -212,7 +204,7 @@ main() {
   # Create subscription
   curl --silent --location --request POST 'http://platform.docker.localhost/offer/internal/subscriptions' \
   --header 'Content-Type: application/json' \
-  --data-raw "{\"countryCode\": \"FR\", \"workspaceId\": \"${WORKSPACE_ID}\", \"priceId\": \"price_1J05YJAYmbimY05BpjcSne7V\"}"
+  --data-raw "{\"userId\": \"fd016582-3e6a-4951-a9c5-e03e81d63761\", \"workspaceId\": \"${WORKSPACE_ID}\"}"
 
   # Create topology
     curl --silent --location --request POST 'http://platform.docker.localhost/topology/internal/workspaces' \

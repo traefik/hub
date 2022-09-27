@@ -72,7 +72,7 @@ metadata:
   name: hub-alert-check-job
   namespace: hub
 spec:
-  schedule: "* * * * *"
+  schedule: "*/5 * * * *"
   jobTemplate:
     spec:
       parallelism: 1
