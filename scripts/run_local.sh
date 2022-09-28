@@ -106,7 +106,7 @@ main() {
   sleep 5
 
   ## Freemium US
-  kubectl run --timeout="${TIMEOUT}" --command=true -it --rm --restart=Never --image=hub-offer:dev\
+  kubectl run --timeout="${TIMEOUT}" --command=true -it --rm --restart=Never --image=gcr.io/traefiklabs/hub-offer:latest\
   --image-pull-policy=IfNotPresent --namespace=hub \
   --overrides='{"apiVersion": "v1", "spec": {"imagePullSecrets": [{"name": "gcr-access-token"}]}}' -- hub-offer-c /hub-offer create-offer \
   --mongodb-uri="mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/offers?authSource=admin" \
@@ -129,7 +129,7 @@ main() {
   --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
 
   ## Premium US
-  kubectl run --timeout="${TIMEOUT}" --command=true -it --rm --restart=Never --image=hub-offer:dev \
+  kubectl run --timeout="${TIMEOUT}" --command=true -it --rm --restart=Never --image=gcr.io/traefiklabs/hub-offer:latest \
   --image-pull-policy=IfNotPresent --namespace=hub \
   --overrides='{"apiVersion": "v1", "spec": {"imagePullSecrets": [{"name": "gcr-access-token"}]}}' -- hub-offer-c /hub-offer create-offer \
   --mongodb-uri="mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/offers?authSource=admin" \
@@ -154,7 +154,7 @@ main() {
   --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
 
   ## Freemium EU
-  kubectl run --timeout="${TIMEOUT}" --command=true -it --rm --restart=Never --image=hub-offer:dev \
+  kubectl run --timeout="${TIMEOUT}" --command=true -it --rm --restart=Never --image=gcr.io/traefiklabs/hub-offer:latest \
   --image-pull-policy=IfNotPresent --namespace=hub \
   --overrides='{"apiVersion": "v1", "spec": {"imagePullSecrets": [{"name": "gcr-access-token"}]}}' -- hub-offer-c /hub-offer create-offer \
   --mongodb-uri="mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/offers?authSource=admin" \
@@ -177,7 +177,7 @@ main() {
   --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
 
   ## Premium EU
-  kubectl run --timeout="${TIMEOUT}" --command=true -it --rm --restart=Never --image=hub-offer:dev \
+  kubectl run --timeout="${TIMEOUT}" --command=true -it --rm --restart=Never --image=gcr.io/traefiklabs/hub-offer:latest \
   --image-pull-policy=IfNotPresent --namespace=hub \
   --overrides='{"apiVersion": "v1", "spec": {"imagePullSecrets": [{"name": "gcr-access-token"}]}}' -- hub-offer-c /hub-offer create-offer \
   --mongodb-uri="mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/offers?authSource=admin" \

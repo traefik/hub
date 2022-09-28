@@ -21,7 +21,7 @@ spec:
         - name: gcr-access-token
       containers:
         - name: hub-offer
-          image: hub-offer:dev
+          image: gcr.io/traefiklabs/hub-offer:latest
           imagePullPolicy: IfNotPresent
           resources:
             limits:
@@ -299,7 +299,7 @@ spec:
             - name: gcr-access-token
           containers:
             - name: hub-offer-effective-from-update
-              image: hub-offer:dev
+              image: gcr.io/traefiklabs/hub-offer:latest
               imagePullPolicy: IfNotPresent
               env:
                 - name: LOG_LEVEL
@@ -345,7 +345,7 @@ spec:
             - name: gcr-access-token
           containers:
             - name: hub-offer-quotas-update
-              image: hub-offer:dev
+              image: gcr.io/traefiklabs/hub-offer:latest
               imagePullPolicy: IfNotPresent
               env:
                 - name: LOG_LEVEL
