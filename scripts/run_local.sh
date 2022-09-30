@@ -105,7 +105,7 @@ main() {
   renew-jwt
   sleep 5
 
-  ## Freemium US
+  ## Freemium
   kubectl run --timeout="${TIMEOUT}" --command=true -it --rm --restart=Never --image=gcr.io/traefiklabs/hub-offer:latest\
   --image-pull-policy=IfNotPresent --namespace=hub \
   --overrides='{"apiVersion": "v1", "spec": {"imagePullSecrets": [{"name": "gcr-access-token"}]}}' -- hub-offer-c /hub-offer create-offer \
@@ -128,7 +128,7 @@ main() {
   --offer-config-gslb-http-healthcheck-min-threshold-editable="false" \
   --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
 
-  ## Premium US
+  ## Premium
   kubectl run --timeout="${TIMEOUT}" --command=true -it --rm --restart=Never --image=gcr.io/traefiklabs/hub-offer:latest \
   --image-pull-policy=IfNotPresent --namespace=hub \
   --overrides='{"apiVersion": "v1", "spec": {"imagePullSecrets": [{"name": "gcr-access-token"}]}}' -- hub-offer-c /hub-offer create-offer \
@@ -145,54 +145,6 @@ main() {
   --offer-quotas-users="20" \
   --offer-quotas-domains="100" \
   --offer-quotas-gslb-bandwidth="50000000000" \
-  --offer-quotas-alert-triggers="100" \
-  --offer-quotas-alert-history="200" \
-  --offer-quotas-edge-ingresses="10" \
-  --offer-config-gslb-http-healthcheck-min-interval-seconds=15 \
-  --offer-config-gslb-http-healthcheck-min-threshold-editable="true" \
-  --offer-features="team-management" --offer-features="geo-steering" \
-  --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
-
-  ## Freemium EU
-  kubectl run --timeout="${TIMEOUT}" --command=true -it --rm --restart=Never --image=gcr.io/traefiklabs/hub-offer:latest \
-  --image-pull-policy=IfNotPresent --namespace=hub \
-  --overrides='{"apiVersion": "v1", "spec": {"imagePullSecrets": [{"name": "gcr-access-token"}]}}' -- hub-offer-c /hub-offer create-offer \
-  --mongodb-uri="mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/offers?authSource=admin" \
-  --log-level="debug" \
-  --offer-name="freemium" \
-  --offer-config-metrics-interval="1m" \
-  --offer-config-metrics-tables="1m" \
-  --offer-config-metrics-tables="10m" \
-  --offer-config-metrics-tables="1h" \
-  --offer-quotas-clusters="2" \
-  --offer-config-access-control-max-secured-routes="3" \
-  --offer-quotas-users="2" \
-  --offer-quotas-domains="10" \
-  --offer-quotas-gslb-bandwidth="50000000000" \
-  --offer-quotas-alert-triggers="5" \
-  --offer-quotas-alert-history="10" \
-  --offer-quotas-edge-ingresses="10" \
-  --offer-config-gslb-http-healthcheck-min-interval-seconds=60 \
-  --offer-config-gslb-http-healthcheck-min-threshold-editable="false" \
-  --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
-
-  ## Premium EU
-  kubectl run --timeout="${TIMEOUT}" --command=true -it --rm --restart=Never --image=gcr.io/traefiklabs/hub-offer:latest \
-  --image-pull-policy=IfNotPresent --namespace=hub \
-  --overrides='{"apiVersion": "v1", "spec": {"imagePullSecrets": [{"name": "gcr-access-token"}]}}' -- hub-offer-c /hub-offer create-offer \
-  --mongodb-uri="mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/offers?authSource=admin" \
-  --log-level="debug" \
-  --offer-name="premium" \
-  --offer-config-metrics-interval="1m" \
-  --offer-config-metrics-tables="1m" \
-  --offer-config-metrics-tables="10m" \
-  --offer-config-metrics-tables="1h" \
-  --offer-config-metrics-tables="1d" \
-  --offer-quotas-clusters="5" \
-  --offer-config-access-control-max-secured-routes="50" \
-  --offer-quotas-users="20" \
-  --offer-quotas-domains="100" \
-  --offer-quotas-gslb-bandwidth="1000000000" \
   --offer-quotas-alert-triggers="100" \
   --offer-quotas-alert-history="200" \
   --offer-quotas-edge-ingresses="10" \

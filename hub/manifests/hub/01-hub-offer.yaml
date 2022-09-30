@@ -40,6 +40,11 @@ spec:
                 secretKeyRef:
                   key: stripe-default-webhook-key-test
                   name: hub-secret
+            - name: STRIPE_DEFAULT_PUBLIC_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: stripe-default-public-key-test
+                  name: hub-secret
             - name: STRIPE_EMEA_KEY
               valueFrom:
                 secretKeyRef:
@@ -49,6 +54,11 @@ spec:
               valueFrom:
                 secretKeyRef:
                   key: stripe-eu-webhook-key-test
+                  name: hub-secret
+            - name: STRIPE_EMEA_PUBLIC_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: stripe-eu-public-key-test
                   name: hub-secret
             - name: TOPOLOGY_GIT_ORG_NAME
               value: "traefiklabs"
@@ -278,52 +288,6 @@ spec:
           port: 80
       middlewares:
         - name: stripprefix
----
-apiVersion: batch/v1beta1
-kind: CronJob
-metadata:
-  name: hub-offer-effective-from-update
-  namespace: hub
-spec:
-  schedule: "*/5 * * * *"
-  jobTemplate:
-    spec:
-      parallelism: 1
-      template:
-        metadata:
-          labels:
-            app: hub-offer-effective-from-update
-        spec:
-          restartPolicy: Never
-          imagePullSecrets:
-            - name: gcr-access-token
-          containers:
-            - name: hub-offer-effective-from-update
-              image: gcr.io/traefiklabs/hub-offer:latest
-              imagePullPolicy: IfNotPresent
-              env:
-                - name: LOG_LEVEL
-                  value: debug
-                - name: MONGODB_URI
-                  value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/alerts?authSource=admin
-                - name: USER_QUOTA_ENFORCER_URL
-                  value: http://hub-workspace.hub.svc.cluster.local/internal/quotas
-                - name: GSLB_QUOTA_ENFORCER_URL
-                  value: http://hub-gslb.hub.svc.cluster.local/internal/quotas
-                - name: EDGE_INGRESS_QUOTA_ENFORCER_URL
-                  value: http://hub-gslb.hub.svc.cluster.local/internal/quotas
-                - name: DOMAIN_QUOTA_ENFORCER_URL
-                  value: http://hub-gslb.hub.svc.cluster.local/internal/quotas
-                - name: ALERT_QUOTA_ENFORCER_URL
-                  value: http://hub-alert.hub.svc.cluster.local/internal/quotas
-                - name: CLUSTER_QUOTA_ENFORCER_URL
-                  value: http://hub-cluster.hub.svc.cluster.local/internal/quotas
-              args:
-                - effective-from-update
-              resources:
-                limits:
-                  cpu: 50m
-                  memory: 32Mi
 ---
 apiVersion: batch/v1beta1
 kind: CronJob
