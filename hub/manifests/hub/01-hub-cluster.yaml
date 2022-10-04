@@ -68,6 +68,8 @@ spec:
               value: http://hub-gslb.hub.svc.cluster.local/internal
             - name: TUNNEL_SERVICE_URL
               value: http://hub-tunnel-orchestrator.hub.svc.cluster.local/internal
+            - name: NOTIFICATION_SERVICE_URL
+              value: http://hub-notification.hub.svc.cluster.local/internal
             - name: TRACING_ENDPOINT
               value: "http://jaeger.jaeger.svc.cluster.local:14268"
             - name: TRACING_PROBABILITY
@@ -114,7 +116,7 @@ spec:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && (Path(`/agent/link`) || Path(`/agent/ping`))
+      match: Host(`platform.docker.localhost`) && (Path(`/agent/link`) || Path(`/agent/ping`) || Path(`/agent/version-status`))
       services:
         - name: hub-cluster
           port: 80
@@ -134,7 +136,7 @@ spec:
     - web
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && (Path(`/agent/link`) || Path(`/agent/ping`))
+      match: Host(`platform.docker.localhost`) && (Path(`/agent/link`) || Path(`/agent/ping`) || Path(`/agent/version-status`))
       services:
         - name: hub-cluster
           port: 80
