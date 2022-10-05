@@ -44,6 +44,8 @@ spec:
               value: "1"
             - name: WORKSPACE_SERVICE_URL
               value: http://hub-workspace.hub.svc.cluster.local/internal
+            - name: CLUSTER_SERVICE_URL
+              value: http://hub-cluster.hub.svc.cluster.local/internal
             - name: OFFER_SERVICE_URL
               value: http://hub-offer.hub.svc.cluster.local/internal
             - name : JWT_CERT
