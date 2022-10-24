@@ -19,8 +19,38 @@
       ],
       "permissions": [
         {
+          "action": "edit",
+          "resource": "subscription",
+          "scope": "*"
+        },
+        {
+          "action": "view",
+          "resource": "subscription",
+          "scope": "*"
+        },
+        {
           "action": "view",
           "resource": "workspace"
+        },
+        {
+          "action": "create",
+          "resource": "api_token",
+          "scope": "*"
+        },
+        {
+          "action": "view",
+          "resource": "api_token",
+          "scope": "*"
+        },
+        {
+          "action": "edit",
+          "resource": "api_token",
+          "scope": "*"
+        },
+        {
+          "action": "delete",
+          "resource": "api_token",
+          "scope": "*"
         },
         {
           "action": "create",
@@ -155,6 +185,11 @@
       "permissions": [
         {
           "action": "view",
+          "resource": "subscription",
+          "scope": "*"
+        },
+        {
+          "action": "view",
           "resource": "workspace"
         },
         {
@@ -276,6 +311,11 @@
       "type": "custom",
       "users": [],
       "permissions": [
+        {
+          "action": "view",
+          "resource": "subscription",
+          "scope": "*"
+        },
         {
           "action": "view",
           "resource": "workspace"

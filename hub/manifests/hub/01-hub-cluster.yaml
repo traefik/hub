@@ -38,6 +38,11 @@ spec:
             periodSeconds: 5
             failureThreshold: 2
           env:
+            - name: API_TOKEN_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: public.out
+                  name: api-token-key
             - name: JWT_CERT
               valueFrom:
                 secretKeyRef:

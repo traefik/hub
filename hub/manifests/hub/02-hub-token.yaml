@@ -38,6 +38,25 @@ spec:
             periodSeconds: 5
             failureThreshold: 2
           env:
+            - name: WORKSPACE_SERVICE_URL
+              value: http://hub-workspace.hub.svc.cluster.local/internal
+            - name: JWT_CERT
+              valueFrom:
+                secretKeyRef:
+                  key: jwt-cert
+                  name: hub-secret
+            - name: JWT_ISS
+              value: "https://traefiklabs-hub-preview.eu.auth0.com/"
+            - name: JWT_SUB
+              valueFrom:
+                secretKeyRef:
+                  key: jwt-sub
+                  name: hub-secret
+            - name: JWT_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: private.out
+                  name: jwt-private-key
             - name: TRACING_ENDPOINT
               value: "http://jaeger.jaeger.svc.cluster.local:14268"
             - name: TRACING_PROBABILITY
@@ -73,14 +92,14 @@ spec:
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: token-internal-tls
+  name: token-external-tls
   namespace: hub
 spec:
   entryPoints:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && PathPrefix(`/token/internal`)
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/token/external`)
       services:
         - name: hub-token
           port: 80
@@ -93,14 +112,14 @@ spec:
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: token-internal
+  name: token-external
   namespace: hub
 spec:
   entryPoints:
     - web
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && PathPrefix(`/token/internal`)
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/token/external`)
       services:
         - name: hub-token
           port: 80

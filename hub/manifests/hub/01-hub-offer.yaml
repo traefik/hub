@@ -79,7 +79,7 @@ spec:
             - name: GSLB_QUOTA_ENFORCER_URL
               value: http://hub-gslb.hub.svc.cluster.local/internal/quotas
             - name: EDGE_INGRESS_QUOTA_ENFORCER_URL
-              value: http://hub-gslb.hub.svc.cluster.local/internal/quotas
+              value: http://hub-tunnel-orchestrator.hub.svc.cluster.local/internal/quotas
             - name: DOMAIN_QUOTA_ENFORCER_URL
               value: http://hub-gslb.hub.svc.cluster.local/internal/quotas
             - name: JWT_CERT

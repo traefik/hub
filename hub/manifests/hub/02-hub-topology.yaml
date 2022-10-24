@@ -184,7 +184,7 @@ spec:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && Path(`/agent/topology`)
+      match: Host(`platform.docker.localhost`) && (Path(`/agent/topology`) || Path(`/agent/commands`) || Path(`/agent/command-reports`))
       services:
         - name: hub-topology
           port: 80
@@ -204,7 +204,7 @@ spec:
     - web
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && Path(`/agent/topology`)
+      match: Host(`platform.docker.localhost`) && (Path(`/agent/topology`) || Path(`/agent/commands`) || Path(`/agent/command-reports`))
       services:
         - name: hub-topology
           port: 80
