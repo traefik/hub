@@ -76,6 +76,8 @@ spec:
               value: http://hub-token.hub.svc.cluster.local/internal
             - name: USER_QUOTA_ENFORCER_URL
               value: http://hub-workspace.hub.svc.cluster.local/internal/quotas
+            - name: ACP_QUOTA_ENFORCER_URL
+              value: http://hub-acp.hub.svc.cluster.local/internal/quotas
             - name: GSLB_QUOTA_ENFORCER_URL
               value: http://hub-gslb.hub.svc.cluster.local/internal/quotas
             - name: EDGE_INGRESS_QUOTA_ENFORCER_URL
