@@ -13,3 +13,4 @@ venv
 diagrams/dist
 diagrams/diagrams
 
+hub/manifests/hub/02-hub-notification.yaml

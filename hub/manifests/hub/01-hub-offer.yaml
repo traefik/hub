@@ -74,6 +74,8 @@ spec:
               value: http://hub-user.hub.svc.cluster.local/internal
             - name: TOKEN_SERVICE_URL
               value: http://hub-token.hub.svc.cluster.local/internal
+            - name: NOTIFICATION_SERVICE_URL
+              value: http://hub-notification.hub.svc.cluster.local/internal
             - name: USER_QUOTA_ENFORCER_URL
               value: http://hub-workspace.hub.svc.cluster.local/internal/quotas
             - name: ACP_QUOTA_ENFORCER_URL

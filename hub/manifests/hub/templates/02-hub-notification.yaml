@@ -76,8 +76,10 @@ spec:
             - --sendgrid-welcome-template-id=d-267cf2806d0f4cdc99a1c1d2cbd6d3dc
             - --sendgrid-unverified-email-reminder-template-id=d-a06cdfd675e649459394b9e16a676b44
             - --sendgrid-no-cluster-reminder-template-id=d-5f561710d8d74ecab6dbcddb62c3f954
+            - --sendgrid-request-scale-offer-template-id=d-5214ae9100c943dd8194aa3af6679ee8
             - --sendgrid-from=noreply@traefik.io
             - --sendgrid-from-name=Me
+            - --sendgrid-sales-email=${GCLOUD_EMAIL}
             - --mongodb-uri=mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/notification?authSource=admin
 
 ---
