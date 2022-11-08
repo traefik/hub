@@ -87,6 +87,7 @@ main() {
   # Install Hub
   echo "Deploying Hub services."
 
+  export GCLOUD_EMAIL
   envsubst < "$PROJECT_DIR"/hub/manifests/hub/templates/02-hub-notification.yaml > "$PROJECT_DIR"/hub/manifests/hub/02-hub-notification.yaml
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/hub/secrets/
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/hub/

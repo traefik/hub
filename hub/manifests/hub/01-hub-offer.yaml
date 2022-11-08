@@ -332,6 +332,8 @@ spec:
                   value: http://hub-alert.hub.svc.cluster.local/internal/quotas
                 - name: CLUSTER_QUOTA_ENFORCER_URL
                   value: http://hub-cluster.hub.svc.cluster.local/internal/quotas
+                - name: ACP_QUOTA_ENFORCER_URL
+                  value: http://hub-acp.hub.svc.cluster.local/internal/quotas
               args:
                 - quotas-update
               resources:
