@@ -6,6 +6,7 @@ readonly PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" && pwd)/.."
 ENV_FILE=${PROJECT_DIR}/hub/.env
 [[ -f "${ENV_FILE}" ]] && source "${ENV_FILE}"
 WORKSPACE_ID="${WORKSPACE_ID:-6311c90bfce04bd29e473a20}"
+K3S_IMAGE="${K3S_IMAGE-"rancher/k3s:v1.24.4-k3s1"}"
 
 main() {
   check-tools
@@ -195,7 +196,7 @@ main() {
   # Install Ingress-nginx
   echo "Deploying nginx."
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/ingress-nginx/
-  kubectl -n ingress-nginx wait --for condition=available --timeout="${TIMEOUT}" deployment/ingress-nginx-controller
+  kubectl -n ingress-nginx wait --for condition=available --timeout="${TIMEOUT}" deployment/nginx-ingress-nginx-controller
 
   # Install HaProxy
   echo "Deploying haproxy."
@@ -310,7 +311,16 @@ setup-k3s() {
     k3d cluster start k3s-default-hub
   else
     echo "Setting up k3s cluster."
-    k3d cluster create k3s-default-hub --agents=2 --k3s-arg "--no-deploy=traefik@servers:*" --image="rancher/k3s:v1.21.5-k3s1" --port 80:80@loadbalancer --port 443:443@loadbalancer --port 8000:8000@loadbalancer --port 8443:8443@loadbalancer --port 9000:9000@loadbalancer --port 9443:9443@loadbalancer --port 9090:9090@loadbalancer
+    k3d cluster create k3s-default-hub --agents=2 \
+      --k3s-arg "--no-deploy=traefik@servers:*" \
+      --image="$K3S_IMAGE" \
+      --port 80:80@loadbalancer \
+      --port 443:443@loadbalancer \
+      --port 8000:8000@loadbalancer \
+      --port 8443:8443@loadbalancer \
+      --port 9000:9000@loadbalancer \
+      --port 9443:9443@loadbalancer \
+      --port 9090:9090@loadbalancer
   fi
 
   # Wait until cluster is ready

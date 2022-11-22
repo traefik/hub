@@ -64,6 +64,8 @@ spec:
               value: "traefiklabs"
             - name: TOPOLOGY_GIT_PROXY_HOST
               value: platform.docker.localhost
+            - name: ACP_QUOTA_ENFORCER_URL
+              value: http://hub-acp.hub.svc.cluster.local/internal/quotas
             - name: ALERT_QUOTA_ENFORCER_URL
               value: http://hub-alert.hub.svc.cluster.local/internal/quotas
             - name: CLUSTER_QUOTA_ENFORCER_URL

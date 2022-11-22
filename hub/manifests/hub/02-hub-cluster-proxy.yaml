@@ -59,8 +59,7 @@ spec:
   entryPoints:
     - cluster-proxy
   routes:
-    - kind: Rule
-      match: HostSNI(`*`)
+    - match: HostSNI(`*`)
       services:
         - name: hub-cluster-proxy
           port: 443
