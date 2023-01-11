@@ -1,0 +1,13 @@
+apiVersion: hub.traefik.io/v1alpha1
+kind: Catalog
+metadata:
+  name: myawesomecatalog
+spec:
+  customDomains:
+    - foo.example.com
+    - bar.example.com
+  services:
+    - name: petstore-svc
+      namespace: petstore
+      pathPrefix: "/"
+      port: 8080

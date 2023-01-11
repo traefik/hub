@@ -153,7 +153,7 @@ main() {
   --offer-quotas-edge-ingresses="10" \
   --offer-config-gslb-http-healthcheck-min-interval-seconds=15 \
   --offer-config-gslb-http-healthcheck-min-threshold-editable="true" \
-  --offer-features="team-management" --offer-features="geo-steering" \
+  --offer-features="team-management" --offer-features="geo-steering" --offer-features="api-management" --offer-features="oidc" \
   --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
 
   # Create subscription
@@ -207,6 +207,11 @@ main() {
   echo "Deploying whoami."
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/whoami/
   kubectl -n whoami wait --for condition=available --timeout="${TIMEOUT}" deployment/whoami
+
+  # Install petstore as openapi example
+  echo "Deploying petstore."
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/petstore/
+  kubectl -n petstore wait --for condition=available --timeout="${TIMEOUT}" deployment/petstore-app
 
   # Install monitoring
   echo "Deploying monitoring."

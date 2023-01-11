@@ -1,0 +1,36 @@
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: petstore
+  namespace: petstore
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: petstore-app
+  template:
+    metadata:
+      labels:
+        app: petstore-app
+    spec:
+      containers:
+        - name: openapi
+          image: swaggerapi/petstore3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: petstore-svc
+  namespace: petstore
+  annotations:
+    hub.traefik.io/openapi-path: /api/v3/openapi.json
+    hub.traefik.io/openapi-port: "8080"
+  labels:
+    app: petstore
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+  selector:
+    app: petstore-app
