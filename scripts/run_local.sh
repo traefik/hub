@@ -304,10 +304,12 @@ check-tools() {
 }
 
 prepare-docker-images() {
-  for image in $(find $PROJECT_DIR -type f -name '*.yaml' | xargs grep 'image: ' | awk -F ':' '{ print $3":"$4 }'); do
-    docker pull "${image}"
-    k3d image import ${image} -c k3s-default-hub
-  done
+  images=$(find "${PROJECT_DIR}" -type f -name '*.yaml' | xargs grep 'image: ' | tr -d \" | awk -F '@' '{ print $1 }' | awk -F ':' '{ print $3":"$4 }' | sort | uniq)
+
+  images=$(echo "${images}" | grep -v "hub-ui|hub-git")
+
+  echo "${images}" | xargs -P4 -n1 docker pull
+  k3d image import -c k3s-default-hub ${images}
 }
 
 setup-k3s() {

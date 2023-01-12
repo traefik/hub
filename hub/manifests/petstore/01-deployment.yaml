@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: openapi
-          image: swaggerapi/petstore3
+          image: swaggerapi/petstore3:latest
 ---
 apiVersion: v1
 kind: Service
