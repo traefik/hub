@@ -46,6 +46,7 @@ spec:
 
             - --experimental.hub
             - --hub.tls.insecure
+            - --entrypoints.traefikhub-catalog.Address=:9902
             - --metrics.prometheus.addrouterslabels
           ports:
             - name: web

@@ -16,6 +16,9 @@ spec:
     - protocol: TCP
       name: websecure
       port: 443
+    - protocol: TCP
+      name: hub-catalog
+      port: 9902
   selector:
     app: traefik
 

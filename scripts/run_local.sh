@@ -327,7 +327,8 @@ setup-k3s() {
       --port 8443:8443@loadbalancer \
       --port 9000:9000@loadbalancer \
       --port 9443:9443@loadbalancer \
-      --port 9090:9090@loadbalancer
+      --port 9090:9090@loadbalancer \
+      --port 9902:9902@loadbalancer
   fi
 
   # Wait until cluster is ready
