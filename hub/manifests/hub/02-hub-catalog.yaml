@@ -58,6 +58,8 @@ spec:
               value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/tokens?authSource=admin
             - name: OFFER_SERVICE_URL
               value: "http://hub-offer.hub.svc.cluster.local/internal"
+            - name: TUNNEL_SERVICE_URL
+              value: "http://hub-tunnel-orchestrator.hub.svc.cluster.local/internal"
             - name: LOG_LEVEL
               value: debug
           args:
