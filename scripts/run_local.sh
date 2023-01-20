@@ -122,6 +122,7 @@ main() {
   --offer-quotas-clusters="2" \
   --offer-config-access-control-max-secured-routes="3" \
   --offer-quotas-users="2" \
+  --offer-quotas-acps="3" \
   --offer-quotas-domains="10" \
   --offer-quotas-gslb-bandwidth="1000000000" \
   --offer-quotas-alert-triggers="5" \
@@ -146,6 +147,7 @@ main() {
   --offer-quotas-clusters="5" \
   --offer-config-access-control-max-secured-routes="50" \
   --offer-quotas-users="20" \
+  --offer-quotas-acps="10" \
   --offer-quotas-domains="100" \
   --offer-quotas-gslb-bandwidth="50000000000" \
   --offer-quotas-alert-triggers="100" \
