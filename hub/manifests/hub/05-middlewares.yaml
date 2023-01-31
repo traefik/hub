@@ -48,6 +48,7 @@ spec:
       - /topology
       - /tunnel
       - /workspace
+      - /catalog
 
 ---
 apiVersion: traefik.containo.us/v1alpha1
