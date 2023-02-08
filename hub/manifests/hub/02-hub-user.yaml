@@ -58,6 +58,8 @@ spec:
               value: debug
             - name: MONGODB_URI
               value: "mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/user?authSource=admin"
+            - name: EVENTS_SERVICE_URL
+              value: http://hub-log-events.hub.svc.cluster.local/internal
           args:
             - serve
             - --addr=:80

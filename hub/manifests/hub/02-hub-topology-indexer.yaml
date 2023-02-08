@@ -50,6 +50,8 @@ spec:
               value: hub
             - name: TOKEN_SERVICE_URL
               value: http://hub-token.hub.svc.cluster.local/internal
+            - name: EVENTS_SERVICE_URL
+              value: http://hub-log-events.hub.svc.cluster.local/internal
             - name: TRACING_ENDPOINT
               value: "http://jaeger.jaeger.svc.cluster.local:14268"
             - name: TRACING_PROBABILITY

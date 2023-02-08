@@ -64,6 +64,8 @@ spec:
               value: https://webapp.docker.io/r
             - name: MONGODB_URI
               value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/invitations?authSource=admin
+            - name: EVENTS_SERVICE_URL
+              value: http://hub-log-events.hub.svc.cluster.local/internal
             - name: LOG_LEVEL
               value: debug
           args:

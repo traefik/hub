@@ -66,6 +66,8 @@ spec:
               value: "http://hub-notification.hub.svc.cluster.local/internal"
             - name: USER_SERVICE_URL
               value: "http://hub-user.hub.svc.cluster.local/internal"
+            - name: EVENTS_SERVICE_URL
+              value: http://hub-log-events.hub.svc.cluster.local/internal
             - name: MONGODB_ENCRYPTION_KEY
               value: JUMqRi1KYU5jUmZValhuMnI1dTh4L0E/RChHK0tiUGU=
             - name: MONGODB_URI

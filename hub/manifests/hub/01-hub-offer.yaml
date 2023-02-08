@@ -80,14 +80,14 @@ spec:
               value: http://hub-notification.hub.svc.cluster.local/internal
             - name: USER_QUOTA_ENFORCER_URL
               value: http://hub-workspace.hub.svc.cluster.local/internal/quotas
-            - name: ACP_QUOTA_ENFORCER_URL
-              value: http://hub-acp.hub.svc.cluster.local/internal/quotas
             - name: GSLB_QUOTA_ENFORCER_URL
               value: http://hub-gslb.hub.svc.cluster.local/internal/quotas
             - name: EDGE_INGRESS_QUOTA_ENFORCER_URL
               value: http://hub-tunnel-orchestrator.hub.svc.cluster.local/internal/quotas
             - name: DOMAIN_QUOTA_ENFORCER_URL
               value: http://hub-gslb.hub.svc.cluster.local/internal/quotas
+            - name: EVENTS_SERVICE_URL
+              value: http://hub-log-events.hub.svc.cluster.local/internal
             - name: JWT_CERT
               valueFrom:
                 secretKeyRef:

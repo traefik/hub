@@ -1,0 +1,80 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hub-log-events
+  namespace: hub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hub-log-events
+  template:
+    metadata:
+      labels:
+        app: hub-log-events
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "80"
+    spec:
+      imagePullSecrets:
+        - name: gcr-access-token
+      containers:
+        - name: hub-log-events
+          image: gcr.io/traefiklabs/hub-log-events:latest
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              port: 80
+              path: /live
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 2
+          readinessProbe:
+            httpGet:
+              port: 80
+              path: /ready
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 2
+          env:
+            - name: TRACING_ENDPOINT
+              value: "http://jaeger.jaeger.svc.cluster.local:14268"
+            - name: TRACING_PROBABILITY
+              value: "1"
+            - name : JWT_CERT
+              valueFrom :
+                secretKeyRef :
+                  key : jwt-cert
+                  name : hub-secret
+            - name : JWT_ISS
+              value : "https://traefiklabs-hub-preview.eu.auth0.com/"
+            - name : JWT_SUB
+              valueFrom :
+                secretKeyRef :
+                  key : jwt-sub
+                  name : hub-secret
+            - name: LOG_LEVEL
+              value: debug
+          args:
+            - serve
+            - --addr=:80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hub-log-events
+  namespace: hub
+  labels:
+    app: hub-log-events
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      name: hub-log-events
+    - port: 40000
+      targetPort: 40000
+      name: hub-log-events-debug
+  selector:
+    app: hub-log-events

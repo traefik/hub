@@ -64,6 +64,8 @@ spec:
               value: http://hub-token.hub.svc.cluster.local/internal
             - name: INDEXER_API_URL
               value: http://hub-topology-indexer-api.hub.svc.cluster.local/internal
+            - name: EVENTS_SERVICE_URL
+              value: http://hub-log-events.hub.svc.cluster.local/internal
             - name: TRACING_ENDPOINT
               value: "http://jaeger.jaeger.svc.cluster.local:14268"
             - name: TRACING_PROBABILITY
