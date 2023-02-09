@@ -103,8 +103,8 @@ spec:
               value: http://hub-notification.hub.svc.cluster.local/internal
             - name: WORKSPACE_SERVICE_URL
               value: http://hub-workspace.hub.svc.cluster.local/internal
-            - name: EVENTS_SERVICE_URL
-              value: http://hub-log-events.hub.svc.cluster.local/internal
+            - name: TRACE_SERVICE_URL
+              value: http://hub-trace.hub.svc.cluster.local/internal
             - name: HUB_DOMAIN_SUFFIX
               value: hub.traefik.io
             - name: CLOUDFLARE_EMAIL

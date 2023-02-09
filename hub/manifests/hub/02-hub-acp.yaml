@@ -23,20 +23,20 @@ spec:
         - name: hub-acp
           image: gcr.io/traefiklabs/hub-acp:latest
           imagePullPolicy: IfNotPresent
-#          livenessProbe:
-#            httpGet:
-#              port: 80
-#              path: /live
-#            initialDelaySeconds: 5
-#            periodSeconds: 5
-#            failureThreshold: 2
-#          readinessProbe:
-#            httpGet:
-#              port: 80
-#              path: /ready
-#            initialDelaySeconds: 5
-#            periodSeconds: 5
-#            failureThreshold: 2
+          livenessProbe:
+            httpGet:
+              port: 80
+              path: /live
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 2
+          readinessProbe:
+            httpGet:
+              port: 80
+              path: /ready
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 2
           env:
             - name: TRACING_ENDPOINT
               value: "http://jaeger.jaeger.svc.cluster.local:14268"
@@ -48,8 +48,8 @@ spec:
               value: http://hub-cluster.hub.svc.cluster.local/internal
             - name: OFFER_SERVICE_URL
               value: http://hub-offer.hub.svc.cluster.local/internal
-            - name: EVENTS_SERVICE_URL
-              value: http://hub-log-events.hub.svc.cluster.local/internal
+            - name: TRACE_SERVICE_URL
+              value: http://hub-trace.hub.svc.cluster.local/internal
             - name : JWT_CERT
               valueFrom :
                 secretKeyRef :

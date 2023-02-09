@@ -2,17 +2,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hub-log-events
+  name: hub-trace
   namespace: hub
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: hub-log-events
+      app: hub-trace
   template:
     metadata:
       labels:
-        app: hub-log-events
+        app: hub-trace
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "80"
@@ -20,8 +20,8 @@ spec:
       imagePullSecrets:
         - name: gcr-access-token
       containers:
-        - name: hub-log-events
-          image: gcr.io/traefiklabs/hub-log-events:latest
+        - name: hub-trace
+          image: gcr.io/traefiklabs/hub-trace:latest
           imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:
@@ -63,18 +63,18 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: hub-log-events
+  name: hub-trace
   namespace: hub
   labels:
-    app: hub-log-events
+    app: hub-trace
 spec:
   type: ClusterIP
   ports:
     - port: 80
       targetPort: 80
-      name: hub-log-events
+      name: hub-trace
     - port: 40000
       targetPort: 40000
-      name: hub-log-events-debug
+      name: hub-trace-debug
   selector:
-    app: hub-log-events
+    app: hub-trace

@@ -113,8 +113,8 @@ spec:
               value: "http://hub-workspace.hub.svc.cluster.local/internal"
             - name: CERTIFICATES_SERVICE_URL
               value: "http://hub-certificates.hub.svc.cluster.local/internal"
-            - name: EVENTS_SERVICE_URL
-              value: http://hub-log-events.hub.svc.cluster.local/internal
+            - name: TRACE_SERVICE_URL
+              value: http://hub-trace.hub.svc.cluster.local/internal
             - name: TRACING_ENDPOINT
               value: "http://jaeger.jaeger.svc.cluster.local:14268"
             - name: TRACING_USERNAME
