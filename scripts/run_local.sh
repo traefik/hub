@@ -130,7 +130,7 @@ main() {
   --offer-quotas-edge-ingresses="10" \
   --offer-config-gslb-http-healthcheck-min-interval-seconds=60 \
   --offer-config-gslb-http-healthcheck-min-threshold-editable="false" \
-  --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
+  --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" --offer-features="api-management" || true
 
   ## Premium
   kubectl run --timeout="${TIMEOUT}" --command=true -it --rm --restart=Never --image=gcr.io/traefiklabs/hub-offer:latest \
@@ -156,7 +156,7 @@ main() {
   --offer-config-gslb-http-healthcheck-min-interval-seconds=15 \
   --offer-config-gslb-http-healthcheck-min-threshold-editable="true" \
   --offer-features="team-management" --offer-features="geo-steering" --offer-features="api-management" --offer-features="oidc" \
-  --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" || true
+  --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" --offer-features="api-management" || true
 
   # Create subscription
   curl --silent --location --request POST 'http://platform.docker.localhost/offer/internal/subscriptions' \

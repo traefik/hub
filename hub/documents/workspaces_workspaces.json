@@ -133,6 +133,26 @@
           "scope": "*"
         },
         {
+          "action": "create",
+          "resource": "catalog",
+          "scope": "*"
+        },
+        {
+          "action": "view",
+          "resource": "catalog",
+          "scope": "*"
+        },
+        {
+          "action": "edit",
+          "resource": "catalog",
+          "scope": "*"
+        },
+        {
+          "action": "delete",
+          "resource": "catalog",
+          "scope": "*"
+        },
+        {
           "action": "edit",
           "resource": "workspace"
         },
