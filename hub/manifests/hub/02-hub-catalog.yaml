@@ -165,3 +165,88 @@ spec:
           port: 80
       middlewares:
         - name: stripprefix
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hub-catalog-check-unverified-job
+  namespace: hub
+spec:
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 5
+      parallelism: 1
+      template:
+        metadata:
+          labels:
+            cronjob: hub-catalog-check-job
+        spec:
+          containers:
+            - args:
+                - check
+              env:
+                - name: DEV_MODE
+                  value: "true"
+                - name: MONGODB_URI
+                  value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/catalogs?authSource=admin
+                - name: CERTIFICATES_SERVICE_URL
+                  value: "http://hub-certificates.hub.svc.cluster.local/internal"
+                - name: LOG_LEVEL
+                  value: debug
+                - name: CNAME_DNS_CHALLENGE
+                  value: "acme-challenge.preview.traefikhub.dev"
+                - name: MONGODB_MINPOOL
+                  value: "1"
+                - name: MONGODB_MAXPOOL
+                  value: "3"
+              image: gcr.io/traefiklabs/hub-catalog:latest
+              name: hub-catalog-check-job
+          imagePullSecrets:
+            - name: gcr-access-token
+          restartPolicy: Never
+  schedule: '*/5 * * * *'
+
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hub-catalog-check-verified-job
+  namespace: hub
+spec:
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 5
+      parallelism: 1
+      template:
+        metadata:
+          labels:
+            cronjob: hub-catalog-check-job
+        spec:
+          containers:
+            - args:
+                - check
+              env:
+                - name: VERIFIED_DOMAIN
+                  value: "true"
+                - name: DEV_MODE
+                  value: "true"
+                - name: MONGODB_URI
+                  value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/catalogs?authSource=admin
+                - name: CERTIFICATES_SERVICE_URL
+                  value: "http://hub-certificates.hub.svc.cluster.local/internal"
+                - name: LOG_LEVEL
+                  value: debug
+                - name: CNAME_DNS_CHALLENGE
+                  value: "acme-challenge.preview.traefikhub.dev"
+                - name: MONGODB_MINPOOL
+                  value: "1"
+                - name: MONGODB_MAXPOOL
+                  value: "3"
+              image: gcr.io/traefiklabs/hub-catalog:latest
+              name: hub-catalog-check-job
+          imagePullSecrets:
+            - name: gcr-access-token
+          restartPolicy: Never
+  schedule: '@daily'

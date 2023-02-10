@@ -93,6 +93,8 @@ main() {
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/hub/secrets/
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/hub/
 
+  apply-coredns-conf
+
   # Create token
   kubectl rollout status deploy --timeout="${TIMEOUT}" -n hub hub-topology
   kubectl rollout status deploy --timeout="${TIMEOUT}" -n hub hub-cluster
