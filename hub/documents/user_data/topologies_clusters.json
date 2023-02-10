@@ -1,0 +1,13 @@
+[
+  {
+    "_id": {
+      "$oid": "63da7ea6642a4945757d7531"
+    },
+    "id": "442462ba-e1ac-4ce8-abdd-3d6b8944da7e",
+    "workspaceId": "63da78bda8b057540c5f8cdc",
+    "serviceCount": 3,
+    "ingressCount": 0,
+    "namespaces": null,
+    "serviceTypes": null
+  }
+]

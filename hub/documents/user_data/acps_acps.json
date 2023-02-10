@@ -1,0 +1,30 @@
+[
+  {
+    "_id": "63da7f0db6f06ea69a6644f5",
+    "clusterId": "442462ba-e1ac-4ce8-abdd-3d6b8944da7e",
+    "workspaceId": "63da78bda8b057540c5f8cdc",
+    "name": "basicauth",
+    "version": "CG9j3ouFeI8T9Ii1pJ1dKHnbDVA=",
+    "jwt": null,
+    "basicAuth": {
+      "users": [
+        "my-user:$2a$10$viZDZANwq1DLsdC..K2SeOPgBWFr5go2d6okP6OYtfdZlaVVuzZKu"
+      ],
+      "realm": "",
+      "stripAuthorizationHeader": false,
+      "forwardUsernameHeader": ""
+    },
+    "apiKey": null,
+    "oidc": null,
+    "oidcGoogle": null,
+    "syncedAt": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    },
+    "createdAt": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    },
+    "updatedAt": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    }
+  }
+]

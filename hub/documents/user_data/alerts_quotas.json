@@ -1,0 +1,24 @@
+[
+  {
+    "_id": {
+      "$oid": "63da78bd642a4945757c5463"
+    },
+    "name": "alert-history",
+    "workspaceId": "63da78bda8b057540c5f8cdc",
+    "effectiveFrom": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    },
+    "max": 10
+  },
+  {
+    "_id": {
+      "$oid": "63da78bd642a4945757c5464"
+    },
+    "name": "alert-triggers",
+    "workspaceId": "63da78bda8b057540c5f8cdc",
+    "effectiveFrom": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    },
+    "max": 5
+  }
+]

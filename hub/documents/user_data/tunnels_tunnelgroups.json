@@ -1,0 +1,28 @@
+[
+  {
+    "_id": {
+      "$oid": "63da7d5699ec91c1b24a8616"
+    },
+    "workspaceId": "63da78bda8b057540c5f8cdc",
+    "clusterId": "442462ba-e1ac-4ce8-abdd-3d6b8944da7e",
+    "domain": "*-fegx4m.cw6u7v96.preview.traefikhub.dev",
+    "tunnels": [
+      {
+        "id": "bb1454f5-f1af-43ab-9e0e-1c80245f9c07",
+        "brokerId": "9b7b799b-6788-4f3d-983c-6895933abde9",
+        "inboundPort": 41013
+      },
+      {
+        "id": "f5b308b1-7052-40b9-9732-c872630bb282",
+        "brokerId": "b4ba5415-2126-4082-a18f-e78fbc5f902d",
+        "inboundPort": 45255
+      }
+    ],
+    "tunnelsCount": {
+      "$numberLong": "2"
+    },
+    "tunnelsUpdatedAt": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    }
+  }
+]

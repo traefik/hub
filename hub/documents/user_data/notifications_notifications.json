@@ -1,0 +1,44 @@
+[
+  {
+    "_id": "63da7d562d760331a34fb534",
+    "workspaceId": "63da78bda8b057540c5f8cdc",
+    "type": "info",
+    "message": "Traefik Hub has automatically requested a TLS certificate for your workspace domain *.cw6u7v96.preview.traefikhub.dev. This should take no longer than a couple of minutes. In the meantime, services will be published using a default self-signed certificate.",
+    "resource": "certificate",
+    "createdAt": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    },
+    "users": [
+      "f2d02f10-4bbc-4143-b8b1-97d649732cea"
+    ],
+    "cleared": []
+  },
+  {
+    "_id": "63da7da32d760331a34fb535",
+    "workspaceId": "63da78bda8b057540c5f8cdc",
+    "type": "success",
+    "message": "Traefik Hub has deployed your workspace domain certificate *.cw6u7v96.preview.traefikhub.dev. You can now publish your services securely behind TLS. Enjoy the process!",
+    "resource": "certificate",
+    "createdAt": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    },
+    "users": [
+      "f2d02f10-4bbc-4143-b8b1-97d649732cea"
+    ],
+    "cleared": []
+  },
+  {
+    "_id": "63da80fd2d760331a34fb536",
+    "workspaceId": "63da78bda8b057540c5f8cdc",
+    "type": "info",
+    "message": "Your cluster \"agenttraefik\" has been upgraded to v1.0.1",
+    "resource": "cluster",
+    "createdAt": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    },
+    "users": [
+      "f2d02f10-4bbc-4143-b8b1-97d649732cea"
+    ],
+    "cleared": []
+  }
+]

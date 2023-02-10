@@ -1,0 +1,10 @@
+[
+  {
+    "_id": {
+      "$oid": "63da78bd642a4945757c5470"
+    },
+    "name": "users",
+    "workspaceId": "63da78bda8b057540c5f8cdc",
+    "max": 1
+  }
+]

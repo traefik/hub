@@ -1,0 +1,27 @@
+[
+  {
+    "_id": "0b113653-c76b-417b-b659-8d84fc39cd1f",
+    "workspaceId": "63da78bda8b057540c5f8cdc",
+    "teamId": "63da78bda8b057540c5f8cde",
+    "createdBy": {
+      "id": "f2d02f10-4bbc-4143-b8b1-97d649732cea",
+      "name": "baptiste.mayelle+testdelete@traefik.io"
+    },
+    "maxUses": 1,
+    "targetEmail": "john.doe@traefik.io",
+    "slots": [
+      {
+        "userId": "f2d02f10-4bbc-4143-b8b1-97d649732cea",
+        "at": {
+          "$date": "2021-10-01T12:27:03.583Z"
+        }
+      }
+    ],
+    "expiresAt": {
+      "$date": "2035-10-01T12:27:03.583Z"
+    },
+    "createdAt": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    }
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "_id": {
+      "$oid": "63da7d5640d8407757c537b5"
+    },
+    "workspaceId": "63da78bda8b057540c5f8cdc",
+    "clusterId": "442462ba-e1ac-4ce8-abdd-3d6b8944da7e",
+    "hash": "62393761636465332d633264392d343530382d626430662d366461326637623234356663cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e",
+    "disabled": false,
+    "createdAt": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    }
+  }
+]

@@ -1,0 +1,497 @@
+[
+  {
+    "_id": {
+      "$oid": "63da78bda8b057540c5f8cdc"
+    },
+    "name": "Baptiste TestDelete's workspace",
+    "isUser": false,
+    "users": [
+      "f2d02f10-4bbc-4143-b8b1-97d649732cea"
+    ],
+    "teams": [
+      {
+        "_id": {
+          "$oid": "63da78bda8b057540c5f8cdd"
+        },
+        "name": "Owner",
+        "type": "owner",
+        "users": [
+          "f2d02f10-4bbc-4143-b8b1-97d649732cea"
+        ],
+        "permissions": [
+          {
+            "action": "view",
+            "resource": "workspace"
+          },
+          {
+            "action": "create",
+            "resource": "edge_ingress",
+            "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "edge_ingress",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "edge_ingress",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "edge_ingress",
+            "scope": "*"
+          },
+          {
+            "action": "create",
+            "resource": "cluster",
+            "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "cluster",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "cluster",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "cluster",
+            "scope": "*"
+          },
+          {
+            "action": "create",
+            "resource": "gslb",
+            "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "gslb",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "gslb",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "gslb",
+            "scope": "*"
+          },
+          {
+            "action": "create",
+            "resource": "acp",
+            "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "acp",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "acp",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "acp",
+            "scope": "*"
+          },
+          {
+            "action": "create",
+            "resource": "catalog",
+            "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "catalog",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "catalog",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "catalog",
+            "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "subscription",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "workspace"
+          },
+          {
+            "action": "create",
+            "resource": "invitation"
+          },
+          {
+            "action": "view",
+            "resource": "invitation",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "invitation",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "user",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "owner"
+          },
+          {
+            "action": "edit",
+            "resource": "subscription",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "workspace"
+          },
+          {
+            "action": "create",
+            "resource": "api_token",
+            "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "api_token",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "api_token",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "api_token",
+            "scope": "*"
+          }
+        ],
+        "updatedAt": {
+          "$date": "2021-10-01T12:27:03.583Z"
+        },
+        "createdAt": {
+          "$date": "2021-10-01T12:27:03.583Z"
+        }
+      },
+      {
+        "_id": {
+          "$oid": "63da78bda8b057540c5f8cde"
+        },
+        "name": "Admin",
+        "type": "admin",
+        "users": [],
+        "permissions": [
+          {
+            "action": "view",
+            "resource": "workspace"
+          },
+          {
+            "action": "create",
+            "resource": "edge_ingress",
+            "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "edge_ingress",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "edge_ingress",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "edge_ingress",
+            "scope": "*"
+          },
+          {
+            "action": "create",
+            "resource": "cluster",
+            "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "cluster",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "cluster",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "cluster",
+            "scope": "*"
+          },
+          {
+            "action": "create",
+            "resource": "gslb",
+            "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "gslb",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "gslb",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "gslb",
+            "scope": "*"
+          },
+          {
+            "action": "create",
+            "resource": "acp",
+            "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "acp",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "acp",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "acp",
+            "scope": "*"
+          },
+          {
+            "action": "create",
+            "resource": "catalog",
+            "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "catalog",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "catalog",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "catalog",
+            "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "subscription",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "workspace"
+          },
+          {
+            "action": "create",
+            "resource": "invitation"
+          },
+          {
+            "action": "view",
+            "resource": "invitation",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "invitation",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "user",
+            "scope": "*"
+          }
+        ],
+        "updatedAt": {
+          "$date": "2021-10-01T12:27:03.583Z"
+        },
+        "createdAt": {
+          "$date": "2021-10-01T12:27:03.583Z"
+        }
+      },
+      {
+        "_id": {
+          "$oid": "63da78bda8b057540c5f8cdf"
+        },
+        "name": "Member",
+        "type": "custom",
+        "users": [],
+        "permissions": [
+          {
+            "action": "view",
+            "resource": "workspace"
+          },
+          {
+            "action": "create",
+            "resource": "edge_ingress",
+            "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "edge_ingress",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "edge_ingress",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "edge_ingress",
+            "scope": "*"
+          },
+          {
+            "action": "create",
+            "resource": "cluster",
+            "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "cluster",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "cluster",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "cluster",
+            "scope": "*"
+          },
+          {
+            "action": "create",
+            "resource": "gslb",
+            "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "gslb",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "gslb",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "gslb",
+            "scope": "*"
+          },
+          {
+            "action": "create",
+            "resource": "acp",
+            "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "acp",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "acp",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "acp",
+            "scope": "*"
+          },
+          {
+            "action": "create",
+            "resource": "catalog",
+            "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "catalog",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "catalog",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "catalog",
+            "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "subscription",
+            "scope": "*"
+          }
+        ],
+        "updatedAt": {
+          "$date": "2021-10-01T12:27:03.583Z"
+        },
+        "createdAt": {
+          "$date": "2021-10-01T12:27:03.583Z"
+        }
+      }
+    ],
+    "ca": {
+      "certificate": {
+        "$binary": {
+          "base64": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJwekNDQVZtZ0F3SUJBZ0lSQU9zQkdJM1B5V1l5US9GSVhxZFUvNDh3QlFZREsyVndNRk14Q3pBSkJnTlYKQkFZVEFrWlNNUlV3RXdZRFZRUUtFd3hVY21GbFptbHJJRXhoWW5NeExUQXJCZ05WQkFNVEpEWXpaR0UzT0dKawpZVGhpTURVM05UUXdZelZtT0dOa1l5NTBjbUZsWm1sckxtaDFZakFlRncweU16QXlNREV4TkRNMU5ERmFGdzB5Ck9EQXhNekV4TkRNMU5ERmFNRk14Q3pBSkJnTlZCQVlUQWtaU01SVXdFd1lEVlFRS0V3eFVjbUZsWm1scklFeGgKWW5NeExUQXJCZ05WQkFNVEpEWXpaR0UzT0dKa1lUaGlNRFUzTlRRd1l6Vm1PR05rWXk1MGNtRmxabWxyTG1oMQpZakFxTUFVR0F5dGxjQU1oQU1DRytWcGFmV2YxTXFnajBkZStsdGphellRVThDQkRacEd1V1ZXdUg0UVNvMEl3ClFEQU9CZ05WSFE4QkFmOEVCQU1DQWdRd0R3WURWUjBUQVFIL0JBVXdBd0VCL3pBZEJnTlZIUTRFRmdRVTFtSUQKRnFEUEIyRm13ait2WWNiR0VQRzZrQXd3QlFZREsyVndBMEVBNDFpV1IwTDZqYjFBWFlDS0ZBbEo0RWxPdVNMMQpyTW9YT2hFL1BQRGJlSXJqcWo3Y01iQ1JOdEdHTlV2QklhcnJGMytaeEFGMWtOb0Q0WXdNTFhUVURRPT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=",
+          "subType": "00"
+        }
+      },
+      "privateKey": {
+        "$binary": {
+          "base64": "fmuTpkNe6CYVS/wKst2G4ngBpwYET3jEkcjhaKCT8wh/HtQiR/9iau4fwPs+gYZ/c6BcQU3Q9VC0biYd7MfZ9K1j/F4Wpv6Qel3Qew==",
+          "subType": "00"
+        }
+      },
+      "updatedAt": {
+        "$date": "2021-10-01T12:27:03.583Z"
+      }
+    },
+    "domain": "cw6u7v96.preview.traefikhub.dev",
+    "clusterCreatedCount": {
+      "$numberInt": "1"
+    },
+    "updatedAt": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    },
+    "createdAt": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    }
+  }
+]

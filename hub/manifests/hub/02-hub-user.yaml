@@ -58,11 +58,100 @@ spec:
               value: debug
             - name: MONGODB_URI
               value: "mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/user?authSource=admin"
+            - name: AUTH0_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  key: hub-services-client-id
+                  name: hub-secret
+            - name: AUTH0_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: hub-services-client-secret
+                  name: hub-secret
+            - name: AUTH0_ENDPOINT
+              value: https://traefiklabs-hub-preview.eu.auth0.com
+            - name: AUTH0_AUDIENCE
+              value: https://traefiklabs-hub-preview.eu.auth0.com/api/v2/
             - name: TRACE_SERVICE_URL
               value: http://hub-trace.hub.svc.cluster.local/internal
           args:
             - serve
             - --addr=:80
+
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hub-user-delete
+  namespace: hub
+spec:
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 5
+      parallelism: 1
+      template:
+        metadata:
+          labels:
+            cronjob: hub-user-delete
+        spec:
+          containers:
+            - args:
+                - deleteuser
+              env:
+                - name: ACP_SERVICE_URL
+                  value: http://hub-acp.hub.svc.cluster.local/internal
+                - name: ALERT_SERVICE_URL
+                  value: http://hub-alert.hub.svc.cluster.local/internal
+                - name: CATALOG_SERVICE_URL
+                  value: http://hub-catalog.hub.svc.cluster.local/internal
+                - name: CERTIFICATE_SERVICE_URL
+                  value: http://hub-certificates.hub.svc.cluster.local/internal
+                - name: CLUSTER_SERVICE_URL
+                  value: http://hub-cluster.hub.svc.cluster.local/internal
+                - name: GSLB_SERVICE_URL
+                  value: http://hub-gslb.hub.svc.cluster.local/internal
+                - name: INVITATION_SERVICE_URL
+                  value: http://hub-invitation.hub.svc.cluster.local/internal
+                - name: METRICS_SERVICE_URL
+                  value: http://hub-metrics.hub.svc.cluster.local/internal
+                - name: NOTIFICATION_SERVICE_URL
+                  value: http://hub-notification.hub.svc.cluster.local/internal
+                - name: OFFER_SERVICE_URL
+                  value: http://hub-offer.hub.svc.cluster.local/internal
+                - name: TOKEN_SERVICE_URL
+                  value: http://hub-token.hub.svc.cluster.local/internal
+                - name: TOPOLOGY_SERVICE_URL
+                  value: http://hub-topology.hub.svc.cluster.local/internal
+                - name: TUNNEL_SERVICE_URL
+                  value: http://hub-tunnel-orchestrator.hub.svc.cluster.local/internal
+                - name: WORKSPACE_SERVICE_URL
+                  value: http://hub-workspace.hub.svc.cluster.local/internal
+                - name: LOG_LEVEL
+                  value: debug
+                - name: MONGODB_URI
+                  value: "mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/user?authSource=admin"
+                - name: AUTH0_CLIENT_ID
+                  valueFrom:
+                    secretKeyRef:
+                      key: hub-services-client-id
+                      name: hub-secret
+                - name: AUTH0_CLIENT_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      key: hub-services-client-secret
+                      name: hub-secret
+                - name: AUTH0_ENDPOINT
+                  value: https://traefiklabs-hub-preview.eu.auth0.com
+                - name: AUTH0_AUDIENCE
+                  value: https://traefiklabs-hub-preview.eu.auth0.com/api/v2/
+              image: gcr.io/traefiklabs/hub-user:latest
+              name: hub-user-delete
+          imagePullSecrets:
+            - name: gcr-access-token
+          restartPolicy: Never
+  schedule: '@daily'
+  suspend: true
 
 ---
 apiVersion: v1

@@ -1,0 +1,72 @@
+[
+  {
+    "_id": "4cdc4483-9f0b-4421-9e89-6dc919599156",
+    "name": "4cdc4483-9f0b-4421-9e89-6dc919599156",
+    "workspaceId": "63da78bda8b057540c5f8cdc",
+    "strategy": "single-cluster",
+    "cname": "",
+    "domains": [
+      {
+        "name": "*-fegx4m.cw6u7v96.preview.traefikhub.dev",
+        "verified": true,
+        "ownedByHub": true
+      }
+    ],
+    "zone": [
+      {
+        "id": 0,
+        "loadBalancer": [
+          {
+            "cluster": {
+              "clusterId": "442462ba-e1ac-4ce8-abdd-3d6b8944da7e",
+              "privateTargets": {
+                "endpoint": "*-fegx4m.cw6u7v96.preview.traefikhub.dev",
+                "targets": [
+                  {
+                    "address": "18.130.63.181:41013",
+                    "pops": [
+                      {
+                        "id": "s00-euw2-ec2-tunnel1",
+                        "reachable": true
+                      },
+                      {
+                        "id": "s00-euw2-ec2-tunnel0",
+                        "reachable": true
+                      }
+                    ]
+                  },
+                  {
+                    "address": "13.40.200.67:45255",
+                    "pops": [
+                      {
+                        "id": "s00-euw2-ec2-tunnel1",
+                        "reachable": true
+                      },
+                      {
+                        "id": "s00-euw2-ec2-tunnel0",
+                        "reachable": true
+                      }
+                    ]
+                  }
+                ]
+              },
+              "targets": null,
+              "location": {
+                "latitude": 0.0,
+                "longitude": 0.0
+              }
+            },
+            "weight": 1
+          }
+        ]
+      }
+    ],
+    "httpHealthcheck": null,
+    "createdAt": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    },
+    "updatedAt": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    }
+  }
+]

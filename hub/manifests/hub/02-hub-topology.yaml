@@ -73,9 +73,9 @@ spec:
             - name: LOG_LEVEL
               value: debug
             - name: INDEX_MONGODB_URI
-              value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/?authSource=admin
+              value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/topologies?authSource=admin
             - name: JOB_SPEC_MONGODB_URI
-              value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/?authSource=admin
+              value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/topologies?authSource=admin
           args:
             - serve
             - --addr=:80

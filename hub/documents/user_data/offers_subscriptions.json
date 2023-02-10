@@ -1,0 +1,108 @@
+[
+  {
+    "_id": {
+      "$oid": "63da78bd089719a7ea21f849"
+    },
+    "stripeCustomerId": "",
+    "stripeSubscriptionId": "",
+    "stripeAccountId": "",
+    "workspaceId": "63da78bda8b057540c5f8cdc",
+    "status": "active",
+    "blocked": false,
+    "effectiveFrom": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    },
+    "quotasSyncedAt": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    },
+    "offerUpdatedAt": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    },
+    "updatedAt": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    },
+    "cancelAt": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    },
+    "salesContactedAt": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    },
+    "notification7DaysLeft": false,
+    "notification3DaysLeft": false,
+    "notification1DayLeft": false,
+    "stripeSubscriptionUpdatedAt": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    },
+    "stripeCustomerUpdatedAt": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    },
+    "stripePaymentMethodUpdatedAt": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    },
+    "offer": {
+      "name": "freemium",
+      "config": {
+        "metrics": {
+          "interval": 60000000000,
+          "tables": [
+            "1m",
+            "10m",
+            "1h"
+          ]
+        },
+        "accessControl": {
+          "maxSecuredRoutes": 3,
+          "maxEmails": 3
+        }
+      },
+      "quotas": [
+        {
+          "name": "gslb-bandwidth",
+          "max": 1000000000,
+          "type": 2
+        },
+        {
+          "name": "edge-ingresses",
+          "max": 5,
+          "type": 1
+        },
+        {
+          "name": "acps",
+          "max": 1,
+          "type": 1
+        },
+        {
+          "name": "clusters",
+          "max": 1,
+          "type": 1
+        },
+        {
+          "name": "users",
+          "max": 1,
+          "type": 1
+        },
+        {
+          "name": "domains",
+          "max": 100000,
+          "type": 1
+        },
+        {
+          "name": "alert-triggers",
+          "max": 5,
+          "type": 2
+        },
+        {
+          "name": "alert-history",
+          "max": 10,
+          "type": 3
+        }
+      ],
+      "features": [
+        "blue-green",
+        "canary",
+        "active-active",
+        "active-passive"
+      ]
+    }
+  }
+]

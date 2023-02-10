@@ -22,6 +22,9 @@ run-adsl:
 apply-coredns-conf:
 	@$(SCRIPT_DIR)/run_local.sh apply-coredns-conf
 
+createuser:
+	@$(SCRIPT_DIR)/run_local.sh createuser
+
 reset-all-images: reset-agent-image reset-cluster-image reset-workspace-image reset-topology-image reset-token-image reset-metrics-image
 
 reset-agent-image:

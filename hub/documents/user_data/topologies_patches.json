@@ -1,0 +1,17 @@
+[
+  {
+    "_id": {
+      "$oid": "63da7ee560450a9f35443818"
+    },
+    "workspaceId": "63da78bda8b057540c5f8cdc",
+    "clusterId": "442462ba-e1ac-4ce8-abdd-3d6b8944da7e",
+    "version": 2,
+    "parentVersion": 1,
+    "topology": {
+      "$binary": {
+        "base64": "eyJzZXJ2aWNlcyI6eyJibWF5ZWxsZX53aG9hbWkiOnsiY29udGFpbmVyIjp7Im5hbWUiOiJibWF5ZWxsZV93aG9hbWlfMSIsIm5ldHdvcmtzIjpbImJtYXllbGxlX2RlZmF1bHQiXX0sImV4dGVybmFsUG9ydHMiOls4MF0sIm5hbWUiOiJibWF5ZWxsZX53aG9hbWkifX19",
+        "subType": "00"
+      }
+    }
+  }
+]

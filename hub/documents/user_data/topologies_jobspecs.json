@@ -1,0 +1,19 @@
+[
+  {
+    "_id": "8fd17fe6-b7bc-4810-84e6-d81a29de7f8e",
+    "clusterId": "442462ba-e1ac-4ce8-abdd-3d6b8944da7e",
+    "deleted": false,
+    "workspaceId": "63da78bda8b057540c5f8cdc",
+    "jsonPatch": true,
+    "pending": false,
+    "processAt": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    },
+    "processing": false,
+    "retryCount": 0,
+    "startedAt": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    },
+    "lastIndexedCommitHash": ""
+  }
+]

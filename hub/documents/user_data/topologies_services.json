@@ -1,0 +1,60 @@
+[
+  {
+    "_id": {
+      "$oid": "63da7ea6642a4945757d753f"
+    },
+    "id": "bmayelle~hub-agent",
+    "workspaceId": "63da78bda8b057540c5f8cdc",
+    "clusterId": "442462ba-e1ac-4ce8-abdd-3d6b8944da7e",
+    "type": "",
+    "name": "bmayelle~hub-agent",
+    "namespace": "",
+    "externalPorts": [
+      80
+    ],
+    "container": {
+      "name": "hub-agent",
+      "networks": [
+        "bmayelle_default"
+      ]
+    }
+  },
+  {
+    "_id": {
+      "$oid": "63da7ea6642a4945757d7541"
+    },
+    "id": "bmayelle~traefik",
+    "workspaceId": "63da78bda8b057540c5f8cdc",
+    "clusterId": "442462ba-e1ac-4ce8-abdd-3d6b8944da7e",
+    "type": "",
+    "name": "bmayelle~traefik",
+    "namespace": "",
+    "externalPorts": [
+      80
+    ],
+    "container": {
+      "name": "traefik",
+      "networks": [
+        "bmayelle_default"
+      ]
+    }
+  },
+  {
+    "_id": {
+      "$oid": "63da7ee5642a4945757d839c"
+    },
+    "id": "bmayelle~whoami",
+    "workspaceId": "63da78bda8b057540c5f8cdc",
+    "clusterId": "442462ba-e1ac-4ce8-abdd-3d6b8944da7e",
+    "type": "",
+    "name": "bmayelle~whoami",
+    "namespace": "",
+    "externalPorts": [80],
+    "container": {
+      "name": "bmayelle_whoami_1",
+      "networks": [
+        "bmayelle_default"
+      ]
+    }
+  }
+]

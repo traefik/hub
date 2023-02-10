@@ -404,11 +404,25 @@ clean() {
   kubectl delete -f "$PROJECT_DIR"/hub/manifests/pebble/ 2> /dev/null || true
 }
 
+createuser() {
+  for filename in "${PROJECT_DIR}"/hub/documents/user_data/*; do
+      file=$(basename "${filename}")
+      db=$(echo "${file}" | cut -d '_' -f1)
+      col=$(echo "${file}" | cut -d '_' -f2-4 | cut -d '.' -f1)
+
+      kubectl cp "${PROJECT_DIR}"/hub/documents/user_data/"${file}" -n mongo "$(kubectl get pods -n mongo -l app=mongodb --output=jsonpath={.items..metadata.name})":/tmp/"${file}"
+      kubectl exec -it -n mongo "$(kubectl get pods -n mongo -l app=mongodb --output=jsonpath={.items..metadata.name})" -- bash -c "mongoimport --db ${db} --collection ${col} --file /tmp/${file} --jsonArray --username root --password admin  --authenticationDatabase admin"
+    done
+}
+
 cmd=$1
 
 case $cmd in
     apply-coredns-conf)
         apply-coredns-conf
+    ;;
+    createuser)
+        createuser
     ;;
     renew-gcr-token)
         renew-gcr-token
@@ -426,7 +440,7 @@ case $cmd in
         clean
     ;;
     *)
-        echo "Commands available: apply-coredns-conf, renew-auth0-admin-token, renew-gcr-token, renew-jwt, run, clean"
+        echo "Commands available: apply-coredns-conf, createuser, renew-auth0-admin-token, renew-gcr-token, renew-jwt, run, clean"
         exit 1
     ;;
 esac

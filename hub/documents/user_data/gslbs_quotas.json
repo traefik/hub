@@ -1,0 +1,26 @@
+[
+  {
+    "_id": {
+      "$oid": "63da78bd642a4945757c5469"
+    },
+    "name": "domains",
+    "workspaceId": "63da78bda8b057540c5f8cdc",
+    "effectiveFrom": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    },
+    "max": 100000,
+    "version": 0
+  },
+  {
+    "_id": {
+      "$oid": "63da78bd642a4945757c546b"
+    },
+    "name": "gslb-bandwidth",
+    "workspaceId": "63da78bda8b057540c5f8cdc",
+    "effectiveFrom": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    },
+    "max": 1000000000,
+    "version": 0
+  }
+]

@@ -1,0 +1,29 @@
+[
+  {
+    "_id": "63da7ef199ec91c1b24a8618",
+    "workspaceId": "63da78bda8b057540c5f8cdc",
+    "clusterId": "442462ba-e1ac-4ce8-abdd-3d6b8944da7e",
+    "namespace": "",
+    "name": "bmayelle-whoami-1675263729179",
+    "domain": "mobile-stoat-fegx4m.cw6u7v96.preview.traefikhub.dev",
+    "service": {
+      "name": "bmayelle~whoami",
+      "network": "bmayelle_default",
+      "port": 80
+    },
+    "version": "YgXoJvK4mA+18uMjdLxI+n2NPVY=",
+    "syncedAt": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    },
+    "createdAt": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    },
+    "updatedAt": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    },
+    "acp": {
+      "name": "basicauth"
+    },
+    "customDomains": null
+  }
+]

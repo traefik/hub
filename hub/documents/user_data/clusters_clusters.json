@@ -1,0 +1,33 @@
+[
+  {
+    "_id": "442462ba-e1ac-4ce8-abdd-3d6b8944da7e",
+    "workspaceId": "63da78bda8b057540c5f8cdc",
+    "ingressControllerEndpoints": null,
+    "gatewayEndpoint": "",
+    "name": "agenttraefik",
+    "label": "fegx4m",
+    "platform": "other",
+    "version": "v1.0.1",
+    "packedVersion": 4294967297,
+    "notification15DaysLeft": false,
+    "notification5DaysLeft": false,
+    "notification0DaysLeft": false,
+    "createdAt": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    },
+    "updatedAt": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    },
+    "lastPing": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    },
+    "location": {
+      "country": "FR",
+      "city": "Lormont",
+      "latitude": 44.8809,
+      "longitude": -0.5203
+    },
+    "upToDate": true,
+    "kubeId": ""
+  }
+]

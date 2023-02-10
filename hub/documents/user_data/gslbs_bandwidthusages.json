@@ -1,0 +1,13 @@
+[
+  {
+    "_id": {
+      "$oid": "63da79c8642a4945757c88c0"
+    },
+    "billingCycleStart": {
+      "$date": "2021-10-01T12:27:03.583Z"
+    },
+    "workspaceId": "63da78bda8b057540c5f8cdc",
+    "consumed": 17986,
+    "quotaExceeded": false
+  }
+]
