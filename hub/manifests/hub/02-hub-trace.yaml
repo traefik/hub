@@ -54,6 +54,8 @@ spec:
                 secretKeyRef :
                   key : jwt-sub
                   name : hub-secret
+            - name: SUB_SERVICE_TOKEN
+              value: tEmgBDVUg0D3DxLsVJ9eiHIb6gX0fUcd@clients
             - name: LOG_LEVEL
               value: debug
           args:
@@ -78,3 +80,22 @@ spec:
       name: hub-trace-debug
   selector:
     app: hub-trace
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: hub-trace
+  namespace: hub
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/trace`)
+      services:
+        - name: hub-trace
+          port: 80
+      middlewares:
+        - name: stripprefix
+          namespace: hub

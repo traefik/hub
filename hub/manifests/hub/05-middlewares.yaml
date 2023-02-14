@@ -46,6 +46,7 @@ spec:
       - /token
       - /topology-indexer-api # the order of strip prefixes is important ! :-/
       - /topology
+      - /trace
       - /tunnel
       - /workspace
       - /catalog
