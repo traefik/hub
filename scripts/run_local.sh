@@ -200,7 +200,7 @@ main() {
   # Install Ingress-nginx
   echo "Deploying nginx."
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/ingress-nginx/
-  kubectl -n ingress-nginx wait --for condition=available --timeout="${TIMEOUT}" deployment/nginx-ingress-nginx-controller
+  kubectl -n ingress-nginx wait --for condition=available --timeout="${TIMEOUT}" deployment/ingress-nginx-controller
 
   # Install HaProxy
   echo "Deploying haproxy."
@@ -215,7 +215,7 @@ main() {
   # Install petstore as openapi example
   echo "Deploying petstore."
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/petstore/
-  kubectl -n petstore wait --for condition=available --timeout="${TIMEOUT}" deployment/petstore-app
+  kubectl -n petstore wait --for condition=available --timeout="${TIMEOUT}" deployment/petstore
 
   # Install monitoring
   echo "Deploying monitoring."
