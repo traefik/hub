@@ -1,0 +1,36 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-acp-auth
+
+data:
+  # echo -n "blabla" | base64
+  value: YmxhYmxh
+---
+apiVersion: hub.traefik.io/v1alpha1
+kind: AccessControlPolicy
+metadata:
+  name: my-acp
+spec:
+  oAuthIntro:
+    clientConfig:
+      url: http://hydra.oauthidp.svc:4445/oauth2/introspect
+      auth:
+        kind: Bearer # Can be "Bearer", "Basic", "Header" or "Query".
+        secret: # Depending on "kind", the content of the secret will vary.
+          name: my-acp-auth
+          namespace: default
+      headers:
+        Request-Host: '{{ .Request.Host }}'
+      tokenTypeHint: access_token
+      timeoutSeconds: 15
+      maxRetries: 3
+    tokenSource:
+      header: Authorization
+      headerAuthScheme: Bearer # Only valid if name == Authorization.
+      query: token
+      cookie: token
+#    claims: Equals(`group`, `dev`)
+#    forwardHeaders:
+#      Group: group
