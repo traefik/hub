@@ -65,6 +65,8 @@ spec:
               value: "http://hub-workspace.hub.svc.cluster.local/internal"
             - name: CLUSTER_SERVICE_URL
               value: "http://hub-cluster.hub.svc.cluster.local/internal"
+            - name: USER_SERVICE_URL
+              value: "http://hub-user.hub.svc.cluster.local/internal"
           args:
             - serve
             - --addr=:80
@@ -77,6 +79,9 @@ spec:
             - --sendgrid-unverified-email-reminder-template-id=d-a06cdfd675e649459394b9e16a676b44
             - --sendgrid-no-cluster-reminder-template-id=d-5f561710d8d74ecab6dbcddb62c3f954
             - --sendgrid-request-scale-offer-template-id=d-5214ae9100c943dd8194aa3af6679ee8
+            - --sendgrid-deprecated-agent-15days-template-id=d-d-0ffc1f69318d42c5a32aac103c8dd25b
+            - --sendgrid-deprecated-agent-5days-template-id=d-835d0c6aa1d44255b99c79f2e8722b71
+            - --sendgrid-deprecated-agent-template-id=d-1869455d64e5485498a3dbda938bd6a7
             - --sendgrid-from=noreply@traefik.io
             - --sendgrid-from-name=Me
             - --sendgrid-sales-email=${GCLOUD_EMAIL}
