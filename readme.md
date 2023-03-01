@@ -143,6 +143,19 @@ You have to reapply the coredns configuration with `make apply-coredns-conf`.
 `make run-adsl` allows docker to pull the images before starting the cluster.
 We recommend running it instead of `make run` if your internet connection is a bit slow.
 
+
+### Mongodb
+
+The mongodb is provisioned with username `root` and password `admin`.
+
+```bash
+# forward port
+kubectl port-forward -n mongo services/mongodb 27017:27017
+
+# using mongosh cli
+mongosh mongodb://root:admin@localhost
+```
+
 ### Using Tunneling
 To have a complete view at the tunneling functionality, you can read this
 [doc](https://notion.so/containous/10-01-22-Tunneling-8bc7a7451abe4679afa8c24a4456ee36).

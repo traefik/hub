@@ -9,8 +9,11 @@ controllerDeployment:
     - --log-format=console
     - --ingress-class-name=traefik-lb
     - --platform-url=http://platform.docker.localhost/agent
-    - --traefik.metrics-url=http://traefik-hub.hub-agent.svc.cluster.local:8080/metrics
+    - --traefik.metrics-url=http://traefik-hub.traefik.svc.cluster.local:8080/metrics
 tunnelDeployment:
+  traefik:
+    tunnelHost: traefik-hub.traefik.svc.cluster.local
+    tunnelPort: 9901
   args:
     - --log-level=debug
     - --platform-url=http://platform.docker.localhost/agent

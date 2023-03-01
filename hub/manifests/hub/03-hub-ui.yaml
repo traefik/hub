@@ -83,6 +83,8 @@ spec:
               value: http://hub-tunnel-orchestrator/external
             - name: ACP_SERVICE_ENDPOINT
               value: http://hub-acp/external
+            - name: PLATFORM_BASE_URL
+              value: http://platform.docker.localhost
             - name: IS_LOCAL
               value: "true"
             - name: "NODE_TLS_REJECT_UNAUTHORIZED"

@@ -62,6 +62,7 @@ rules:
       - tlsstores
       - tlsoptions
       - middlewares
+      - middlewaretcps
       - traefikservices
       - serverstransports
     verbs:

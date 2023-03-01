@@ -27,13 +27,15 @@ spec:
             - name: ADDR
               value: :80
             - name: INBOUND_ADDR
-              value: 127.0.0.1
+              value: 0.0.0.0
             - name: OUTBOUND_ADDR
               value: :8080
             - name: ORCHESTRATOR_SERVICE_URL
               value: http://platform.docker.localhost/tunnel/brokers
             - name: PUBLIC_INBOUND_ADDR
-              value: 127.0.0.1
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
             - name: PUBLIC_OUTBOUND_ADDR
               value: ws://platform.docker.localhost:80/broker
             - name: TRACE_SERVICE_URL

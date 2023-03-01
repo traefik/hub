@@ -245,6 +245,8 @@ spec:
           image: gcr.io/traefiklabs/enterprise:hub-fork
           imagePullPolicy: IfNotPresent
           env:
+            - name: METRICS_TCP_SERVICE_URL
+              value: http://hub-check.pop.svc.cluster.local/internal
             - name: POD_NAME
               valueFrom:
                 fieldRef:

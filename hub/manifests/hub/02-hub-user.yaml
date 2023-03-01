@@ -74,6 +74,11 @@ spec:
               value: https://traefiklabs-hub-preview.eu.auth0.com/api/v2/
             - name: TRACE_SERVICE_URL
               value: http://hub-trace.hub.svc.cluster.local/internal
+            - name: AUTH0_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: token
+                  name: auth0-admin-token
           args:
             - serve
             - --addr=:80
@@ -207,7 +212,23 @@ spec:
           port: 80
       middlewares:
         - name: stripprefix
-
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: users-external
+  namespace: hub
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/users/external`)
+      services:
+        - name: hub-user
+          port: 80
+      middlewares:
+        - name: stripprefix
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute

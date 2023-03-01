@@ -212,17 +212,17 @@ main() {
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/whoami/
   kubectl -n whoami wait --for condition=available --timeout="${TIMEOUT}" deployment/whoami
 
-  # Install petstore as openapi example
-  echo "Deploying petstore."
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/petstore/
-  kubectl -n petstore wait --for condition=available --timeout="${TIMEOUT}" deployment/petstore
-
   # Install monitoring
   echo "Deploying monitoring."
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/monitoring/00-namespace.yaml
   kubectl delete configmap -n monitoring grafana-dashboard || true
   kubectl create configmap -n monitoring grafana-dashboard --from-file="$PROJECT_DIR"/hub/manifests/monitoring/dashboards/
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/monitoring/
+
+  # Install petstore as openapi example
+  echo "Deploying petstore."
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/petstore/
+  kubectl -n petstore wait --for condition=available --timeout="${TIMEOUT}" deployment/petstore
 }
 
 update-local-hosts() {
