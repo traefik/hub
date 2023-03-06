@@ -42,7 +42,7 @@ spec:
             - name: GSLB_SERVICE_URL
               value: http://hub-gslb.hub.svc.cluster.local/internal
             - name: MIN_BROKER_FRESHNESS
-              value: 10m
+              value: 35s
             - name: MAX_TUNNELS_PER_BROKER
               value: "200"
             - name: LOG_LEVEL

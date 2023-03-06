@@ -5,6 +5,11 @@ metadata:
   namespace: kube-system
 data:
   hub.server: |
+    traefik-hub.app:53 {
+        errors
+        rewrite name regex (.*) traefikee-gslb-proxy-svc.pop.svc.cluster.local
+        forward . 127.0.0.1
+    }
     docker.localhost:53 {
         errors
         rewrite name platform.docker.localhost traefik.traefik.svc.cluster.local

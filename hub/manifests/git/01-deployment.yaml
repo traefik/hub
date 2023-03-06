@@ -27,7 +27,7 @@ spec:
         - name: gcr-access-token
       containers:
         # https://github.com/traefik/infra-tooling/tree/master/hub-git
-        - image: gcr.io/traefiklabs/hub-git:v0.1.15
+        - image: gcr.io/traefiklabs/hub-git:v0.1.21
           imagePullPolicy: IfNotPresent
           name: hub-git
           env:

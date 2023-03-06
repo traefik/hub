@@ -1,6 +1,7 @@
+
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: mongodb
   namespace: mongo
@@ -9,6 +10,7 @@ spec:
   selector:
     matchLabels:
       app: mongodb
+  serviceName: mongodb
   template:
     metadata:
       labels:
@@ -26,12 +28,26 @@ spec:
             - name: MONGODB_REPLICA_SET_KEY
               value: replicatsetkey
             - name: MONGODB_INITIAL_PRIMARY_HOST
-              value: "mongodb.mongo.svc.cluster.local"
+              value: mongodb-0.mongodb.mongo.svc.cluster.local
             - name: MONGODB_ADVERTISED_HOSTNAME
-              value: "mongodb.mongo.svc.cluster.local"
+              value: mongodb-0.mongodb.mongo.svc.cluster.local
+          ports:
+            - containerPort: 27017
+          livenessProbe:
+            failureThreshold: 2
+            tcpSocket:
+              port: 27017
+            initialDelaySeconds: 10
+            periodSeconds: 2
+          readinessProbe:
+            failureThreshold: 2
+            tcpSocket:
+              port: 27017
+            initialDelaySeconds: 10
+            periodSeconds: 2
           volumeMounts:
             - name: mongodb-storage
-              mountPath: /bitnami/mongodb/data/db
+              mountPath: /bitnami/mongodb
       volumes:
         - name: mongodb-storage
           persistentVolumeClaim:

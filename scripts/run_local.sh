@@ -55,7 +55,7 @@ main() {
   # Install Mongo
   echo "Deploying Mongo"
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/mongo/
-  kubectl -n mongo wait --for condition=available --timeout="${TIMEOUT}" deployment/mongodb
+  kubectl -n mongo rollout status --watch --timeout="${TIMEOUT}" statefulset/mongodb
 
   # Install Traefik
   echo "Deploying Traefik."
@@ -272,7 +272,7 @@ renew-gcr-token() {
 }
 
 renew-auth0-admin-token() {
-  kubectl delete job -n hub auth0-admin-token-renew
+  kubectl delete job -n hub auth0-admin-token-renew || true
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/hub/01-auth0-admin-token-renew.yaml
 }
 
