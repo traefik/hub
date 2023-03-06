@@ -134,22 +134,102 @@
         },
         {
           "action": "create",
-          "resource": "catalog",
+          "resource": "gateway",
           "scope": "*"
         },
         {
           "action": "view",
-          "resource": "catalog",
+          "resource": "gateway",
           "scope": "*"
         },
         {
           "action": "edit",
-          "resource": "catalog",
+          "resource": "gateway",
           "scope": "*"
         },
         {
           "action": "delete",
-          "resource": "catalog",
+          "resource": "gateway",
+          "scope": "*"
+        },
+        {
+          "action": "create",
+          "resource": "portal",
+          "scope": "*"
+        },
+        {
+          "action": "view",
+          "resource": "portal",
+          "scope": "*"
+        },
+        {
+          "action": "edit",
+          "resource": "portal",
+          "scope": "*"
+        },
+        {
+          "action": "delete",
+          "resource": "portal",
+          "scope": "*"
+        },
+        {
+          "action": "create",
+          "resource": "api",
+          "scope": "*"
+        },
+        {
+          "action": "view",
+          "resource": "api",
+          "scope": "*"
+        },
+        {
+          "action": "edit",
+          "resource": "api",
+          "scope": "*"
+        },
+        {
+          "action": "delete",
+          "resource": "api",
+          "scope": "*"
+        },
+        {
+          "action": "create",
+          "resource": "collection",
+          "scope": "*"
+        },
+        {
+          "action": "view",
+          "resource": "collection",
+          "scope": "*"
+        },
+        {
+          "action": "edit",
+          "resource": "collection",
+          "scope": "*"
+        },
+        {
+          "action": "delete",
+          "resource": "collection",
+          "scope": "*"
+        },
+        {
+          "action": "create",
+          "resource": "access",
+          "scope": "*"
+        },
+        {
+          "action": "view",
+          "resource": "access",
+          "scope": "*"
+        },
+        {
+          "action": "edit",
+          "resource": "access",
+          "scope": "*"
+        },
+        {
+          "action": "delete",
+          "resource": "access",
           "scope": "*"
         },
         {

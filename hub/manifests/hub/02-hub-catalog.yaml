@@ -102,7 +102,7 @@ spec:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && PathPrefix(`/agent/catalogs`)
+      match: Host(`platform.docker.localhost`) && (PathPrefix(`/agent/gateways`) || PathPrefix(`/agent/portals`) || PathPrefix(`/agent/apis`) || PathPrefix(`/agent/collections`) || PathPrefix(`/agent/accesses`))
       services:
         - name: hub-catalog
           port: 80
@@ -122,7 +122,7 @@ spec:
     - web
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && PathPrefix(`/agent/catalogs`)
+      match: Host(`platform.docker.localhost`) && (PathPrefix(`/agent/gateways`) || PathPrefix(`/agent/portals`) || PathPrefix(`/agent/apis`) || PathPrefix(`/agent/collections`) || PathPrefix(`/agent/accesses`))
       services:
         - name: hub-catalog
           port: 80

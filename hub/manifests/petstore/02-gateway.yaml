@@ -1,0 +1,9 @@
+apiVersion: hub.traefik.io/v1alpha1
+kind: APIGateway
+metadata:
+  name: my-gateway
+  labels:
+    area: products
+spec:
+  apiAccesses:
+    - products

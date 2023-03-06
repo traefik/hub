@@ -1,0 +1,7 @@
+apiVersion: hub.traefik.io/v1alpha1
+kind: APIPortal
+metadata:
+  name: my-portal
+spec:
+  description: "My awesome portal"
+  apiGateway: my-gateway
