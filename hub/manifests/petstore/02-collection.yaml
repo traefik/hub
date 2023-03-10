@@ -1,0 +1,11 @@
+apiVersion: hub.traefik.io/v1alpha1
+kind: APICollection
+metadata:
+  name: my-store-collection
+  labels:
+    area: stores
+spec:
+  pathPrefix: "/stores"
+  apiSelector:
+    matchLabels:
+      area: products

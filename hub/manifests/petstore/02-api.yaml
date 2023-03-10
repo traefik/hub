@@ -1,8 +1,11 @@
 apiVersion: hub.traefik.io/v1alpha1
 kind: API
 metadata:
-  name: myawesomeapi
+  name: my-petstore-api
   namespace: petstore
+  labels:
+    area: products
+    product: pets
 spec:
   pathPrefix: "/petstore"
   service:

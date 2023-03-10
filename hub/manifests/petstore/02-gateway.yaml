@@ -3,7 +3,7 @@ kind: APIGateway
 metadata:
   name: my-gateway
   labels:
-    area: products
+    area: stores
 spec:
   apiAccesses:
-    - products
+    - my-stores-access

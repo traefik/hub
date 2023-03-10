@@ -1,0 +1,19 @@
+apiVersion: hub.traefik.io/v1alpha1
+kind: APIAccess
+metadata:
+  name: my-stores-access
+spec:
+  groups:
+    - suppliers
+  apiCollectionSelector:
+    matchLabels:
+      area: stores
+  apiSelector:
+    matchExpressions:
+      - key: product
+        operator: In
+        values:
+          - pets
+          - books
+          - toys
+
