@@ -2,17 +2,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hub-catalog
+  name: hub-api-management
   namespace: hub
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: hub-catalog
+      app: hub-api-management
   template:
     metadata:
       labels:
-        app: hub-catalog
+        app: hub-api-management
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "80"
@@ -20,8 +20,8 @@ spec:
       imagePullSecrets:
         - name: gcr-access-token
       containers:
-        - name: hub-catalog
-          image: gcr.io/traefiklabs/hub-catalog:latest
+        - name: hub-api-management
+          image: gcr.io/traefiklabs/hub-api-management:latest
           imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:
@@ -55,7 +55,7 @@ spec:
                   key : jwt-sub
                   name : hub-secret
             - name: MONGODB_URI
-              value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/tokens?authSource=admin
+              value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/apimanagement?authSource=admin
             - name: OFFER_SERVICE_URL
               value: "http://hub-offer.hub.svc.cluster.local/internal"
             - name: TUNNEL_SERVICE_URL
@@ -75,27 +75,27 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: hub-catalog
+  name: hub-api-management
   namespace: hub
   labels:
-    app: hub-catalog
+    app: hub-api-management
 spec:
   type: ClusterIP
   ports:
     - port: 80
       targetPort: 80
-      name: hub-catalog
+      name: hub-api-management
     - port: 40000
       targetPort: 40000
-      name: hub-catalog-debug
+      name: hub-api-management-debug
   selector:
-    app: hub-catalog
+    app: hub-api-management
 
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: catalog-agent-tls
+  name: api-management-agent-tls
   namespace: hub
 spec:
   entryPoints:
@@ -104,7 +104,7 @@ spec:
     - kind: Rule
       match: Host(`platform.docker.localhost`) && (PathPrefix(`/agent/gateways`) || PathPrefix(`/agent/portals`) || PathPrefix(`/agent/apis`) || PathPrefix(`/agent/collections`) || PathPrefix(`/agent/accesses`))
       services:
-        - name: hub-catalog
+        - name: hub-api-management
           port: 80
       middlewares:
         - name: auth-token
@@ -115,7 +115,7 @@ spec:
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: catalog-agent
+  name: api-management-agent
   namespace: hub
 spec:
   entryPoints:
@@ -124,7 +124,7 @@ spec:
     - kind: Rule
       match: Host(`platform.docker.localhost`) && (PathPrefix(`/agent/gateways`) || PathPrefix(`/agent/portals`) || PathPrefix(`/agent/apis`) || PathPrefix(`/agent/collections`) || PathPrefix(`/agent/accesses`))
       services:
-        - name: hub-catalog
+        - name: hub-api-management
           port: 80
       middlewares:
         - name: auth-token
@@ -132,16 +132,16 @@ spec:
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: catalog-external-tls
+  name: api-management-external-tls
   namespace: hub
 spec:
   entryPoints:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && PathPrefix(`/catalog/external`)
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/api-management/external`)
       services:
-        - name: hub-catalog
+        - name: hub-api-management
           port: 80
       middlewares:
         - name: stripprefix
@@ -152,16 +152,16 @@ spec:
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: catalog-external
+  name: api-management-external
   namespace: hub
 spec:
   entryPoints:
     - web
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && PathPrefix(`/catalog/external`)
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/api-management/external`)
       services:
-        - name: hub-catalog
+        - name: hub-api-management
           port: 80
       middlewares:
         - name: stripprefix
@@ -169,7 +169,7 @@ spec:
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: hub-catalog-check-unverified-job
+  name: hub-api-management-check-unverified-job
   namespace: hub
 spec:
   concurrencyPolicy: Forbid
@@ -180,7 +180,7 @@ spec:
       template:
         metadata:
           labels:
-            cronjob: hub-catalog-check-job
+            cronjob: hub-api-management-check-job
         spec:
           containers:
             - args:
@@ -189,7 +189,7 @@ spec:
                 - name: DEV_MODE
                   value: "true"
                 - name: MONGODB_URI
-                  value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/catalogs?authSource=admin
+                  value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/apimanagement?authSource=admin
                 - name: CERTIFICATES_SERVICE_URL
                   value: "http://hub-certificates.hub.svc.cluster.local/internal"
                 - name: LOG_LEVEL
@@ -200,8 +200,8 @@ spec:
                   value: "1"
                 - name: MONGODB_MAXPOOL
                   value: "3"
-              image: gcr.io/traefiklabs/hub-catalog:latest
-              name: hub-catalog-check-job
+              image: gcr.io/traefiklabs/hub-api-management:latest
+              name: hub-api-management-check-job
           imagePullSecrets:
             - name: gcr-access-token
           restartPolicy: Never
@@ -211,7 +211,7 @@ spec:
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: hub-catalog-check-verified-job
+  name: hub-api-management-check-verified-job
   namespace: hub
 spec:
   concurrencyPolicy: Forbid
@@ -222,7 +222,7 @@ spec:
       template:
         metadata:
           labels:
-            cronjob: hub-catalog-check-job
+            cronjob: hub-api-management-check-job
         spec:
           containers:
             - args:
@@ -233,7 +233,7 @@ spec:
                 - name: DEV_MODE
                   value: "true"
                 - name: MONGODB_URI
-                  value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/catalogs?authSource=admin
+                  value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/apimanagement?authSource=admin
                 - name: CERTIFICATES_SERVICE_URL
                   value: "http://hub-certificates.hub.svc.cluster.local/internal"
                 - name: LOG_LEVEL
@@ -244,8 +244,8 @@ spec:
                   value: "1"
                 - name: MONGODB_MAXPOOL
                   value: "3"
-              image: gcr.io/traefiklabs/hub-catalog:latest
-              name: hub-catalog-check-job
+              image: gcr.io/traefiklabs/hub-api-management:latest
+              name: hub-api-management-check-job
           imagePullSecrets:
             - name: gcr-access-token
           restartPolicy: Never

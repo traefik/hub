@@ -134,42 +134,42 @@
         },
         {
           "action": "create",
-          "resource": "gateway",
+          "resource": "api_gateway",
           "scope": "*"
         },
         {
           "action": "view",
-          "resource": "gateway",
+          "resource": "api_gateway",
           "scope": "*"
         },
         {
           "action": "edit",
-          "resource": "gateway",
+          "resource": "api_gateway",
           "scope": "*"
         },
         {
           "action": "delete",
-          "resource": "gateway",
+          "resource": "api_gateway",
           "scope": "*"
         },
         {
           "action": "create",
-          "resource": "portal",
+          "resource": "api_portal",
           "scope": "*"
         },
         {
           "action": "view",
-          "resource": "portal",
+          "resource": "api_portal",
           "scope": "*"
         },
         {
           "action": "edit",
-          "resource": "portal",
+          "resource": "api_portal",
           "scope": "*"
         },
         {
           "action": "delete",
-          "resource": "portal",
+          "resource": "api_portal",
           "scope": "*"
         },
         {
@@ -194,42 +194,42 @@
         },
         {
           "action": "create",
-          "resource": "collection",
+          "resource": "api_collection",
           "scope": "*"
         },
         {
           "action": "view",
-          "resource": "collection",
+          "resource": "api_collection",
           "scope": "*"
         },
         {
           "action": "edit",
-          "resource": "collection",
+          "resource": "api_collection",
           "scope": "*"
         },
         {
           "action": "delete",
-          "resource": "collection",
+          "resource": "api_collection",
           "scope": "*"
         },
         {
           "action": "create",
-          "resource": "access",
+          "resource": "api_access",
           "scope": "*"
         },
         {
           "action": "view",
-          "resource": "access",
+          "resource": "api_access",
           "scope": "*"
         },
         {
           "action": "edit",
-          "resource": "access",
+          "resource": "api_access",
           "scope": "*"
         },
         {
           "action": "delete",
-          "resource": "access",
+          "resource": "api_access",
           "scope": "*"
         },
         {
