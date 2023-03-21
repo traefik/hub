@@ -1,231 +1,74 @@
 #!/bin/bash
-set -o pipefail
-set -o errexit
-
-readonly PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" && pwd)/.."
-ENV_FILE=${PROJECT_DIR}/hub/.env
-[[ -f "${ENV_FILE}" ]] && source "${ENV_FILE}"
-WORKSPACE_ID="${WORKSPACE_ID:-6311c90bfce04bd29e473a20}"
-K3S_IMAGE="${K3S_IMAGE-"rancher/k3s:v1.24.4-k3s1"}"
 
 main() {
-  check-tools
-  setup-k3s
+  checkTools
+  setupK3S
 
   if [[ "$AUTO_UPDATE_HOSTS" == "true" ]]; then
-    update-local-hosts
+    updateLocalHosts
   fi
 
   if [[ $2 == "--adsl" ]]; then
-    prepare-docker-images
+    prepareDockerImages
   fi
 
   export KUBECONFIG="$(k3d kubeconfig merge k3s-default-hub)"
   kubectl cluster-info
 
-  TIMEOUT="${TIMEOUT:-180s}"
+  applyCoreDNSConf
+  createNamespaces
+  createSecrets
 
-  [[ "x$GCLOUD_EMAIL" == "x" ]] && read -p "Enter gcloud email: " GCLOUD_EMAIL
-  [[ "x$AWS_CLIENT_ID" == "x" ]] && read -p "Enter aws client id: " AWS_CLIENT_ID
-  [[ "x$AWS_CLIENT_SECRET" == "x" ]] && read -p "Enter aws client secret: " AWS_CLIENT_SECRET
-  [[ "x$HUB_USERNAME" == "x" ]] && read -p "Enter your hub username: " HUB_USERNAME
-  [[ "x$HUB_PASSWORD" == "x" ]] && read -p "Enter your hub password: " HUB_PASSWORD
+  renewGCRToken
 
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/hub/00-namespace.yaml
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/broker/00-namespace.yaml
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/hub-agent/00-namespace.yaml
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/aws-secret-operator/00-namespace.yaml
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/pop/00-namespace.yaml
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/git/00-namespace.yaml
+  # Base
+  installMongo
+  installTraefik
+  installPebble
+  installGit
+  installHub
 
-  apply-coredns-conf
+  renewJWT
 
-  # Create secrets
-  renew-gcr-token
-  kubectl delete secret -n aws-secret-operator aws-secret || true
-  kubectl create secret -n aws-secret-operator generic aws-secret --from-literal="api_key=$AWS_CLIENT_ID" --from-literal="api_secret_key=$AWS_CLIENT_SECRET"
+  createOffers
+  initializeWorkspace
+  installAgent
 
-  # Install AWS Secret Operator
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/aws-secret-operator/
-
-  # Create CronJob for auth0 service token renewal.
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/hub/auth0/auth0-service-token.yaml
-  kubectl create job -n hub auth0-service-token --from cronjobs/auth0-service-token || true
-
-  # Install Mongo
-  echo "Deploying Mongo"
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/mongo/
-  kubectl -n mongo rollout status --watch --timeout="${TIMEOUT}" statefulset/mongodb
-
-  # Install Traefik
-  echo "Deploying Traefik."
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/traefik/
-  kubectl -n traefik wait --for condition=available --timeout="${TIMEOUT}" deployment/traefik
-
-  # Install Pebble
-  echo "Deploying Pebble."
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/pebble/
-  kubectl -n pebble wait --for condition=available --timeout="${TIMEOUT}" deployment/pebble
-
-  # Populate Mongo
-  for dbcol in workspaces_workspaces users_users users_tos ; do
-    db=$(echo $dbcol | awk -F '_' '{print $1}')
-    col=$(echo $dbcol | awk -F '_' '{print $2}')
-    kubectl cp "$PROJECT_DIR"/hub/documents/${dbcol}.json -n mongo $(kubectl get pods -n mongo -l app=mongodb --output=jsonpath={.items..metadata.name}):/tmp/${dbcol}.json
-    kubectl exec -it -n mongo $(kubectl get pods -n mongo -l app=mongodb --output=jsonpath={.items..metadata.name}) -- bash -c "mongoimport --db ${db} --collection ${col} --file /tmp/${dbcol}.json --username root --password admin  --authenticationDatabase admin"
-  done
-
-  # Install Jaeger
-  echo "Deploying Jaeger."
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/jaeger/
-  kubectl -n jaeger wait --for condition=available --timeout="${TIMEOUT}" deployment/jaeger
-
-  # Install Git
-  echo "Deploying Git."
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/git/
-  kubectl -n git wait --for condition=available --timeout="${TIMEOUT}" deployment/hub-git
-
-  # Install Hub
-  echo "Deploying Hub services."
-
-  export GCLOUD_EMAIL
-  envsubst < "$PROJECT_DIR"/hub/manifests/hub/templates/02-hub-notification.yaml > "$PROJECT_DIR"/hub/manifests/hub/02-hub-notification.yaml
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/hub/secrets/
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/hub/
-
-  apply-coredns-conf
-
-  # Create token
-  kubectl rollout status deploy --timeout="${TIMEOUT}" -n hub hub-topology
-  kubectl rollout status deploy --timeout="${TIMEOUT}" -n hub hub-cluster
-  kubectl rollout status deploy --timeout="${TIMEOUT}" -n hub hub-token
-  kubectl rollout status deploy --timeout="${TIMEOUT}" -n hub hub-offer
-  sleep 2
-
-  # Install Broker
-  echo "Deploying Broker service."
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/broker/
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/broker/secrets
-
-  renew-jwt
-  sleep 5
-
-  ## Freemium
-  kubectl run --timeout="${TIMEOUT}" --command=true -it --rm --restart=Never --image=gcr.io/traefiklabs/hub-offer:latest\
-  --image-pull-policy=IfNotPresent --namespace=hub \
-  --overrides='{"apiVersion": "v1", "spec": {"imagePullSecrets": [{"name": "gcr-access-token"}]}}' -- hub-offer-c /hub-offer create-offer \
-  --mongodb-uri="mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/offers?authSource=admin" \
-  --log-level="debug" \
-  --offer-name="freemium" \
-  --offer-config-metrics-interval="1m" \
-  --offer-config-metrics-tables="1m" \
-  --offer-config-metrics-tables="10m" \
-  --offer-config-metrics-tables="1h" \
-  --offer-quotas-clusters="2" \
-  --offer-config-access-control-max-secured-routes="3" \
-  --offer-quotas-users="2" \
-  --offer-quotas-acps="3" \
-  --offer-quotas-domains="10" \
-  --offer-quotas-gslb-bandwidth="1000000000" \
-  --offer-quotas-alert-triggers="5" \
-  --offer-quotas-alert-history="10" \
-  --offer-quotas-edge-ingresses="10" \
-  --offer-config-gslb-http-healthcheck-min-interval-seconds=60 \
-  --offer-config-gslb-http-healthcheck-min-threshold-editable="false" \
-  --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" --offer-features="api-management" || true
-
-  ## Premium
-  kubectl run --timeout="${TIMEOUT}" --command=true -it --rm --restart=Never --image=gcr.io/traefiklabs/hub-offer:latest \
-  --image-pull-policy=IfNotPresent --namespace=hub \
-  --overrides='{"apiVersion": "v1", "spec": {"imagePullSecrets": [{"name": "gcr-access-token"}]}}' -- hub-offer-c /hub-offer create-offer \
-  --mongodb-uri="mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/offers?authSource=admin" \
-  --log-level="debug" \
-  --offer-name="premium" \
-  --offer-config-metrics-interval="1m" \
-  --offer-config-metrics-tables="1m" \
-  --offer-config-metrics-tables="10m" \
-  --offer-config-metrics-tables="1h" \
-  --offer-config-metrics-tables="1d" \
-  --offer-quotas-clusters="5" \
-  --offer-config-access-control-max-secured-routes="50" \
-  --offer-quotas-users="20" \
-  --offer-quotas-acps="10" \
-  --offer-quotas-domains="100" \
-  --offer-quotas-gslb-bandwidth="50000000000" \
-  --offer-quotas-alert-triggers="100" \
-  --offer-quotas-alert-history="200" \
-  --offer-quotas-edge-ingresses="10" \
-  --offer-config-gslb-http-healthcheck-min-interval-seconds=15 \
-  --offer-config-gslb-http-healthcheck-min-threshold-editable="true" \
-  --offer-features="team-management" --offer-features="geo-steering" --offer-features="api-management" --offer-features="oidc" \
-  --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" --offer-features="api-management" || true
-
-  # Create subscription
-  curl --silent --location --request POST 'http://platform.docker.localhost/offer/internal/subscriptions' \
-  --header 'Content-Type: application/json' \
-  --data-raw "{\"userId\": \"fd016582-3e6a-4951-a9c5-e03e81d63761\", \"workspaceId\": \"${WORKSPACE_ID}\"}"
-
-  # Create topology
-    curl --silent --location --request POST 'http://platform.docker.localhost/topology/internal/workspaces' \
-    --header 'Content-Type: application/json' \
-    --data-raw "{\"id\": \"${WORKSPACE_ID}\"}"
-
-  export TOKEN_CLUSTER=$(curl --silent --location --request POST 'http://platform.docker.localhost/cluster/external/clusters' \
-  --header "Authorization: Bearer ${JWT_EXTERNAL}" \
-  --header 'Content-Type: application/json' \
-  --data-raw "{\"name\": \"cluster\"}" | jq -r '.token' | tr -d '\n')
-
-  if [ $TOKEN_CLUSTER != "null" ]; then
-    envsubst < "$PROJECT_DIR"/hub/manifests/hub-agent/templates/values.yaml > "$PROJECT_DIR"/hub/manifests/hub-agent/01-values.yaml
+  # Optional
+  if ${INSTALL_POP}; then
+    installPoP
   fi
 
-  # Install Hub Agent
-  helm repo add traefik-hub https://helm.traefik.io/hub
-  helm repo update
-  helm upgrade --install hub-agent traefik-hub/hub-agent --values="$PROJECT_DIR"/hub/manifests/hub-agent/01-values.yaml --namespace hub-agent
+  if ${INSTALL_BROKER}; then
+    installBroker
+  fi
 
-  # Patch Hub agent to expose debugging port
-  kubectl patch svc -n hub-agent hub-agent-controller -p '{"spec":{"ports":[{"name":"hub-agent-debug","port":40000}]}}'
-  kubectl patch svc -n hub-agent hub-agent-auth-server -p '{"spec":{"ports":[{"name":"hub-agent-debug","port":40000}]}}'
+  if ${INSTALL_JAEGER}; then
+    installJaeger
+  fi
 
-  # Wait for Hub agent to start
-  kubectl -n hub-agent wait --for condition=available --timeout="${TIMEOUT}" deployment/hub-agent-controller
-  kubectl -n hub-agent wait --for condition=available --timeout="${TIMEOUT}" deployment/hub-agent-auth-server
+  if ${INSTALL_MONITORING}; then
+    installMonitoring
+  fi
 
-  # Install PoP
-  echo "Deploying PoP services."
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/pop/secrets
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/pop
+  if ${INSTALL_NGINX}; then
+      installMonitoring
+  fi
 
-  # Install Ingress-nginx
-  echo "Deploying nginx."
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/ingress-nginx/
-  kubectl -n ingress-nginx wait --for condition=available --timeout="${TIMEOUT}" deployment/ingress-nginx-controller
+  if ${INSTALL_HAPROXY}; then
+      installHAProxy
+  fi
 
-  # Install HaProxy
-  echo "Deploying haproxy."
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/ingress-haproxy/
-  kubectl -n haproxy-ingress-controller wait --for condition=available --timeout="${TIMEOUT}" deployment/haproxy-ingress
+  if ${INSTALL_WHOAMI}; then
+      installWhoami
+  fi
 
-  # Install whoami
-  echo "Deploying whoami."
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/whoami/
-  kubectl -n whoami wait --for condition=available --timeout="${TIMEOUT}" deployment/whoami
-
-  # Install monitoring
-  echo "Deploying monitoring."
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/monitoring/00-namespace.yaml
-  kubectl delete configmap -n monitoring grafana-dashboard || true
-  kubectl create configmap -n monitoring grafana-dashboard --from-file="$PROJECT_DIR"/hub/manifests/monitoring/dashboards/
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/monitoring/
-
-  # Install petstore as openapi example
-  echo "Deploying petstore."
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/petstore/
-  kubectl -n petstore wait --for condition=available --timeout="${TIMEOUT}" deployment/petstore
+  if ${INSTALL_PETSTORE}; then
+      installPetstore
+  fi
 }
 
-update-local-hosts() {
+updateLocalHosts() {
   HUB_DOMAIN=${HUB_DOMAIN:-docker.localhost}
   # TODO - could fetch real LB address (k3d)
   lb_address="127.0.0.1"
@@ -247,7 +90,7 @@ sedi() {
   sed --version >/dev/null 2>&1 && sudo sed -i -- "$@" || sudo sed -i "" "$@"
 }
 
-apply-coredns-conf() {
+applyCoreDNSConf() {
     # Create CoreDNS configmap and rollout restart
     kubectl apply -f "$PROJECT_DIR"/coredns/00-configmap.yaml
     echo "Waiting coredns availability";
@@ -257,7 +100,7 @@ apply-coredns-conf() {
     kubectl rollout restart -n kube-system deploy/coredns
 }
 
-renew-gcr-token() {
+renewGCRToken() {
     for namespace in hub hub-agent pop git broker; do
         set +o errexit
         kubectl delete secret -n $namespace gcr-access-token
@@ -271,12 +114,12 @@ renew-gcr-token() {
     done
 }
 
-renew-auth0-admin-token() {
+renewAuth0AdminToken() {
   kubectl delete job -n hub auth0-admin-token-renew || true
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/hub/01-auth0-admin-token-renew.yaml
 }
 
-renew-jwt() {
+renewJWT() {
   JWT_CLIENT_ID=$(kubectl get secret hub-secret -n hub -o json | jq -r '.data["auth0-client-id"]' | tr -d '\n' | base64 -d)
   JWT_CLIENT_SECRET=$(kubectl get secret hub-secret -n hub -o json | jq -r '.data["auth0-client-secret"]' | tr -d '\n' | base64 -d)
 
@@ -296,7 +139,7 @@ renew-jwt() {
   echo "${JWT_EXTERNAL}"
 }
 
-check-tools() {
+checkTools() {
   cmdList="kubectl k3d gcloud helm jq"
   for cmd in $cmdList; do
     echo -n "checking ${cmd}: "
@@ -307,7 +150,7 @@ check-tools() {
     done
 }
 
-prepare-docker-images() {
+prepareDockerImages() {
   images=$(find "${PROJECT_DIR}" -type f -name '*.yaml' | xargs grep 'image: ' | tr -d \" | awk -F '@' '{ print $1 }' | awk -F ':' '{ print $3":"$4 }' | sort | uniq)
 
   images=$(echo "${images}" | grep -v "hub-ui|hub-git")
@@ -316,7 +159,7 @@ prepare-docker-images() {
   k3d image import -c k3s-default-hub ${images}
 }
 
-setup-k3s() {
+setupK3S() {
   if errlog=$(mktemp) && k3d cluster list | grep k3s-default-hub 2> "$errlog" && ! test -s "$errlog"; then
     echo "Starting existing k3s cluster."
     k3d cluster start k3s-default-hub
@@ -404,7 +247,164 @@ clean() {
   kubectl delete -f "$PROJECT_DIR"/hub/manifests/pebble/ 2> /dev/null || true
 }
 
-createuser() {
+createNamespaces() {
+  echo "Create Namespaces."
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/hub/00-namespace.yaml
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/broker/00-namespace.yaml
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/hub-agent/00-namespace.yaml
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/aws-secret-operator/00-namespace.yaml
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/pop/00-namespace.yaml
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/git/00-namespace.yaml
+}
+
+createSecrets() {
+  echo "Create Secrets."
+  kubectl delete secret -n aws-secret-operator aws-secret || true
+  kubectl create secret -n aws-secret-operator generic aws-secret --from-literal="api_key=$AWS_CLIENT_ID" --from-literal="api_secret_key=$AWS_CLIENT_SECRET"
+
+  # Install AWS Secret Operator
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/aws-secret-operator/
+
+  # Create CronJob for auth0 service token renewal.
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/hub/auth0/auth0-service-token.yaml
+  kubectl create job -n hub auth0-service-token --from cronjobs/auth0-service-token || true
+
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/hub/secrets/hub-k3d.yaml
+}
+
+installMongo() {
+  echo "Deploying Mongo."
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/mongo/
+  kubectl -n mongo rollout status --watch --timeout="${TIMEOUT}" statefulset/mongodb
+
+  # Insert required data.
+  for dbcol in workspaces_workspaces users_users users_tos ; do
+      db=$(echo $dbcol | awk -F '_' '{print $1}')
+      col=$(echo $dbcol | awk -F '_' '{print $2}')
+      kubectl cp "$PROJECT_DIR"/hub/documents/${dbcol}.json -n mongo $(kubectl get pods -n mongo -l app=mongodb --output=jsonpath={.items..metadata.name}):/tmp/${dbcol}.json
+      kubectl exec -it -n mongo $(kubectl get pods -n mongo -l app=mongodb --output=jsonpath={.items..metadata.name}) -- bash -c "mongoimport --db ${db} --collection ${col} --file /tmp/${dbcol}.json --username root --password admin  --authenticationDatabase admin"
+    done
+}
+
+installTraefik() {
+  echo "Deploying Traefik."
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/traefik/
+  kubectl -n traefik wait --for condition=available --timeout="${TIMEOUT}" deployment/traefik
+}
+
+installPebble() {
+  echo "Deploying Pebble."
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/pebble/
+  kubectl -n pebble wait --for condition=available --timeout="${TIMEOUT}" deployment/pebble
+}
+
+installJaeger() {
+  echo "Deploying Jaeger."
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/jaeger/
+  kubectl -n jaeger wait --for condition=available --timeout="${TIMEOUT}" deployment/jaeger
+}
+
+installGit() {
+  echo "Deploying Git."
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/git/
+  kubectl -n git wait --for condition=available --timeout="${TIMEOUT}" deployment/hub-git
+}
+
+installHub() {
+    echo "Deploying Hub services."
+
+    export GCLOUD_EMAIL
+    envsubst < "$PROJECT_DIR"/hub/manifests/hub/templates/02-hub-notification.yaml > "$PROJECT_DIR"/hub/manifests/hub/02-hub-notification.yaml
+    kubectl apply -f "$PROJECT_DIR"/hub/manifests/hub/secrets/
+    kubectl apply -f "$PROJECT_DIR"/hub/manifests/hub/
+
+    kubectl rollout status deploy --timeout="${TIMEOUT}" -n hub hub-topology
+    kubectl rollout status deploy --timeout="${TIMEOUT}" -n hub hub-cluster
+    kubectl rollout status deploy --timeout="${TIMEOUT}" -n hub hub-token
+    kubectl rollout status deploy --timeout="${TIMEOUT}" -n hub hub-offer
+}
+
+installBroker() {
+  echo "Deploying Broker service."
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/broker/
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/broker/secrets
+}
+
+installPoP() {
+  echo "Deploying PoP services."
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/pop/secrets
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/pop
+}
+
+installAgent() {
+  echo "Deploying Hub Agent."
+
+  # Create cluster on Hub
+  export TOKEN_CLUSTER=$(curl --silent --location --request POST 'http://platform.docker.localhost/cluster/external/clusters' \
+  --header "Authorization: Bearer ${JWT_EXTERNAL}" \
+  --header 'Content-Type: application/json' \
+  --data-raw "{\"name\": \"cluster\"}" | jq -r '.token' | tr -d '\n')
+
+  if [ "$TOKEN_CLUSTER" != "null" ]; then
+    envsubst < "$PROJECT_DIR"/hub/manifests/hub-agent/templates/values.yaml > "$PROJECT_DIR"/hub/manifests/hub-agent/01-values.yaml
+  fi
+
+  # Install Hub Agent
+  helm repo add traefik-hub https://helm.traefik.io/hub
+  helm repo update
+  helm upgrade --install hub-agent traefik-hub/hub-agent --values="$PROJECT_DIR"/hub/manifests/hub-agent/01-values.yaml --namespace hub-agent
+
+  kubectl -n hub-agent wait --for condition=available --timeout="${TIMEOUT}" deployment/hub-agent-controller
+}
+
+installMonitoring() {
+  echo "Deploying monitoring."
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/monitoring/00-namespace.yaml
+  kubectl delete configmap -n monitoring grafana-dashboard || true
+  kubectl create configmap -n monitoring grafana-dashboard --from-file="$PROJECT_DIR"/hub/manifests/monitoring/dashboards/
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/monitoring/
+}
+
+installNginx() {
+  echo "Deploying nginx."
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/ingress-nginx/
+  kubectl -n ingress-nginx wait --for condition=available --timeout="${TIMEOUT}" deployment/ingress-nginx-controller
+}
+
+installHAProxy() {
+  echo "Deploying haproxy."
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/ingress-haproxy/
+  kubectl -n haproxy-ingress-controller wait --for condition=available --timeout="${TIMEOUT}" deployment/haproxy-ingress
+}
+
+installWhoami() {
+  echo "Deploying whoami."
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/whoami/00-namespace.yaml
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/whoami/01-whoami.yaml
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/whoami/02-acp.yaml
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/whoami/03-ingress-traefik.yaml
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/whoami/03-ingress-traefik-tls.yaml
+
+  kubectl -n whoami wait --for condition=available --timeout="${TIMEOUT}" deployment/whoami
+
+  if ${INSTALL_HAPROXY}; then
+    kubectl apply -f "$PROJECT_DIR"/hub/manifests/whoami/03-ingress-haproxy.yaml
+    kubectl apply -f "$PROJECT_DIR"/hub/manifests/whoami/03-ingress-haproxy-tls.yaml
+  fi
+
+  if ${INSTALL_NGINX}; then
+    kubectl apply -f "$PROJECT_DIR"/hub/manifests/whoami/03-ingress-nginx.yaml
+    kubectl apply -f "$PROJECT_DIR"/hub/manifests/whoami/03-ingress-nginx-tls.yaml
+  fi
+}
+
+installPetstore() {
+  echo "Deploying petstore."
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/petstore/
+  kubectl -n petstore wait --for condition=available --timeout="${TIMEOUT}" deployment/petstore
+}
+
+createUser() {
   for filename in "${PROJECT_DIR}"/hub/documents/user_data/*; do
       file=$(basename "${filename}")
       db=$(echo "${file}" | cut -d '_' -f1)
@@ -415,23 +415,116 @@ createuser() {
     done
 }
 
+createOffers() {
+  ## Freemium
+    kubectl run --timeout="${TIMEOUT}" --command=true -it --rm --restart=Never --image=gcr.io/traefiklabs/hub-offer:latest\
+    --image-pull-policy=IfNotPresent --namespace=hub \
+    --overrides='{"apiVersion": "v1", "spec": {"imagePullSecrets": [{"name": "gcr-access-token"}]}}' -- hub-offer-c /hub-offer create-offer \
+    --mongodb-uri="mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/offers?authSource=admin" \
+    --log-level="debug" \
+    --offer-name="freemium" \
+    --offer-config-metrics-interval="1m" \
+    --offer-config-metrics-tables="1m" \
+    --offer-config-metrics-tables="10m" \
+    --offer-config-metrics-tables="1h" \
+    --offer-quotas-clusters="2" \
+    --offer-config-access-control-max-secured-routes="3" \
+    --offer-quotas-users="2" \
+    --offer-quotas-acps="3" \
+    --offer-quotas-domains="10" \
+    --offer-quotas-gslb-bandwidth="1000000000" \
+    --offer-quotas-alert-triggers="5" \
+    --offer-quotas-alert-history="10" \
+    --offer-quotas-edge-ingresses="10" \
+    --offer-config-gslb-http-healthcheck-min-interval-seconds=60 \
+    --offer-config-gslb-http-healthcheck-min-threshold-editable="false" \
+    --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" --offer-features="api-management" || true
+
+    ## Premium
+    kubectl run --timeout="${TIMEOUT}" --command=true -it --rm --restart=Never --image=gcr.io/traefiklabs/hub-offer:latest \
+    --image-pull-policy=IfNotPresent --namespace=hub \
+    --overrides='{"apiVersion": "v1", "spec": {"imagePullSecrets": [{"name": "gcr-access-token"}]}}' -- hub-offer-c /hub-offer create-offer \
+    --mongodb-uri="mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/offers?authSource=admin" \
+    --log-level="debug" \
+    --offer-name="premium" \
+    --offer-config-metrics-interval="1m" \
+    --offer-config-metrics-tables="1m" \
+    --offer-config-metrics-tables="10m" \
+    --offer-config-metrics-tables="1h" \
+    --offer-config-metrics-tables="1d" \
+    --offer-quotas-clusters="5" \
+    --offer-config-access-control-max-secured-routes="50" \
+    --offer-quotas-users="20" \
+    --offer-quotas-acps="10" \
+    --offer-quotas-domains="100" \
+    --offer-quotas-gslb-bandwidth="50000000000" \
+    --offer-quotas-alert-triggers="100" \
+    --offer-quotas-alert-history="200" \
+    --offer-quotas-edge-ingresses="10" \
+    --offer-config-gslb-http-healthcheck-min-interval-seconds=15 \
+    --offer-config-gslb-http-healthcheck-min-threshold-editable="true" \
+    --offer-features="team-management" --offer-features="geo-steering" --offer-features="api-management" --offer-features="oidc" \
+    --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" --offer-features="api-management" || true
+}
+
+initializeWorkspace() {
+  # Create subscription
+  curl --silent --location --request POST 'http://platform.docker.localhost/offer/internal/subscriptions' \
+  --header 'Content-Type: application/json' \
+  --data-raw "{\"userId\": \"fd016582-3e6a-4951-a9c5-e03e81d63761\", \"workspaceId\": \"${WORKSPACE_ID}\"}"
+
+  # Create topology
+    curl --silent --location --request POST 'http://platform.docker.localhost/topology/internal/workspaces' \
+    --header 'Content-Type: application/json' \
+    --data-raw "{\"id\": \"${WORKSPACE_ID}\"}"
+}
+
+initializeVariables() {
+  readonly PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" && pwd)/.."
+  export ENV_FILE=${PROJECT_DIR}/hub/.env
+  [[ -f "${ENV_FILE}" ]] && source "${ENV_FILE}"
+
+  export PROJECT_DIR
+  export TIMEOUT="${TIMEOUT:-180s}"
+  export K3S_IMAGE="${K3S_IMAGE-"rancher/k3s:v1.24.4-k3s1"}"
+
+  export WORKSPACE_ID="${WORKSPACE_ID:-6311c90bfce04bd29e473a20}"
+
+  [[ "$GCLOUD_EMAIL" == "" ]] && read -p "Enter gcloud email: " GCLOUD_EMAIL
+  [[ "$AWS_CLIENT_ID" == "" ]] && read -p "Enter aws client id: " AWS_CLIENT_ID
+  [[ "$AWS_CLIENT_SECRET" == "" ]] && read -p "Enter aws client secret: " AWS_CLIENT_SECRET
+  [[ "$HUB_USERNAME" == "" ]] && read -p "Enter your hub username: " HUB_USERNAME
+  [[ "$HUB_PASSWORD" == "" ]] && read -p "Enter your hub password: " HUB_PASSWORD
+
+  [[ "$INSTALL_POP" == "" ]] && export INSTALL_POP=false
+  [[ "$INSTALL_BROKER" == "" ]] && export INSTALL_BROKER=false
+  [[ "$INSTALL_JAEGER" == "" ]] && export INSTALL_JAEGER=false
+  [[ "$INSTALL_MONITORING" == "" ]] && export INSTALL_MONITORING=false
+  [[ "$INSTALL_NGINX" == "" ]] && export INSTALL_NGINX=false
+  [[ "$INSTALL_HAPROXY" == "" ]] && export INSTALL_HAPROXY=false
+  [[ "$INSTALL_WHOAMI" == "" ]] && export INSTALL_WHOAMI=false
+  [[ "$INSTALL_PETSTORE" == "" ]] && export INSTALL_PETSTORE=false
+}
+
+initializeVariables
+
 cmd=$1
 
 case $cmd in
     apply-coredns-conf)
-        apply-coredns-conf
+        applyCoreDNSConf
     ;;
-    createuser)
-        createuser
+    create-user)
+        createUser
     ;;
     renew-gcr-token)
-        renew-gcr-token
+        renewGCRToken
     ;;
     renew-jwt)
-        renew-jwt
+        renewJWT
     ;;
     renew-auth0-admin-token)
-        renew-auth0-admin-token
+        renewAuth0AdminToken
     ;;
     run)
         main "$@"
@@ -440,7 +533,7 @@ case $cmd in
         clean
     ;;
     *)
-        echo "Commands available: apply-coredns-conf, createuser, renew-auth0-admin-token, renew-gcr-token, renew-jwt, run, clean"
+        echo "Commands available: apply-core-dns-conf, create-user, renew-auth0-admin-token, renew-gcr-token, renew-jwt, run, clean"
         exit 1
     ;;
 esac
