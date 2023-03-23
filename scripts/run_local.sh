@@ -68,6 +68,15 @@ main() {
   fi
 }
 
+helmUpdate() {
+  if [ "${HUB_HELM_CHART_PATH}" == "traefik-hub/hub-agent" ]; then
+    helm repo add traefik-hub https://helm.traefik.io/hub
+    helm repo update
+  fi
+
+  helm upgrade --install hub-agent ${HUB_HELM_CHART_PATH} --values="$PROJECT_DIR"/hub/manifests/hub-agent/01-values.yaml --namespace hub-agent
+}
+
 updateLocalHosts() {
   HUB_DOMAIN=${HUB_DOMAIN:-docker.localhost}
   # TODO - could fetch real LB address (k3d)
@@ -350,9 +359,7 @@ installAgent() {
   fi
 
   # Install Hub Agent
-  helm repo add traefik-hub https://helm.traefik.io/hub
-  helm repo update
-  helm upgrade --install hub-agent traefik-hub/hub-agent --values="$PROJECT_DIR"/hub/manifests/hub-agent/01-values.yaml --namespace hub-agent
+  helmUpdate
 
   kubectl -n hub-agent wait --for condition=available --timeout="${TIMEOUT}" deployment/hub-agent-controller
 }
@@ -496,14 +503,15 @@ initializeVariables() {
   [[ "$HUB_USERNAME" == "" ]] && read -p "Enter your hub username: " HUB_USERNAME
   [[ "$HUB_PASSWORD" == "" ]] && read -p "Enter your hub password: " HUB_PASSWORD
 
-  [[ "$INSTALL_POP" == "" ]] && export INSTALL_POP=false
-  [[ "$INSTALL_BROKER" == "" ]] && export INSTALL_BROKER=false
-  [[ "$INSTALL_JAEGER" == "" ]] && export INSTALL_JAEGER=false
-  [[ "$INSTALL_MONITORING" == "" ]] && export INSTALL_MONITORING=false
-  [[ "$INSTALL_NGINX" == "" ]] && export INSTALL_NGINX=false
-  [[ "$INSTALL_HAPROXY" == "" ]] && export INSTALL_HAPROXY=false
-  [[ "$INSTALL_WHOAMI" == "" ]] && export INSTALL_WHOAMI=false
-  [[ "$INSTALL_PETSTORE" == "" ]] && export INSTALL_PETSTORE=false
+  INSTALL_POP="${INSTALL_POP:-false}"
+  INSTALL_BROKER="${INSTALL_BROKER:-false}"
+  INSTALL_JAEGER="${INSTALL_JAEGER:-false}"
+  INSTALL_MONITORING="${INSTALL_MONITORING:-false}"
+  INSTALL_NGINX="${INSTALL_NGINX:-false}"
+  INSTALL_HAPROXY="${INSTALL_HAPROXY:-false}"
+  INSTALL_WHOAMI="${INSTALL_WHOAMI:-false}"
+  INSTALL_PETSTORE="${INSTALL_PETSTORE:-false}"
+  HUB_HELM_CHART_PATH="${HUB_HELM_CHART_PATH:-traefik-hub/hub-agent}"
 }
 
 initializeVariables
@@ -514,8 +522,41 @@ case $cmd in
     apply-coredns-conf)
         applyCoreDNSConf
     ;;
+    clean)
+        clean
+    ;;
     create-user)
         createUser
+    ;;
+    helm-update)
+        helmUpdate
+    ;;
+    install-broker)
+        installBroker
+    ;;
+    install-haproxy)
+        installHAProxy
+    ;;
+    install-jaeger)
+        installJaeger
+    ;;
+    install-monitoring)
+        installMonitoring
+    ;;
+    install-nginx)
+        installNginx
+    ;;
+    install-petstore)
+        installPetstore
+    ;;
+    install-pop)
+        installPoP
+    ;;
+    install-whoami)
+        installWhoami
+    ;;
+    renew-auth0-admin-token)
+        renewAuth0AdminToken
     ;;
     renew-gcr-token)
         renewGCRToken
@@ -523,17 +564,13 @@ case $cmd in
     renew-jwt)
         renewJWT
     ;;
-    renew-auth0-admin-token)
-        renewAuth0AdminToken
-    ;;
     run)
         main "$@"
     ;;
-    clean)
-        clean
-    ;;
     *)
-        echo "Commands available: apply-core-dns-conf, create-user, renew-auth0-admin-token, renew-gcr-token, renew-jwt, run, clean"
+        echo "Commands available: apply-core-dns-conf, clean, create-user, helm-update, install-broker, install-haproxy," \
+          "install-jaeger, install-monitoring, install-nginx, install-petstore, install-pop, install-whoami, renew-auth0-admin-token," \
+          "renew-gcr-token, renew-jwt, run"
         exit 1
     ;;
 esac
