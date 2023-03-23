@@ -61,6 +61,8 @@ spec:
               value: http://hub-acp.hub.svc.cluster.local/internal
             - name: ALERT_SERVICE_URL
               value: http://hub-alert.hub.svc.cluster.local/internal
+            - name: API_MANAGEMENT_SERVICE_URL
+              value: http://hub-api-management.hub.svc.cluster.local/internal
             - name: WORKSPACE_SERVICE_URL
               value: http://hub-workspace.hub.svc.cluster.local/internal
             - name: METRICS_SERVICE_URL
