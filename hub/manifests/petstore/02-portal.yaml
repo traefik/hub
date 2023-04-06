@@ -4,4 +4,7 @@ metadata:
   name: my-portal
 spec:
   description: "My awesome portal"
+  customDomains:
+    - my-portal.tls.docker.localhost
+
   apiGateway: my-gateway

@@ -1,0 +1,24 @@
+[
+  {
+    "_id": "6419ad9354bbf93c9c86881d",
+    "workspaceId": "6311c90bfce04bd29e473a20",
+    "name": "suppliers",
+    "createdAt": {
+      "$date": "2023-03-21T14:37:56.060Z"
+    },
+    "updatedAt": {
+      "$date": "2023-03-21T14:37:56.060Z"
+    }
+  },
+  {
+    "_id": "6419ad9354bb9c86881df93c",
+    "workspaceId": "6311c90bfce04bd29e473a20",
+    "name": "developers",
+    "createdAt": {
+      "$date": "2023-03-21T14:37:56.060Z"
+    },
+    "updatedAt": {
+      "$date": "2023-03-21T14:37:56.060Z"
+    }
+  }
+]

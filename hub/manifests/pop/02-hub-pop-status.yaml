@@ -34,6 +34,8 @@ spec:
               value: http://traefikee-gslb-proxy-svc.pop.svc.cluster.local:8081/api/overview
             - name: LOG_LEVEL
               value: debug
+            - name: LOG_FORMAT
+              value: console
           args:
             - popstatus
             - --mongodb-uri=mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/gslb?authSource=admin

@@ -1,10 +1,12 @@
-{
-  "_id": {
-    "$oid": "616976b1eb698c03ba0b7e57"
-  },
-  "version": "1.0.0",
-  "content": "best ToS ever\n",
-  "createdAt": {
-    "$date": "2021-10-15T12:40:17.342Z"
+[
+  {
+    "_id": {
+      "$oid": "616976b1eb698c03ba0b7e57"
+    },
+    "version": "1.0.0",
+    "content": "best ToS ever\n",
+    "createdAt": {
+      "$date": "2021-10-15T12:40:17.342Z"
+    }
   }
-}
+]

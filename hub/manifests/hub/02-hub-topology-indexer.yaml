@@ -60,6 +60,8 @@ spec:
               value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/topologies?authSource=admin
             - name: LOG_LEVEL
               value: debug
+            - name: LOG_FORMAT
+              value: console
           args:
             - serve-indexer
             - --addr=:80
@@ -195,6 +197,8 @@ spec:
               value: 2s
             - name: LOG_LEVEL
               value: debug
+            - name: LOG_FORMAT
+              value: console
           args:
             - index
             - --addr=:80

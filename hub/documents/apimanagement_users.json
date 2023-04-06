@@ -1,0 +1,50 @@
+[
+  {
+    "_id": "6419ae6354bb9c86881df93d",
+    "workspaceId": "6311c90bfce04bd29e473a20",
+    "firstName": "John",
+    "lastName": "Doe",
+    "company": "Traefik Labs",
+    "email": "john.doe@traefik.io",
+    "passwordHash": "$2a$10$3eIUKZ/NDG7ikxNGDACm9eRkBlT8OYU7CGDauFdQ7e9SjpITPExvG",
+    "_clearTextPassword": "secret",
+    "groupIds": [
+      "6419ad9354bb9c86881df93c"
+    ],
+    "status": "active",
+    "resetCode": "",
+    "lastLogin": {
+      "$date": "2023-03-21T14:37:56.060Z"
+    },
+    "createdAt": {
+      "$date": "2023-03-21T14:37:56.060Z"
+    },
+    "updatedAt": {
+      "$date": "2023-03-21T14:37:56.060Z"
+    }
+  },
+  {
+    "_id": "6419ae63581d868f93d4bb9c",
+    "workspaceId": "6311c90bfce04bd29e473a20",
+    "firstName": "Jane",
+    "lastName": "Doe",
+    "company": "Traefik Labs",
+    "email": "jane.doe@traefik.io",
+    "passwordHash": "$2a$10$3eIUKZ/NDG7ikxNGDACm9eRkBlT8OYU7CGDauFdQ7e9SjpITPExvG",
+    "_clearTextPassword": "secret",
+    "groupIds": [
+      "6419ad9354bbf93c9c86881d"
+    ],
+    "status": "active",
+    "resetCode": "",
+    "lastLogin": {
+      "$date": "2023-03-21T14:37:56.060Z"
+    },
+    "createdAt": {
+      "$date": "2023-03-21T14:37:56.060Z"
+    },
+    "updatedAt": {
+      "$date": "2023-03-21T14:37:56.060Z"
+    }
+  }
+]

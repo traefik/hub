@@ -97,6 +97,8 @@ spec:
               value: JUMqRi1KYU5jUmZValhuMnI1dTh4L0E/RChHK0tiUGU=
             - name: LOG_LEVEL
               value: debug
+            - name: LOG_FORMAT
+              value: console
             - name: GSLB_SERVICE_URL
               value: http://hub-gslb.hub.svc.cluster.local/internal
             - name: NOTIFICATION_SERVICE_URL

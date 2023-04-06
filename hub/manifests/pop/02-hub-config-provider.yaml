@@ -61,6 +61,8 @@ spec:
               value: http://hub-check.pop.svc.cluster.local/internal
             - name: LOG_LEVEL
               value: debug
+            - name: LOG_FORMAT
+              value: console
           args:
             - serveconfig
             - --addr=:80

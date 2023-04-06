@@ -23,6 +23,7 @@ main() {
 
   # Base
   installMongo
+  installHydra
   installTraefik
   installPebble
   installGit
@@ -74,7 +75,7 @@ helmUpdate() {
     helm repo update
   fi
 
-  helm upgrade --install hub-agent ${HUB_HELM_CHART_PATH} --values="$PROJECT_DIR"/hub/manifests/hub-agent/01-values.yaml --namespace hub-agent
+   helm upgrade --install hub-agent "${HUB_HELM_CHART_PATH}" --values="$PROJECT_DIR"/hub/manifests/hub-agent/01-values.yaml --namespace hub-agent
 }
 
 updateLocalHosts() {
@@ -287,12 +288,25 @@ installMongo() {
   kubectl -n mongo rollout status --watch --timeout="${TIMEOUT}" statefulset/mongodb
 
   # Insert required data.
-  for dbcol in workspaces_workspaces users_users users_tos ; do
-      db=$(echo $dbcol | awk -F '_' '{print $1}')
-      col=$(echo $dbcol | awk -F '_' '{print $2}')
-      kubectl cp "$PROJECT_DIR"/hub/documents/${dbcol}.json -n mongo $(kubectl get pods -n mongo -l app=mongodb --output=jsonpath={.items..metadata.name}):/tmp/${dbcol}.json
-      kubectl exec -it -n mongo $(kubectl get pods -n mongo -l app=mongodb --output=jsonpath={.items..metadata.name}) -- bash -c "mongoimport --db ${db} --collection ${col} --file /tmp/${dbcol}.json --username root --password admin  --authenticationDatabase admin"
-    done
+  for filename in "${PROJECT_DIR}"/hub/documents/*; do
+      # Skip directories.
+      if [ -d "$filename" ]; then
+          continue
+      fi
+
+      file=$(basename "${filename}")
+      db=$(echo "${file}" | cut -d '_' -f1)
+      col=$(echo "${file}" | cut -d '_' -f2-4 | cut -d '.' -f1)
+
+      kubectl cp "${PROJECT_DIR}"/hub/documents/"${file}" -n mongo "$(kubectl get pods -n mongo -l app=mongodb --output=jsonpath={.items..metadata.name})":/tmp/"${file}"
+      kubectl exec -it -n mongo "$(kubectl get pods -n mongo -l app=mongodb --output=jsonpath={.items..metadata.name})" -- bash -c "mongoimport --db ${db} --collection ${col} --file /tmp/${file} --jsonArray --username root --password admin  --authenticationDatabase admin"
+  done
+}
+
+installHydra() {
+  echo "Deploying Hydra."
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/hydra/
+  kubectl -n hydra rollout status --watch --timeout="${TIMEOUT}" deployment/hydra
 }
 
 installTraefik() {
@@ -445,7 +459,7 @@ createOffers() {
     --offer-quotas-edge-ingresses="10" \
     --offer-config-gslb-http-healthcheck-min-interval-seconds=60 \
     --offer-config-gslb-http-healthcheck-min-threshold-editable="false" \
-    --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" --offer-features="api-management" || true
+    --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" --offer-features="api-management" --offer-features="oidc" || true
 
     ## Premium
     kubectl run --timeout="${TIMEOUT}" --command=true -it --rm --restart=Never --image=gcr.io/traefiklabs/hub-offer:latest \
@@ -471,7 +485,7 @@ createOffers() {
     --offer-config-gslb-http-healthcheck-min-interval-seconds=15 \
     --offer-config-gslb-http-healthcheck-min-threshold-editable="true" \
     --offer-features="team-management" --offer-features="geo-steering" --offer-features="api-management" --offer-features="oidc" \
-    --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" --offer-features="api-management" || true
+    --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" --offer-features="api-management" --offer-features="oidc" || true
 }
 
 initializeWorkspace() {

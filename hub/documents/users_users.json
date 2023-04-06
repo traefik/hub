@@ -1,21 +1,23 @@
-{
-  "_id": "58626c00-a81a-4e17-8ccb-191022334059",
-  "auth0Id": "auth0|6311c90bfce04bd29e473a20",
-  "createdAt": {
-    "$date": "2021-10-01T12:24:49.499Z"
-  },
-  "displayName": "John Doe",
-  "email": "john.doe@traefik.io",
-  "emailVerified": true,
-  "tos": [
-    {
-      "version": "1.0.0",
-      "acceptedAt": {
-        "$date": "2021-10-01T12:27:03.583Z"
+[
+  {
+    "_id": "58626c00-a81a-4e17-8ccb-191022334059",
+    "auth0Id": "auth0|6311c90bfce04bd29e473a20",
+    "createdAt": {
+      "$date": "2021-10-01T12:24:49.499Z"
+    },
+    "displayName": "John Doe",
+    "email": "john.doe@traefik.io",
+    "emailVerified": true,
+    "tos": [
+      {
+        "version": "1.0.0",
+        "acceptedAt": {
+          "$date": "2021-10-01T12:27:03.583Z"
+        }
       }
+    ],
+    "updatedAt": {
+      "$date": "2021-10-01T12:27:03.583Z"
     }
-  ],
-  "updatedAt": {
-    "$date": "2021-10-01T12:27:03.583Z"
   }
-}
+]

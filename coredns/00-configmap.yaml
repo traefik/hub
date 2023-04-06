@@ -12,6 +12,7 @@ data:
     }
     docker.localhost:53 {
         errors
+        rewrite name hydra.docker.localhost hydra.hydra.svc.cluster.local
         rewrite name platform.docker.localhost traefik.traefik.svc.cluster.local
         rewrite name webapp.docker.localhost traefik.traefik.svc.cluster.local
         rewrite name regex (.*)\.tls\.docker\.localhost traefikee-gslb-proxy-svc.pop.svc.cluster.local

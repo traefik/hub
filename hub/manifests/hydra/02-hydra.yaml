@@ -1,0 +1,92 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hydra
+  namespace: hydra
+spec:
+  selector:
+    matchLabels:
+      app: hydra
+  template:
+    metadata:
+      labels:
+        app: hydra
+    spec:
+     initContainers:
+        - image: oryd/hydra:v2.0.3
+          name: migrate
+          args:
+            - migrate
+            - sql
+            - -e
+            - --yes
+          env:
+            - name: DSN
+              value: "postgres://postgres:secret@postgresql.hydra.svc.cluster.local:5432?sslmode=disable&max_conns=20&max_idle_conns=4"
+     containers:
+        - name: hydra
+          image: oryd/hydra:v2.0.3
+          env:
+            - name: DSN
+              value: "postgres://postgres:secret@postgresql.hydra.svc.cluster.local:5432?sslmode=disable&max_conns=20&max_idle_conns=4"
+            - name: SECRETS_SYSTEM
+              value: XnH2HpSYeukauifvo5n7laGzMXwidaEx
+            - name: STRATEGIES_ACCESS_TOKEN
+              value: opaque
+            - name: TTL_ACCESS_TOKEN
+              value: 30s
+            - name: LOG_LEAK_SENSITIVE_VALUES
+              value: "true"
+            - name: URLS_SELF_ISSUER
+              value: http://hydra.docker.localhost
+            - name: URLS_SELF_ADMIN
+              value: http://hydra.hydra.svc:4445
+            - name: URLS_SELF_PUBLIC
+              value: http://hydra.docker.localhost
+            - name: URLS_CONSENT
+              value: http://hydra.docker.localhost/api-management/external/auth/consent
+            - name: URLS_LOGIN
+              value: http://hydra.docker.localhost/api-management/external/auth/login
+            - name: OAUTH2_REFRESH_TOKEN_HOOK
+              value: http://hub-api-management.hub.svc.cluster.local/internal/auth/refresh
+          args:
+            - serve
+            - all
+            - --dev
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hydra
+  namespace: hydra
+spec:
+  selector:
+    app: hydra
+  ports:
+    - name: public
+      port: 80
+      targetPort: 4444
+    - name: admin
+      port: 4445
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hydra
+  namespace: hydra
+spec:
+  ingressClassName: traefik-lb
+  rules:
+    - host: hydra.docker.localhost
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: hydra
+                port:
+                  name: public

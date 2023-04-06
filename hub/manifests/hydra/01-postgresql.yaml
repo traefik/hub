@@ -1,0 +1,56 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgresql
+  namespace: hydra
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgresql
+  template:
+    metadata:
+      labels:
+        app: postgresql
+    spec:
+      containers:
+        - name: postgresql
+          image: postgres:14.4
+          env:
+            - name: POSTGRES_PASSWORD
+              value: secret
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+              subPath: postgres
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: postgresql-data
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: postgresql-data
+  namespace: hydra
+spec:
+  storageClassName: local-path
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresql
+  namespace: hydra
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+      protocol: TCP
+  selector:
+    app: postgresql

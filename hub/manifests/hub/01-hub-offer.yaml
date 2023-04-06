@@ -108,6 +108,8 @@ spec:
               value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/offer?authSource=admin
             - name: LOG_LEVEL
               value: debug
+            - name: LOG_FORMAT
+              value: console
           args:
             - serve
             - --addr=:80
@@ -320,6 +322,8 @@ spec:
               env:
                 - name: LOG_LEVEL
                   value: debug
+                - name: LOG_FORMAT
+                  value: console
                 - name: MONGODB_URI
                   value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/alerts?authSource=admin
                 - name: USER_QUOTA_ENFORCER_URL

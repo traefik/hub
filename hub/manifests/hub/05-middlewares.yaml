@@ -49,7 +49,7 @@ spec:
       - /trace
       - /tunnel
       - /workspace
-      - /catalog
+      - /api-management
 
 ---
 apiVersion: traefik.containo.us/v1alpha1

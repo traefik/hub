@@ -56,6 +56,10 @@ spec:
                   name : hub-secret
             - name: MONGODB_URI
               value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/apimanagement?authSource=admin
+            - name: MONGODB_ENCRYPTION_KEY
+              value: JUMqRi1KYU5jUmZValhuMnI1dTh4L0E/RChHK0tiUGU=
+            - name: HYDRA_URL
+              value: http://hydra.hydra.svc.cluster.local:4445
             - name: OFFER_SERVICE_URL
               value: "http://hub-offer.hub.svc.cluster.local/internal"
             - name: TUNNEL_SERVICE_URL
@@ -68,6 +72,8 @@ spec:
               value: http://hub-trace.hub.svc.cluster.local/internal
             - name: LOG_LEVEL
               value: debug
+            - name: LOG_FORMAT
+              value: console
           args:
             - serve
             - --addr=:80
@@ -128,6 +134,7 @@ spec:
           port: 80
       middlewares:
         - name: auth-token
+
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
@@ -139,7 +146,7 @@ spec:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && PathPrefix(`/api-management/external`)
+      match: (Host(`hydra.docker.localhost`) || Host(`platform.docker.localhost`)) && PathPrefix(`/api-management/external`)
       services:
         - name: hub-api-management
           port: 80
@@ -159,12 +166,57 @@ spec:
     - web
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && PathPrefix(`/api-management/external`)
+      match: (Host(`hydra.docker.localhost`) || Host(`platform.docker.localhost`)) && PathPrefix(`/api-management/external`)
       services:
         - name: hub-api-management
           port: 80
       middlewares:
         - name: stripprefix
+
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hub-api-management-reconcile-job
+  namespace: hub
+spec:
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 5
+      parallelism: 1
+      template:
+        metadata:
+          labels:
+            cronjob: hub-api-management-reconcile-job
+        spec:
+          containers:
+            - args:
+                - reconcile
+              env:
+                - name: DRY_RUN
+                  value: "false"
+                - name: LOG_LEVEL
+                  value: debug
+                - name: LOG_FORMAT
+                  value: console
+                - name: MONGODB_URI
+                  value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/apimanagement?authSource=admin
+                - name: MONGODB_MINPOOL
+                  value: "1"
+                - name: MONGODB_MAXPOOL
+                  value: "3"
+                - name: HYDRA_URL
+                  value: http://hydra.hydra.svc.cluster.local:4445
+                - name: BATCH_SIZE
+                  value: "100"
+              image: gcr.io/traefiklabs/hub-api-management:latest
+              name: hub-api-management-reconcile-job
+          imagePullSecrets:
+            - name: gcr-access-token
+          restartPolicy: Never
+  schedule: '@daily'
+
 ---
 apiVersion: batch/v1
 kind: CronJob
@@ -190,22 +242,26 @@ spec:
                   value: "true"
                 - name: MONGODB_URI
                   value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/apimanagement?authSource=admin
-                - name: CERTIFICATES_SERVICE_URL
-                  value: "http://hub-certificates.hub.svc.cluster.local/internal"
-                - name: LOG_LEVEL
-                  value: debug
-                - name: CNAME_DNS_CHALLENGE
-                  value: "acme-challenge.preview.traefikhub.dev"
                 - name: MONGODB_MINPOOL
                   value: "1"
                 - name: MONGODB_MAXPOOL
                   value: "3"
+                - name: CERTIFICATES_SERVICE_URL
+                  value: "http://hub-certificates.hub.svc.cluster.local/internal"
+                - name: HYDRA_URL
+                  value: http://hydra.hydra.svc.cluster.local:4445
+                - name: LOG_LEVEL
+                  value: debug
+                - name: LOG_FORMAT
+                  value: console
+                - name: CNAME_DNS_CHALLENGE
+                  value: "acme-challenge.preview.traefikhub.dev"
               image: gcr.io/traefiklabs/hub-api-management:latest
               name: hub-api-management-check-job
           imagePullSecrets:
             - name: gcr-access-token
           restartPolicy: Never
-  schedule: '*/5 * * * *'
+  schedule: '*/1 * * * *'
 
 ---
 apiVersion: batch/v1
@@ -234,16 +290,21 @@ spec:
                   value: "true"
                 - name: MONGODB_URI
                   value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/apimanagement?authSource=admin
-                - name: CERTIFICATES_SERVICE_URL
-                  value: "http://hub-certificates.hub.svc.cluster.local/internal"
-                - name: LOG_LEVEL
-                  value: debug
-                - name: CNAME_DNS_CHALLENGE
-                  value: "acme-challenge.preview.traefikhub.dev"
                 - name: MONGODB_MINPOOL
                   value: "1"
                 - name: MONGODB_MAXPOOL
                   value: "3"
+                - name: CERTIFICATES_SERVICE_URL
+                  value: "http://hub-certificates.hub.svc.cluster.local/internal"
+                - name: HYDRA_URL
+                  value: http://hydra.hydra.svc.cluster.local:4445
+                - name: LOG_LEVEL
+                  value: debug
+                - name: LOG_FORMAT
+                  value: console
+                - name: CNAME_DNS_CHALLENGE
+                  value: "acme-challenge.preview.traefikhub.dev"
+
               image: gcr.io/traefiklabs/hub-api-management:latest
               name: hub-api-management-check-job
           imagePullSecrets:
