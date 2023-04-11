@@ -146,7 +146,7 @@ spec:
     - websecure
   routes:
     - kind: Rule
-      match: (Host(`hydra.docker.localhost`) || Host(`platform.docker.localhost`)) && PathPrefix(`/api-management/external`)
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/api-management/external`)
       services:
         - name: hub-api-management
           port: 80
@@ -166,12 +166,50 @@ spec:
     - web
   routes:
     - kind: Rule
-      match: (Host(`hydra.docker.localhost`) || Host(`platform.docker.localhost`)) && PathPrefix(`/api-management/external`)
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/api-management/external`)
       services:
         - name: hub-api-management
           port: 80
       middlewares:
         - name: stripprefix
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: api-management-sso-external-tls
+  namespace: hub
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`sso.portal.docker.localhost`) && (PathPrefix(`/login`) || PathPrefix(`/consent`) || PathPrefix(`/error`))
+      services:
+        - name: hub-api-management
+          port: 80
+      middlewares:
+        - name: sso-prefix
+  tls:
+    certResolver: default
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: api-management-sso-external
+  namespace: hub
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`sso.portal.docker.localhost`) && (PathPrefix(`/login`) || PathPrefix(`/consent`) || PathPrefix(`/error`))
+      services:
+        - name: hub-api-management
+          port: 80
+      middlewares:
+        - name: sso-prefix
 
 ---
 apiVersion: batch/v1

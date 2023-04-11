@@ -9,7 +9,7 @@ controllerDeployment:
     - --log-format=console
     - --ingress-class-name=traefik-lb
     - --platform-url=http://platform.docker.localhost/agent
-    - --platform-idp-url=http://hydra.docker.localhost
+    - --platform-idp-url=http://sso.portal.docker.localhost
     - --traefik.metrics-url=http://traefik-hub.traefik.svc.cluster.local:8080/metrics
 tunnelDeployment:
   traefik:

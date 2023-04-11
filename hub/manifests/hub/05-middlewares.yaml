@@ -25,6 +25,16 @@ spec:
 apiVersion: traefik.containo.us/v1alpha1
 kind: Middleware
 metadata:
+  name: sso-prefix
+  namespace: hub
+spec:
+  addPrefix:
+    prefix: /external/auth
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
   name: stripprefix
   namespace: hub
 spec:

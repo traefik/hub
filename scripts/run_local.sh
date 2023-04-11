@@ -84,6 +84,7 @@ updateLocalHosts() {
   lb_address="127.0.0.1"
   hub_hosts="platform.$HUB_DOMAIN
     webapp.$HUB_DOMAIN
+    sso.portal.$HUB_DOMAIN
     jaeger-ui.$HUB_DOMAIN
     prometheus.$HUB_DOMAIN
     grafana.$HUB_DOMAIN"

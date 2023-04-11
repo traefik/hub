@@ -3,7 +3,8 @@ kind: APIPortal
 metadata:
   name: my-portal
 spec:
-  description: "My awesome portal"
+  title: "Awesome Portal"
+  description: "This is an awesome portal."
   customDomains:
     - my-portal.tls.docker.localhost
 

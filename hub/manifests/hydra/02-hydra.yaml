@@ -39,15 +39,15 @@ spec:
             - name: LOG_LEAK_SENSITIVE_VALUES
               value: "true"
             - name: URLS_SELF_ISSUER
-              value: http://hydra.docker.localhost
+              value: http://sso.portal.docker.localhost
+            - name: URLS_SELF_PUBLIC
+              value: http://sso.portal.docker.localhost
             - name: URLS_SELF_ADMIN
               value: http://hydra.hydra.svc:4445
-            - name: URLS_SELF_PUBLIC
-              value: http://hydra.docker.localhost
             - name: URLS_CONSENT
-              value: http://hydra.docker.localhost/api-management/external/auth/consent
+              value: http://sso.portal.docker.localhost/consent
             - name: URLS_LOGIN
-              value: http://hydra.docker.localhost/api-management/external/auth/login
+              value: http://sso.portal.docker.localhost/login
             - name: OAUTH2_REFRESH_TOKEN_HOOK
               value: http://hub-api-management.hub.svc.cluster.local/internal/auth/refresh
           args:
@@ -80,7 +80,7 @@ metadata:
 spec:
   ingressClassName: traefik-lb
   rules:
-    - host: hydra.docker.localhost
+    - host: sso.portal.docker.localhost
       http:
         paths:
           - path: /
