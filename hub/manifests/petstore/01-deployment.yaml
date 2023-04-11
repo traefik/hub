@@ -14,9 +14,12 @@ spec:
       labels:
         app: petstore-app
     spec:
+      imagePullSecrets:
+        - name: gcr-access-token
       containers:
         - name: openapi
-          image: swaggerapi/petstore3:latest
+          image: gcr.io/traefiklabs/petstore3:latest
+
 ---
 apiVersion: v1
 kind: Service

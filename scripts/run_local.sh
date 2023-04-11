@@ -423,6 +423,17 @@ installWhoami() {
 installPetstore() {
   echo "Deploying petstore."
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/petstore/
+
+  set +o errexit
+  kubectl delete secret -n petstore gcr-access-token
+  set -o errexit
+
+  kubectl create secret -n petstore docker-registry gcr-access-token \
+          --docker-server=gcr.io \
+          --docker-username=oauth2accesstoken \
+          --docker-password="$(gcloud auth print-access-token)" \
+          --docker-email=${GCLOUD_EMAIL}
+
   kubectl -n petstore wait --for condition=available --timeout="${TIMEOUT}" deployment/petstore
 }
 
