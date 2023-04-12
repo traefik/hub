@@ -184,7 +184,7 @@ spec:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`sso.portal.docker.localhost`) && (PathPrefix(`/login`) || PathPrefix(`/consent`) || PathPrefix(`/error`))
+      match: Host(`sso.portal.docker.localhost`) && (PathPrefix(`/login`) || PathPrefix(`/consent`) || PathPrefix(`/error`) || PathPrefix(`/reset-password`) || PathPrefix(`/static`) || PathPrefix(`/robots.txt`))
       services:
         - name: hub-api-management
           port: 80
@@ -204,7 +204,7 @@ spec:
     - web
   routes:
     - kind: Rule
-      match: Host(`sso.portal.docker.localhost`) && (PathPrefix(`/login`) || PathPrefix(`/consent`) || PathPrefix(`/error`))
+      match: Host(`sso.portal.docker.localhost`) && (PathPrefix(`/login`) || PathPrefix(`/consent`) || PathPrefix(`/error`) || PathPrefix(`/reset-password`) || PathPrefix(`/static`) || PathPrefix(`/robots.txt`))
       services:
         - name: hub-api-management
           port: 80
