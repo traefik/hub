@@ -1,0 +1,239 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nats
+  namespace: nats
+  labels:
+    app: nats
+    app.kubernetes.io/name: nats
+    app.kubernetes.io/instance: hub
+    app.kubernetes.io/version: "2.9.15-alpine"
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nats
+      app.kubernetes.io/instance: hub
+  replicas: 3
+  serviceName: nats
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: Parallel
+  template:
+    metadata:
+      annotations:
+        configmap.reloader.stakater.com/reload: "nats-config"
+        prometheus.io/path: /metrics
+        prometheus.io/port: "7777"
+        prometheus.io/scrape: "true"
+      labels:
+        app: nats
+        app.kubernetes.io/name: nats
+        app.kubernetes.io/instance: hub
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app.kubernetes.io/name
+                      operator: In
+                      values:
+                        - nats
+                topologyKey: "kubernetes.io/hostname"
+      topologySpreadConstraints:
+        - maxSkew: 2
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: "ScheduleAnyway"
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: nats
+      dnsPolicy: ClusterFirst
+      # Common volumes for the containers.
+      volumes:
+        - name: config-volume
+          configMap:
+            name: nats-config
+        - name: pid
+          emptyDir: {}
+        - name: nats-data
+          emptyDir:
+            sizeLimit: 1Gi
+      # Required to be able to HUP signal and apply config
+      # reload to the server without restarting the pod.
+      shareProcessNamespace: true
+      terminationGracePeriodSeconds: 60
+      containers:
+        - name: nats
+          image: nats:2.9.15-alpine
+          imagePullPolicy: IfNotPresent
+          resources: # TODO: adjust it based on observability metrics
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          ports:
+            - containerPort: 4222
+              name: client
+            - containerPort: 6222
+              name: cluster
+            - containerPort: 8222
+              name: monitor
+          command:
+            - "nats-server"
+            - "--config"
+            - "/etc/nats-config/nats.conf"
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: SERVER_NAME
+              value: $(POD_NAME)
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: CLUSTER_ADVERTISE
+              value: $(POD_NAME).nats.$(POD_NAMESPACE).svc.cluster.local
+            - name: NATS_SERVER_USER
+              valueFrom:
+                secretKeyRef:
+                  name: nats-auth
+                  key: NATS_SERVER_USER
+            - name: NATS_SERVER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nats-auth
+                  key: NATS_SERVER_PASSWORD
+            - name: NATS_HUB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: nats-auth
+                  key: NATS_HUB_USER
+            - name: NATS_HUB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nats-auth
+                  key: NATS_HUB_PASSWORD
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/nats-config
+            - name: pid
+              mountPath: /var/run/nats
+            - name: nats-data
+              mountPath: /var/lib/nats
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 8222
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 5
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 8222
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsGroup: 65534
+            runAsNonRoot: true
+            runAsUser: 65534
+            seccompProfile:
+              type: RuntimeDefault
+          startupProbe:
+            # for NATS server versions >=2.7.1, /healthz will be enabled
+            # startup probe checks that the JS server is enabled, is current with the meta leader,
+            # and that all streams and consumers assigned to this JS server are current
+            failureThreshold: 30
+            httpGet:
+              path: /healthz
+              port: 8222
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          # Gracefully stop NATS Server on pod deletion or image upgrade.
+          #
+          lifecycle:
+            preStop:
+              exec:
+                # send the lame duck shutdown signal to trigger a graceful shutdown
+                # nats-server will ignore the TERM signal it receives after this
+                #
+                command:
+                  - "nats-server"
+                  - "-sl=ldm=/var/run/nats/nats.pid"
+
+        ##############################
+        #                            #
+        #  NATS Prometheus Exporter  #
+        #                            #
+        ##############################
+        - name: metrics
+          image: natsio/prometheus-nats-exporter:0.10.1
+          imagePullPolicy: IfNotPresent
+          resources: # TODO: adjust it based on observability metrics
+            requests:
+              cpu: 50m
+              memory: 32Mi
+            limits:
+              cpu: 50m
+              memory: 32Mi
+          args:
+            - -varz
+            - -jsz
+            - all
+            - -prefix=nats
+            - http://localhost:8222/
+          ports:
+            - containerPort: 7777
+              name: metrics
+          livenessProbe:
+            exec:
+              command:
+                - pgrep
+                - prometheus-nats-exporter
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: metrics
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsGroup: 65534
+            runAsNonRoot: true
+            runAsUser: 65534
+            seccompProfile:
+              type: RuntimeDefault
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: nats
+  namespace: nats
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nats
+      app.kubernetes.io/instance: hub

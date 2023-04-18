@@ -27,6 +27,7 @@ main() {
   installTraefik
   installPebble
   installGit
+  installNats
   installHub
 
   renewJWT
@@ -75,7 +76,7 @@ helmUpdate() {
     helm repo update
   fi
 
-   helm upgrade --install hub-agent "${HUB_HELM_CHART_PATH}" --values="$PROJECT_DIR"/hub/manifests/hub-agent/01-values.yaml --namespace hub-agent
+   helm upgrade --devel --install hub-agent "${HUB_HELM_CHART_PATH}" --values="$PROJECT_DIR"/hub/manifests/hub-agent/01-values.yaml --namespace hub-agent
 }
 
 updateLocalHosts() {
@@ -181,6 +182,7 @@ setupK3S() {
       --image="$K3S_IMAGE" \
       --port 80:80@loadbalancer \
       --port 443:443@loadbalancer \
+      --port 4222:4222@loadbalancer \
       --port 8000:8000@loadbalancer \
       --port 8443:8443@loadbalancer \
       --port 9000:9000@loadbalancer \
@@ -332,6 +334,12 @@ installGit() {
   echo "Deploying Git."
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/git/
   kubectl -n git wait --for condition=available --timeout="${TIMEOUT}" deployment/hub-git
+}
+
+installNats() {
+  echo "Deploying Nats."
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/nats/
+  kubectl -n nats rollout status --watch --timeout="${TIMEOUT}" statefulset.apps/nats
 }
 
 installHub() {
@@ -496,7 +504,7 @@ createOffers() {
     --offer-quotas-edge-ingresses="10" \
     --offer-config-gslb-http-healthcheck-min-interval-seconds=15 \
     --offer-config-gslb-http-healthcheck-min-threshold-editable="true" \
-    --offer-features="team-management" --offer-features="geo-steering" --offer-features="api-management" --offer-features="oidc" \
+    --offer-features="team-management" --offer-features="geo-steering" \
     --offer-features="blue-green" --offer-features="canary" --offer-features="active-active" --offer-features="active-passive" --offer-features="api-management" --offer-features="oidc" || true
 }
 

@@ -1,0 +1,58 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nats-config
+  namespace: nats
+data:
+  nats.conf: |
+    http: 8222
+    server_name: $POD_NAME
+    port: 4222
+    pid_file: "/var/run/nats/nats.pid"
+
+    system_account: "$SYS"
+    authorization: {
+        timeout: 5s
+    }
+
+    accounts: {
+      $SYS: {
+        users: [{ user: $NATS_SERVER_USER, pass: $NATS_SERVER_PASSWORD }]
+      }
+      hub: {
+        jetstream: "enabled",
+        users: [{ user: $NATS_HUB_USER, pass: $NATS_HUB_PASSWORD }]
+      }
+    }
+
+    allow_non_tls: true
+
+    cluster {
+      name: nats
+      port: 6222
+
+      authorization {
+        user: "$NATS_SERVER_USER"
+        password: "$NATS_SERVER_PASSWORD"
+        timeout: 0.5
+      }
+
+      routes = [
+        "nats://$NATS_SERVER_USER:$NATS_SERVER_PASSWORD@nats-0.nats.nats.svc.cluster.local:6222",
+        "nats://$NATS_SERVER_USER:$NATS_SERVER_PASSWORD@nats-1.nats.nats.svc.cluster.local:6222",
+        "nats://$NATS_SERVER_USER:$NATS_SERVER_PASSWORD@nats-2.nats.nats.svc.cluster.local:6222"
+      ]
+      cluster_advertise: $CLUSTER_ADVERTISE
+
+      connect_retries: 120
+    }
+
+    jetstream {
+      store_dir: /var/lib/nats
+      max_mem: 128M
+      max_file: 1G
+    }
+
+    lame_duck_grace_period: 10s
+    lame_duck_duration: 30s

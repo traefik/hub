@@ -13,6 +13,7 @@
     - [Test application](#test-application)
   - [API](./api/api.md)
     - [Hub agent traefik](./api/api.md#hub-agent-traefik)
+  - [nats](#nats)
 
 **You can run the full stack of Hub with K3D or by manually install every piece of the puzzle.
 We hardly recommend the K3D way of course.**
@@ -443,4 +444,26 @@ X-Forwarded-Port: 80
 X-Forwarded-Proto: http
 X-Forwarded-Server: traefik-78b84dc55f-8f25x
 X-Real-Ip: 10.42.1.12
+```
+
+## nats
+
+### Install and configuring nats-cli
+
+Install nats-cli from: https://docs.nats.io/using-nats/nats-tools/nats_cli
+
+```bash
+# Setting up nats-cli context
+nats context save traefik-hub-local \
+--server nats://nats.docker.localhost:4222 \
+--user traefik-hub \
+--password traefik-hub \
+--description 'Traefik Hub local' \
+--select
+```
+
+### Wiretap all nats messages
+
+```bash
+nats subscribe '>'
 ```

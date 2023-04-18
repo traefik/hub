@@ -35,7 +35,7 @@ spec:
             - name: STRATEGIES_ACCESS_TOKEN
               value: opaque
             - name: TTL_ACCESS_TOKEN
-              value: 30s
+              value: 24h
             - name: LOG_LEAK_SENSITIVE_VALUES
               value: "true"
             - name: URLS_SELF_ISSUER
@@ -48,8 +48,6 @@ spec:
               value: http://sso.portal.docker.localhost/consent
             - name: URLS_LOGIN
               value: http://sso.portal.docker.localhost/login
-            - name: OAUTH2_REFRESH_TOKEN_HOOK
-              value: http://hub-api-management.hub.svc.cluster.local/internal/auth/refresh
           args:
             - serve
             - all
