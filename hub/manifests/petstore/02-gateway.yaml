@@ -5,5 +5,8 @@ metadata:
   labels:
     area: stores
 spec:
+  customDomains:
+    - my-gateway.tls.docker.localhost
+
   apiAccesses:
     - my-stores-access

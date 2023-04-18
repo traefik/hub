@@ -18,3 +18,7 @@ tunnelDeployment:
   args:
     - --log-level=debug
     - --platform-url=http://platform.docker.localhost/agent
+devPortalDeployment:
+  args:
+    - --log-level=debug
+    - --platform-url=http://platform.docker.localhost/agent
