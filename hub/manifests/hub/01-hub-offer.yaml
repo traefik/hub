@@ -86,6 +86,10 @@ spec:
               value: http://hub-tunnel-orchestrator.hub.svc.cluster.local/internal/quotas
             - name: DOMAIN_QUOTA_ENFORCER_URL
               value: http://hub-gslb.hub.svc.cluster.local/internal/quotas
+            - name: GATEWAY_QUOTA_ENFORCER_URL
+              value: http://hub-api-management.hub.svc.cluster.local/internal/quotas
+            - name: NODE_QUOTA_ENFORCER_URL
+              value: http://hub-topology.hub.svc.cluster.local/internal/quotas
             - name: TRACE_SERVICE_URL
               value: http://hub-trace.hub.svc.cluster.local/internal
             - name: JWT_CERT
@@ -340,6 +344,10 @@ spec:
                   value: http://hub-cluster.hub.svc.cluster.local/internal/quotas
                 - name: ACP_QUOTA_ENFORCER_URL
                   value: http://hub-acp.hub.svc.cluster.local/internal/quotas
+                - name: GATEWAY_QUOTA_ENFORCER_URL
+                  value: http://hub-api-management.hub.svc.cluster.local/internal/quotas
+                - name: NODE_QUOTA_ENFORCER_URL
+                  value: http://hub-topology.hub.svc.cluster.local/internal/quotas
               args:
                 - quotas-update
               resources:
