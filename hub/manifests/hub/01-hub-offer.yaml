@@ -301,7 +301,7 @@ spec:
       middlewares:
         - name: stripprefix
 ---
-apiVersion: batch/v1beta1
+apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: hub-offer-quotas-update
@@ -350,6 +350,82 @@ spec:
                   value: http://hub-topology.hub.svc.cluster.local/internal/quotas
               args:
                 - quotas-update
+              resources:
+                limits:
+                  cpu: 50m
+                  memory: 32Mi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hub-offer-notify-trial-ending
+  namespace: hub
+spec:
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      parallelism: 1
+      template:
+        metadata:
+          labels:
+            app: hub-offer-notify-trial-ending
+        spec:
+          restartPolicy: Never
+          imagePullSecrets:
+            - name: gcr-access-token
+          containers:
+            - name: hub-offer-notify-trial-ending
+              image: gcr.io/traefiklabs/hub-offer:latest
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: LOG_LEVEL
+                  value: debug
+                - name: LOG_FORMAT
+                  value: console
+                - name: MONGODB_URI
+                  value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/alerts?authSource=admin
+                - name: NOTIFICATION_SERVICE_URL
+                  value: http://hub-notification.hub.svc.cluster.local/internal
+              args:
+                - notify-trial-ending
+              resources:
+                limits:
+                  cpu: 50m
+                  memory: 32Mi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hub-offer-lock-subscriptions
+  namespace: hub
+spec:
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      parallelism: 1
+      template:
+        metadata:
+          labels:
+            app: hub-offer-lock-subscriptions
+        spec:
+          restartPolicy: Never
+          imagePullSecrets:
+            - name: gcr-access-token
+          containers:
+            - name: hub-offer-lock-subscriptions
+              image: gcr.io/traefiklabs/hub-offer:latest
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: LOG_LEVEL
+                  value: debug
+                - name: LOG_FORMAT
+                  value: console
+                - name: MONGODB_URI
+                  value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/alerts?authSource=admin
+                - name: TOKEN_SERVICE_URL
+                  value: http://hub-token.hub.svc.cluster.local/internal
+              args:
+                - lock-subscriptions
               resources:
                 limits:
                   cpu: 50m
