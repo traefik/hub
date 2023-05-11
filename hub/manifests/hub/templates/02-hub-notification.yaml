@@ -69,21 +69,43 @@ spec:
               value: "http://hub-cluster.hub.svc.cluster.local/internal"
             - name: USER_SERVICE_URL
               value: "http://hub-user.hub.svc.cluster.local/internal"
+            - name: SENDGRID_ALERT_TEMPLATE_ID
+              value: d-e31e1f5ce35c4b95b8390d19ce1a2543
+            - name: SENDGRID_CUSTOMER_TRIAL_ENDING_TEMPLATE_ID
+              value: d-d86128b08bc840119959e0acce0bb729
+            - name: SENDGRID_CUSTOMER_LICENSE_ENDING_TEMPLATE_ID
+              value: d-511a67561089435fa14046ccdbca85b2
+            - name: SENDGRID_SALES_TRIAL_ENDING_TEMPLATE_ID
+              value: d-d6657644ab2444eab8989ff62a6e5b77
+            - name: SENDGRID_SALES_LICENSE_ENDING_TEMPLATE_ID
+              value: d-dfd85f877e1c48998243f9bdfae5da5f
+            - name: SENDGRID_INVITATION_TEMPLATE_ID
+              value: d-31a4a51c91f245728e419d5980fe1bbc
+            - name: SENDGRID_BETA_INVITATION_TEMPLATE_ID
+              value: d-57cb9d7ad67e4fddb83db4c9b372eb91
+            - name: SENDGRID_WELCOME_TEMPLATE_ID
+              value: d-267cf2806d0f4cdc99a1c1d2cbd6d3dc
+            - name: SENDGRID_UNVERIFIED_EMAIL_REMINDER_TEMPLATE_ID
+              value: d-a06cdfd675e649459394b9e16a676b44
+            - name: SENDGRID_NO_CLUSTER_REMINDER_TEMPLATE_ID
+              value: d-5f561710d8d74ecab6dbcddb62c3f954
+            - name: SENDGRID_REQUEST_SCALE_OFFER_TEMPLATE_ID
+              value: d-5214ae9100c943dd8194aa3af6679ee8
+            - name: SENDGRID_DEPRECATED_AGENT_15DAYS_TEMPLATE_ID
+              value: d-0ffc1f69318d42c5a32aac103c8dd25b
+            - name: SENDGRID_DEPRECATED_AGENT_5DAYS_TEMPLATE_ID
+              value: d-835d0c6aa1d44255b99c79f2e8722b71
+            - name: SENDGRID_DEPRECATED_AGENT_TEMPLATE_ID
+              value: d-1869455d64e5485498a3dbda938bd6a7
+            - name: SENDGRID_SALES_TRIAL_ENDED_TEMPLATE_ID
+              value: d-62cf0f3717c74acca7df96fd88f2ca3d
+            - name: SENDGRID_SALES_LICENSE_ENDED_TEMPLATE_ID
+              value: d-b92039adc5af4ff89f2d1700405c4f2c
           args:
             - serve
             - --addr=:80
             - --sendgrid-host=https://api.sendgrid.com/v3/
             - --sendgrid-endpoint=/mail/send
-            - --sendgrid-alert-template-id=d-e31e1f5ce35c4b95b8390d19ce1a2543
-            - --sendgrid-invitation-template-id=d-31a4a51c91f245728e419d5980fe1bbc
-            - --sendgrid-beta-invitation-template-id=d-57cb9d7ad67e4fddb83db4c9b372eb91
-            - --sendgrid-welcome-template-id=d-267cf2806d0f4cdc99a1c1d2cbd6d3dc
-            - --sendgrid-unverified-email-reminder-template-id=d-a06cdfd675e649459394b9e16a676b44
-            - --sendgrid-no-cluster-reminder-template-id=d-5f561710d8d74ecab6dbcddb62c3f954
-            - --sendgrid-request-scale-offer-template-id=d-5214ae9100c943dd8194aa3af6679ee8
-            - --sendgrid-deprecated-agent-15days-template-id=d-d-0ffc1f69318d42c5a32aac103c8dd25b
-            - --sendgrid-deprecated-agent-5days-template-id=d-835d0c6aa1d44255b99c79f2e8722b71
-            - --sendgrid-deprecated-agent-template-id=d-1869455d64e5485498a3dbda938bd6a7
             - --sendgrid-from=noreply@traefik.io
             - --sendgrid-from-name=Me
             - --sendgrid-sales-email=${GCLOUD_EMAIL}
