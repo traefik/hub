@@ -60,6 +60,8 @@ spec:
               value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/metrics?authSource=admin
             - name: TRACE_SERVICE_URL
               value: http://hub-trace.hub.svc.cluster.local/internal
+            - name: PROMETHEUS_URL
+              value: http://prometheus-remote-write.monitoring.svc.cluster.local/api/v1/write
             - name: LOG_LEVEL
               value: debug
             - name: LOG_FORMAT

@@ -26,7 +26,6 @@ main() {
   installHydra
   installTraefik
   installPebble
-  installGit
   installNats
   installHub
 
@@ -112,7 +111,7 @@ applyCoreDNSConf() {
 }
 
 renewGCRToken() {
-    for namespace in hub hub-agent pop git broker; do
+    for namespace in hub hub-agent pop broker; do
         set +o errexit
         kubectl delete secret -n $namespace gcr-access-token
         set -o errexit
@@ -164,7 +163,7 @@ checkTools() {
 prepareDockerImages() {
   images=$(find "${PROJECT_DIR}" -type f -name '*.yaml' | xargs grep 'image: ' | tr -d \" | awk -F '@' '{ print $1 }' | awk -F ':' '{ print $3":"$4 }' | sort | uniq)
 
-  images=$(echo "${images}" | grep -v "hub-ui|hub-git")
+  images=$(echo "${images}" | grep -v "hub-ui")
 
   echo "${images}" | xargs -P4 -n1 docker pull
   k3d image import -c k3s-default-hub ${images}
@@ -266,7 +265,6 @@ createNamespaces() {
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/hub-agent/00-namespace.yaml
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/aws-secret-operator/00-namespace.yaml
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/pop/00-namespace.yaml
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/git/00-namespace.yaml
 }
 
 createSecrets() {
@@ -327,12 +325,6 @@ installJaeger() {
   echo "Deploying Jaeger."
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/jaeger/
   kubectl -n jaeger wait --for condition=available --timeout="${TIMEOUT}" deployment/jaeger
-}
-
-installGit() {
-  echo "Deploying Git."
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/git/
-  kubectl -n git wait --for condition=available --timeout="${TIMEOUT}" deployment/hub-git
 }
 
 installNats() {

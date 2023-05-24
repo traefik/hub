@@ -40,14 +40,6 @@ spec:
             periodSeconds: 5
             failureThreshold: 2
           env:
-            - name: GIT_ORG
-              value: traefiklabs
-            - name: GERRIT_URL
-              value: http://hub-git.git
-            - name: GERRIT_USER
-              value: hub
-            - name: GERRIT_PASSWORD
-              value: hub
             - name: JWT_CERT
               valueFrom:
                 secretKeyRef:
@@ -62,8 +54,6 @@ spec:
                   name: hub-secret
             - name: TOKEN_SERVICE_URL
               value: http://hub-token.hub.svc.cluster.local/internal
-            - name: INDEXER_API_URL
-              value: http://hub-topology-indexer-api.hub.svc.cluster.local/internal
             - name: TRACE_SERVICE_URL
               value: http://hub-trace.hub.svc.cluster.local/internal
             - name: TRACING_ENDPOINT

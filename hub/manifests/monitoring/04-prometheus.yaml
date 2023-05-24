@@ -168,8 +168,11 @@ spec:
             - '--storage.tsdb.retention=60d'
             - '--storage.tsdb.path="/prometheus/data/"'
             - '--web.enable-lifecycle'
+            - '--web.enable-remote-write-receiver'
             - '--config.file=/prometheus/config/prometheus.yaml'
           ports:
+            - name: web
+              containerPort: 80
             - name: webui
               containerPort: 9090
           resources:
@@ -217,6 +220,24 @@ spec:
         - name: rules-volume
           configMap:
             name: prometheus-rules
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-remote-write
+  namespace: monitoring
+  labels:
+    app: prometheus
+    component: core
+spec:
+  ports:
+    - port: 80
+      protocol: TCP
+      name: web
+  selector:
+    app: prometheus
+    component: core
 
 ---
 apiVersion: v1

@@ -358,7 +358,7 @@ spec:
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: hub-offer-notify-trial-ending
+  name: hub-offer-ending-notification
   namespace: hub
 spec:
   schedule: "*/5 * * * *"
@@ -368,13 +368,13 @@ spec:
       template:
         metadata:
           labels:
-            app: hub-offer-notify-trial-ending
+            app: hub-offer-ending-notification
         spec:
           restartPolicy: Never
           imagePullSecrets:
             - name: gcr-access-token
           containers:
-            - name: hub-offer-notify-trial-ending
+            - name: hub-offer-ending-notification
               image: gcr.io/traefiklabs/hub-offer:latest
               imagePullPolicy: IfNotPresent
               env:
@@ -387,7 +387,7 @@ spec:
                 - name: NOTIFICATION_SERVICE_URL
                   value: http://hub-notification.hub.svc.cluster.local/internal
               args:
-                - notify-trial-ending
+                - ending-notification
               resources:
                 limits:
                   cpu: 50m
@@ -424,6 +424,8 @@ spec:
                   value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/alerts?authSource=admin
                 - name: TOKEN_SERVICE_URL
                   value: http://hub-token.hub.svc.cluster.local/internal
+                - name: NOTIFICATION_SERVICE_URL
+                  value: http://hub-notification.hub.svc.cluster.local/internal
               args:
                 - lock-subscriptions
               resources:

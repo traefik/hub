@@ -15,16 +15,6 @@ spec:
 apiVersion: traefik.containo.us/v1alpha1
 kind: Middleware
 metadata:
-  name: push-indexer-prefix
-  namespace: hub
-spec:
-  addPrefix:
-    prefix: /agent/git
-
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: Middleware
-metadata:
   name: sso-prefix
   namespace: hub
 spec:
@@ -54,34 +44,11 @@ spec:
       - /offer
       - /user
       - /token
-      - /topology-indexer-api # the order of strip prefixes is important ! :-/
       - /topology
       - /trace
       - /tunnel
       - /workspace
       - /api-management
-
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: Middleware
-metadata:
-  name: git-strip-prefix
-  namespace: hub
-spec:
-  stripPrefix:
-    prefixes:
-      - /traefiklabs
-
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: Middleware
-metadata:
-  name: git-token
-  namespace: hub
-spec:
-  headers:
-    customRequestHeaders:
-      Authorization: Basic aHViOmh1Yg==
 
 ---
 apiVersion: traefik.containo.us/v1alpha1
