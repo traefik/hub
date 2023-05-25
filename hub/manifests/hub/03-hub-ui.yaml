@@ -115,6 +115,22 @@ metadata:
   namespace: hub
 spec:
   entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`webapp.docker.localhost`)
+      services:
+        - name: hub-ui
+          port: 80
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: hub-ui-tls
+  namespace: hub
+spec:
+  entryPoints:
     - websecure
   routes:
     - kind: Rule

@@ -16,17 +16,11 @@ helm-update:
 install-broker:
 	@$(SCRIPT_DIR)/run_local.sh install-broker
 
-install-haproxy:
-	@$(SCRIPT_DIR)/run_local.sh install-haproxy
-
 install-jaeger:
 	@$(SCRIPT_DIR)/run_local.sh install-jaeger
 
 install-monitoring:
 	@$(SCRIPT_DIR)/run_local.sh install-monitoring
-
-install-nginx:
-	@$(SCRIPT_DIR)/run_local.sh install-nginx
 
 install-petstore:
 	@$(SCRIPT_DIR)/run_local.sh install-petstore
@@ -62,12 +56,6 @@ reset-acp-image:
 
 reset-admin-image:
 	kubectl patch deployment -n hub hub-admin -p '{"spec":{"template":{"spec":{"containers":[{"name":"hub-admin","image":"gcr.io/traefiklabs/hub-admin:latest","imagePullPolicy":"IfNotPresent"}]}}}}'
-
-reset-agent-image:
-	kubectl patch deployment -n hub-agent hub-agent-controller -p '{"spec":{"template":{"spec":{"containers":[{"name":"hub-agent-controller","image":"gcr.io/traefiklabs/hub-agent-kubernetes:latest","imagePullPolicy":"IfNotPresent"}]}}}}'
-	kubectl patch deployment -n hub-agent hub-agent-auth-server -p '{"spec":{"template":{"spec":{"containers":[{"name":"hub-agent-auth-server","image":"gcr.io/traefiklabs/hub-agent-kubernetes:latest","imagePullPolicy":"IfNotPresent"}]}}}}'
-	kubectl patch deployment -n hub-agent hub-agent-tunnel -p '{"spec":{"template":{"spec":{"containers":[{"name":"hub-agent-tunnel","image":"gcr.io/traefiklabs/hub-agent-kubernetes:latest","imagePullPolicy":"IfNotPresent"}]}}}}'
-	kubectl patch deployment -n hub-agent hub-agent-dev-portal -p '{"spec":{"template":{"spec":{"containers":[{"name":"hub-agent-dev-portal","image":"gcr.io/traefiklabs/hub-agent-kubernetes:latest","imagePullPolicy":"IfNotPresent"}]}}}}'
 
 reset-alert-image:
 	kubectl patch deployment -n hub hub-alert -p '{"spec":{"template":{"spec":{"containers":[{"name":"hub-alert","image":"gcr.io/traefiklabs/hub-alert:latest","imagePullPolicy":"IfNotPresent"}]}}}}'

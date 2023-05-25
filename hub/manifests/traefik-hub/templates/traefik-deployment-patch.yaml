@@ -1,0 +1,35 @@
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  namespace: traefik
+  name: traefik
+spec:
+  template:
+    spec:
+      containers:
+        - name: proxy-sidecar
+          image: ghcr.io/traefik/traefik-hub:v2
+          imagePullPolicy: IfNotPresent
+          args:
+            - --entrypoints.hub-secured.address=:443
+            - --entrypoints.hub-secured.http.tls
+            - --entrypoints.hub-web.address=:80
+            - --hub.ingresscontroller.scheme=http
+            - --hub.ingresscontroller.port=8000
+            - --hub.token=${TOKEN_CLUSTER}
+            - --hub.platformUrl=http://platform.docker.localhost/agent
+            - --log.level=error
+
+        - name: traefik
+          args:
+            - --entrypoints.web.Address=:8000
+            - --entrypoints.websecure.Address=:8443
+            - --entrypoints.websecure.http.tls
+            - --providers.kubernetescrd.allowexternalnameservices=true
+            - --providers.kubernetescrd.allowcrossnamespace=true
+            - --providers.kubernetesingress.ingressclass=traefik-lb
+            - --api.dashboard
+            - --api.insecure
+            - --metrics.prometheus
+            - --log.level=debug

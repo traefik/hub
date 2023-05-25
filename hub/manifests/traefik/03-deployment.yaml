@@ -42,13 +42,6 @@ spec:
             - --api.insecure
             - --metrics.prometheus
             - --log.level=debug
-
-            - --experimental.hub
-            - --hub.tls.insecure
-            - --entrypoints.traefikhub-catalog.Address=:9902
-            - --entrypoints.traefikhub-tunl.Address=:9901
-            - --metrics.prometheus.addrouterslabels
-            - --metrics.prometheus
           ports:
             - name: web
               containerPort: 80
@@ -56,5 +49,3 @@ spec:
               containerPort: 443
             - name: metrics
               containerPort: 8080
-            - name: traefikhub-tunl
-              containerPort: 9901

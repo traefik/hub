@@ -13,29 +13,6 @@ spec:
     - protocol: TCP
       name: websecure
       port: 443
-    - protocol: TCP
-      name: hub-catalog
-      port: 9902
-  selector:
-    app: traefik
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: traefik-hub
-  namespace: traefik
-spec:
-  type: ClusterIP
-  ports:
-    - protocol: TCP
-      name: metrics
-      port: 8080
-      targetPort: metrics
-    - protocol: TCP
-      port: 9901
-      name: traefikhub-tunl
-      targetPort: traefikhub-tunl
   selector:
     app: traefik
 

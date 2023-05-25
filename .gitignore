@@ -8,6 +8,7 @@ venv
 
 ## Generated templates
 01-values.yaml
+01-traefik-deployment-patch.yaml
 
 # generated for diagrams
 diagrams/dist

@@ -21,51 +21,7 @@ data:
       evaluation_interval: 10s
     rule_files:
       - "/prometheus/rules/*.yaml"
-    scrape_configs:
-      - job_name: 'haproxy'
-        relabel_configs:
-            # Only scape pods with annotation prometheus.io/scrape: "true".
-          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
-            action: keep
-            regex: true
-            # Use port given in annotation prometheus.io/port.
-          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
-            action: replace
-            regex: ([^:]+)(?::\d+)?;(\d+)
-            replacement: $1:$2
-            target_label: __address__
-            # Add the version label extracted from the pod label version.
-          - source_labels: [__meta_kubernetes_pod_label_version]
-            action: replace
-            replacement: $1
-            target_label: version
-        kubernetes_sd_configs:
-          - role: pod
-            namespaces:
-              names:
-                - haproxy-ingress-controller
-      - job_name: 'nginx'
-        relabel_configs:
-            # Only scape pods with annotation prometheus.io/scrape: "true".
-          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
-            action: keep
-            regex: true
-            # Use port given in annotation prometheus.io/port.
-          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
-            action: replace
-            regex: ([^:]+)(?::\d+)?;(\d+)
-            replacement: $1:$2
-            target_label: __address__
-            # Add the version label extracted from the pod label version.
-          - source_labels: [__meta_kubernetes_pod_label_version]
-            action: replace
-            replacement: $1
-            target_label: version
-        kubernetes_sd_configs:
-          - role: pod
-            namespaces:
-              names:
-                - ingress-nginx
+    scrape_configs:      
       - job_name: 'traefik'
         relabel_configs:
             # Only scape pods with annotation prometheus.io/scrape: "true".
@@ -163,7 +119,7 @@ spec:
         runAsNonRoot: true
       containers:
         - name: prometheus
-          image: prom/prometheus:v2.16.0
+          image: prom/prometheus:v2.44.0
           args:
             - '--storage.tsdb.retention=60d'
             - '--storage.tsdb.path="/prometheus/data/"'
@@ -265,6 +221,22 @@ apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
   name: prometheus
+  namespace: monitoring
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`prometheus.docker.localhost`)
+      services:
+        - name: prometheus
+          port: 9090
+          namespace: monitoring
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: prometheus-tls
   namespace: monitoring
 spec:
   entryPoints:

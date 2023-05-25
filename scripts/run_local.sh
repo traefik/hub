@@ -32,7 +32,7 @@ main() {
   renewJWT
 
   initializeWorkspace
-  installAgent
+  installTraefikHub
 
   # Optional
   if ${INSTALL_POP}; then
@@ -51,14 +51,6 @@ main() {
     installMonitoring
   fi
 
-  if ${INSTALL_NGINX}; then
-      installMonitoring
-  fi
-
-  if ${INSTALL_HAPROXY}; then
-      installHAProxy
-  fi
-
   if ${INSTALL_WHOAMI}; then
       installWhoami
   fi
@@ -66,15 +58,6 @@ main() {
   if ${INSTALL_PETSTORE}; then
       installPetstore
   fi
-}
-
-helmUpdate() {
-  if [ "${HUB_HELM_CHART_PATH}" == "traefik-hub/hub-agent" ]; then
-    helm repo add traefik-hub https://helm.traefik.io/hub
-    helm repo update
-  fi
-
-   helm upgrade --devel --install hub-agent "${HUB_HELM_CHART_PATH}" --values="$PROJECT_DIR"/hub/manifests/hub-agent/01-values.yaml --namespace hub-agent
 }
 
 updateLocalHosts() {
@@ -111,7 +94,7 @@ applyCoreDNSConf() {
 }
 
 renewGCRToken() {
-    for namespace in hub hub-agent pop broker; do
+    for namespace in hub pop broker; do
         set +o errexit
         kubectl delete secret -n $namespace gcr-access-token
         set -o errexit
@@ -185,8 +168,7 @@ setupK3S() {
       --port 8443:8443@loadbalancer \
       --port 9000:9000@loadbalancer \
       --port 9443:9443@loadbalancer \
-      --port 9090:9090@loadbalancer \
-      --port 9902:9902@loadbalancer
+      --port 9090:9090@loadbalancer
   fi
 
   # Wait until cluster is ready
@@ -205,20 +187,9 @@ clean() {
   echo "Undeploying whoami."
   kubectl delete -f "$PROJECT_DIR"/hub/manifests/whoami/ 2> /dev/null || true
 
-  # Uninstall Ingress-nginx-inc
-  echo "Undeploying haproxy."
-  kubectl delete -f "$PROJECT_DIR"/hub/manifests/ingress-haproxy/ 2> /dev/null || true
-
-  # Uninstall Ingress-nginx
-  echo "Undeploying nginx."
-  kubectl delete -f "$PROJECT_DIR"/hub/manifests/ingress-nginx/ 2> /dev/null || true
-
   # Uninstall Jaeger
   echo "Undeploying Jaeger."
   kubectl delete -f "$PROJECT_DIR"/hub/manifests/jaeger/ 2> /dev/null || true
-
-  # Uninstall Hub Agent
-  helm uninstall hub-agent --namespace hub-agent 2> /dev/null || true
 
   # Uninstall Hub
   echo "Undeploying Hub services."
@@ -238,15 +209,26 @@ clean() {
   echo "Undeploying Traefik."
   kubectl delete -f "$PROJECT_DIR"/hub/manifests/traefik/ 2> /dev/null || true
 
+  # Uninstall Traefik Hub
+  echo "Undeploying Traefik Hub"
+  kubectl delete -f "https://hub.traefik.io/install/crd" 2> /dev/null || true
+
   # Uninstall Mongo
   echo "Undeploying Mongo"
   kubectl delete -f "$PROJECT_DIR"/hub/manifests/mongo/ 2> /dev/null || true
+
+  # Uninstall Hydra
+  echo "Undeploying Hydra"
+  kubectl delete -f "$PROJECT_DIR"/hub/manifests/hydra/ 2> /dev/null || true
+
+  # Uninstall Nats
+  echo "Undeploying Nats"
+  kubectl delete -f "$PROJECT_DIR"/hub/manifests/nats/ 2> /dev/null || true
 
   # Delete webhook
   kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io hub 2> /dev/null || true
 
   # Delete ClusterRole, secrets and namespaces
-  kubectl delete -f "$PROJECT_DIR"/hub/manifests/hub-agent/00-namespace.yaml 2> /dev/null || true
   kubectl delete -f "$PROJECT_DIR"/hub/manifests/aws-secret-operator/00-namespace.yaml 2> /dev/null || true
 
   # Uninstall Monitoring
@@ -256,13 +238,16 @@ clean() {
   # Uninstall Pebble
   echo "Undeploying Pebble"
   kubectl delete -f "$PROJECT_DIR"/hub/manifests/pebble/ 2> /dev/null || true
+
+  # Uninstall Petstore
+  echo "Undeploying Petstore"
+  kubectl delete -f "$PROJECT_DIR"/hub/manifests/petstore/ 2> /dev/null || true
 }
 
 createNamespaces() {
   echo "Create Namespaces."
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/hub/00-namespace.yaml
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/broker/00-namespace.yaml
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/hub-agent/00-namespace.yaml
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/aws-secret-operator/00-namespace.yaml
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/pop/00-namespace.yaml
 }
@@ -359,8 +344,8 @@ installPoP() {
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/pop
 }
 
-installAgent() {
-  echo "Deploying Hub Agent."
+installTraefikHub() {
+  echo "Installing Traefik Hub Sidecar."
 
   # Create cluster on Hub
   export TOKEN_CLUSTER=$(curl --silent --location --request POST 'http://platform.docker.localhost/cluster/external/clusters' \
@@ -368,14 +353,20 @@ installAgent() {
   --header 'Content-Type: application/json' \
   --data-raw "{\"name\": \"cluster\"}" | jq -r '.token' | tr -d '\n')
 
+  # Deploy custom resources.
+  kubectl apply -f "https://hub.traefik.io/install/crd"
+  kubectl apply -f "https://hub.traefik.io/install/rbac?serviceAccountName=traefik&serviceAccountNamespace=traefik"
+
+  # Patch Traefik deployment.
   if [ "$TOKEN_CLUSTER" != "null" ]; then
-    envsubst < "$PROJECT_DIR"/hub/manifests/hub-agent/templates/values.yaml > "$PROJECT_DIR"/hub/manifests/hub-agent/01-values.yaml
+    envsubst < "$PROJECT_DIR"/hub/manifests/traefik-hub/templates/traefik-deployment-patch.yaml > "$PROJECT_DIR"/hub/manifests/traefik-hub/01-traefik-deployment-patch.yaml
   fi
 
-  # Install Hub Agent
-  helmUpdate
+  kubectl patch -n traefik deployments/traefik --patch-file "$PROJECT_DIR"/hub/manifests/traefik-hub/01-traefik-deployment-patch.yaml
 
-  kubectl -n hub-agent wait --for condition=available --timeout="${TIMEOUT}" deployment/hub-agent-controller
+  # Configure the Admission Service.
+  kubectl expose deployment --namespace traefik traefik --port=443 --target-port=9943 --name admission
+  kubectl apply -f "https://hub-preview.traefik.io/install/admission?namespace=traefik&token=${TOKEN_CLUSTER}"
 }
 
 installMonitoring() {
@@ -384,18 +375,6 @@ installMonitoring() {
   kubectl delete configmap -n monitoring grafana-dashboard || true
   kubectl create configmap -n monitoring grafana-dashboard --from-file="$PROJECT_DIR"/hub/manifests/monitoring/dashboards/
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/monitoring/
-}
-
-installNginx() {
-  echo "Deploying nginx."
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/ingress-nginx/
-  kubectl -n ingress-nginx wait --for condition=available --timeout="${TIMEOUT}" deployment/ingress-nginx-controller
-}
-
-installHAProxy() {
-  echo "Deploying haproxy."
-  kubectl apply -f "$PROJECT_DIR"/hub/manifests/ingress-haproxy/
-  kubectl -n haproxy-ingress-controller wait --for condition=available --timeout="${TIMEOUT}" deployment/haproxy-ingress
 }
 
 installWhoami() {
@@ -407,16 +386,6 @@ installWhoami() {
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/whoami/03-ingress-traefik-tls.yaml
 
   kubectl -n whoami wait --for condition=available --timeout="${TIMEOUT}" deployment/whoami
-
-  if ${INSTALL_HAPROXY}; then
-    kubectl apply -f "$PROJECT_DIR"/hub/manifests/whoami/03-ingress-haproxy.yaml
-    kubectl apply -f "$PROJECT_DIR"/hub/manifests/whoami/03-ingress-haproxy-tls.yaml
-  fi
-
-  if ${INSTALL_NGINX}; then
-    kubectl apply -f "$PROJECT_DIR"/hub/manifests/whoami/03-ingress-nginx.yaml
-    kubectl apply -f "$PROJECT_DIR"/hub/manifests/whoami/03-ingress-nginx-tls.yaml
-  fi
 }
 
 installPetstore() {
@@ -480,11 +449,8 @@ initializeVariables() {
   INSTALL_BROKER="${INSTALL_BROKER:-false}"
   INSTALL_JAEGER="${INSTALL_JAEGER:-false}"
   INSTALL_MONITORING="${INSTALL_MONITORING:-false}"
-  INSTALL_NGINX="${INSTALL_NGINX:-false}"
-  INSTALL_HAPROXY="${INSTALL_HAPROXY:-false}"
   INSTALL_WHOAMI="${INSTALL_WHOAMI:-false}"
   INSTALL_PETSTORE="${INSTALL_PETSTORE:-false}"
-  HUB_HELM_CHART_PATH="${HUB_HELM_CHART_PATH:-traefik-hub/hub-agent}"
 }
 
 initializeVariables
@@ -507,17 +473,11 @@ case $cmd in
     install-broker)
         installBroker
     ;;
-    install-haproxy)
-        installHAProxy
-    ;;
     install-jaeger)
         installJaeger
     ;;
     install-monitoring)
         installMonitoring
-    ;;
-    install-nginx)
-        installNginx
     ;;
     install-petstore)
         installPetstore
@@ -541,8 +501,8 @@ case $cmd in
         main "$@"
     ;;
     *)
-        echo "Commands available: apply-core-dns-conf, clean, create-user, helm-update, install-broker, install-haproxy," \
-          "install-jaeger, install-monitoring, install-nginx, install-petstore, install-pop, install-whoami, renew-auth0-admin-token," \
+        echo "Commands available: apply-core-dns-conf, clean, create-user, helm-update, install-broker," \
+          "install-jaeger, install-monitoring, install-petstore, install-pop, install-whoami, renew-auth0-admin-token," \
           "renew-gcr-token, renew-jwt, run"
         exit 1
     ;;
