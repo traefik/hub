@@ -88,6 +88,8 @@ spec:
               value: http://hub-gslb.hub.svc.cluster.local/internal/quotas
             - name: GATEWAY_QUOTA_ENFORCER_URL
               value: http://hub-api-management.hub.svc.cluster.local/internal/quotas
+            - name: PORTAL_QUOTA_ENFORCER_URL
+              value: http://hub-api-management.hub.svc.cluster.local/internal/quotas
             - name: NODE_QUOTA_ENFORCER_URL
               value: http://hub-topology.hub.svc.cluster.local/internal/quotas
             - name: TRACE_SERVICE_URL
@@ -345,6 +347,8 @@ spec:
                 - name: ACP_QUOTA_ENFORCER_URL
                   value: http://hub-acp.hub.svc.cluster.local/internal/quotas
                 - name: GATEWAY_QUOTA_ENFORCER_URL
+                  value: http://hub-api-management.hub.svc.cluster.local/internal/quotas
+                - name: PORTAL_QUOTA_ENFORCER_URL
                   value: http://hub-api-management.hub.svc.cluster.local/internal/quotas
                 - name: NODE_QUOTA_ENFORCER_URL
                   value: http://hub-topology.hub.svc.cluster.local/internal/quotas
