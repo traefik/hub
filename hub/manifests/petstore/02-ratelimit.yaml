@@ -1,0 +1,12 @@
+apiVersion: hub.traefik.io/v1alpha1
+kind: APIRateLimit
+metadata:
+  name: suppliers-1every2s
+spec:
+  limit: 1
+  period: 2s
+  groups:
+    - suppliers
+  apiSelector:
+    matchLabels:
+      area: products

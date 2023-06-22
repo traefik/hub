@@ -305,6 +305,25 @@
             "action": "delete",
             "resource": "api_user",
             "scope": "*"
+          },
+          {
+            "action": "create",
+            "resource": "api_rate_limit"
+          },
+          {
+            "action": "view",
+            "resource": "api_rate_limit",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "api_rate_limit",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "api_rate_limit",
+            "scope": "*"
           }
         ],
         "updatedAt": {
@@ -432,6 +451,25 @@
           {
             "action": "delete",
             "resource": "user",
+            "scope": "*"
+          },
+          {
+            "action": "create",
+            "resource": "api_rate_limit"
+          },
+          {
+            "action": "view",
+            "resource": "api_rate_limit",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "api_rate_limit",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "api_rate_limit",
             "scope": "*"
           }
         ],

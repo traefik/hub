@@ -101,6 +101,8 @@ spec:
               value: d-62cf0f3717c74acca7df96fd88f2ca3d
             - name: SENDGRID_SALES_LICENSE_ENDED_TEMPLATE_ID
               value: d-b92039adc5af4ff89f2d1700405c4f2c
+            - name: SENDGRID_NODE_COUNT_EXCEEDED_TEMPLATE_ID
+              value: d-a8dc7c4ac43b4e35a4288c57684ce77c
           args:
             - serve
             - --addr=:80
