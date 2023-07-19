@@ -54,6 +54,8 @@ spec:
               value: "http://jaeger.jaeger.svc.cluster.local:14268"
             - name: TRACING_PROBABILITY
               value: "1"
+            - name: MQ_URL
+              value: nats://traefik-hub:traefik-hub@nats.nats.svc.cluster.local:4222
             - name: MONGODB_URI
               value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/gslb?authSource=admin
             - name: TRACE_SERVICE_URL
