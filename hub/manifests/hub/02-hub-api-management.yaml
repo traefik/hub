@@ -110,7 +110,7 @@ spec:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && (PathPrefix(`/agent/gateways`) || PathPrefix(`/agent/portals`) || PathPrefix(`/agent/apis`) || PathPrefix(`/agent/collections`) || PathPrefix(`/agent/accesses`) || PathPrefix(`/agent/users`) || PathPrefix(`/agent/rate-limits`))
+      match: Host(`platform.docker.localhost`) && (PathPrefix(`/agent/gateways`) || PathPrefix(`/agent/portals`) || PathPrefix(`/agent/apis`) || PathPrefix(`/agent/collections`) || PathPrefix(`/agent/accesses`) || PathPrefix(`/agent/users`) || PathPrefix(`/agent/rate-limits`) || PathPrefix(`/agent/versions`))
       services:
         - name: hub-api-management
           port: 80
@@ -130,7 +130,7 @@ spec:
     - web
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && (PathPrefix(`/agent/gateways`) || PathPrefix(`/agent/portals`) || PathPrefix(`/agent/apis`) || PathPrefix(`/agent/collections`) || PathPrefix(`/agent/accesses`) || PathPrefix(`/agent/users`) || PathPrefix(`/agent/rate-limits`))
+      match: Host(`platform.docker.localhost`) && (PathPrefix(`/agent/gateways`) || PathPrefix(`/agent/portals`) || PathPrefix(`/agent/apis`) || PathPrefix(`/agent/collections`) || PathPrefix(`/agent/accesses`) || PathPrefix(`/agent/users`) || PathPrefix(`/agent/rate-limits`) || PathPrefix(`/agent/versions`))
       services:
         - name: hub-api-management
           port: 80
