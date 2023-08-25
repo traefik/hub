@@ -11,6 +11,11 @@ spec:
         - name: proxy-sidecar
           image: ghcr.io/traefik/traefik-hub:v2
           imagePullPolicy: IfNotPresent
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
           args:
             - --entrypoints.hub-secured.address=:443
             - --entrypoints.hub-secured.http.tls

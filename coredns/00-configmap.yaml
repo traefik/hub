@@ -14,6 +14,7 @@ data:
         errors
         rewrite name nats.docker.localhost nats.nats.svc.cluster.local
         rewrite name sso.portal.docker.localhost hydra.hydra.svc.cluster.local
+        rewrite name keycloak.docker.localhost keycloak.keycloak.svc.cluster.local
         rewrite name platform.docker.localhost traefik.traefik.svc.cluster.local
         rewrite name webapp.docker.localhost traefik.traefik.svc.cluster.local
         rewrite name regex (.*)\.tls\.docker\.localhost traefikee-gslb-proxy-svc.pop.svc.cluster.local

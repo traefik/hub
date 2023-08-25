@@ -60,6 +60,8 @@ spec:
               value: JUMqRi1KYU5jUmZValhuMnI1dTh4L0E/RChHK0tiUGU=
             - name: HYDRA_URL
               value: http://hydra.hydra.svc.cluster.local:4445
+            - name: HYDRA_ISSUER_URL
+              value: http://sso.portal.docker.localhost
             - name: OFFER_SERVICE_URL
               value: "http://hub-offer.hub.svc.cluster.local/internal"
             - name: TUNNEL_SERVICE_URL
@@ -110,7 +112,7 @@ spec:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && (PathPrefix(`/agent/gateways`) || PathPrefix(`/agent/portals`) || PathPrefix(`/agent/apis`) || PathPrefix(`/agent/collections`) || PathPrefix(`/agent/accesses`) || PathPrefix(`/agent/users`) || PathPrefix(`/agent/rate-limits`) || PathPrefix(`/agent/versions`))
+      match: Host(`platform.docker.localhost`) && (PathPrefix(`/agent/gateways`) || PathPrefix(`/agent/portals`) || PathPrefix(`/agent/apis`) || PathPrefix(`/agent/collections`) || PathPrefix(`/agent/accesses`) || PathPrefix(`/agent/users`) || PathPrefix(`/agent/rate-limits`) || PathPrefix(`/agent/versions`) || PathPrefix(`/agent/identity-provider`))
       services:
         - name: hub-api-management
           port: 80
@@ -130,7 +132,7 @@ spec:
     - web
   routes:
     - kind: Rule
-      match: Host(`platform.docker.localhost`) && (PathPrefix(`/agent/gateways`) || PathPrefix(`/agent/portals`) || PathPrefix(`/agent/apis`) || PathPrefix(`/agent/collections`) || PathPrefix(`/agent/accesses`) || PathPrefix(`/agent/users`) || PathPrefix(`/agent/rate-limits`) || PathPrefix(`/agent/versions`))
+      match: Host(`platform.docker.localhost`) && (PathPrefix(`/agent/gateways`) || PathPrefix(`/agent/portals`) || PathPrefix(`/agent/apis`) || PathPrefix(`/agent/collections`) || PathPrefix(`/agent/accesses`) || PathPrefix(`/agent/users`) || PathPrefix(`/agent/rate-limits`) || PathPrefix(`/agent/versions`) || PathPrefix(`/agent/identity-provider`))
       services:
         - name: hub-api-management
           port: 80
@@ -214,6 +216,43 @@ spec:
         - name: sso-prefix
 
 ---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: api-management-internal-tls
+  namespace: hub
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/api-management/internal`)
+      services:
+        - name: hub-api-management
+          port: 80
+      middlewares:
+        - name: stripprefix
+  tls:
+    certResolver: default
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: api-management-internal
+  namespace: hub
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`platform.docker.localhost`) && PathPrefix(`/api-management/internal`)
+      services:
+        - name: hub-api-management
+          port: 80
+      middlewares:
+        - name: stripprefix
+---
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -286,6 +325,8 @@ spec:
                   value: "1"
                 - name: MONGODB_MAXPOOL
                   value: "3"
+                - name: MONGODB_ENCRYPTION_KEY
+                  value: JUMqRi1KYU5jUmZValhuMnI1dTh4L0E/RChHK0tiUGU=
                 - name: CERTIFICATES_SERVICE_URL
                   value: "http://hub-certificates.hub.svc.cluster.local/internal"
                 - name: HYDRA_URL
@@ -334,6 +375,8 @@ spec:
                   value: "1"
                 - name: MONGODB_MAXPOOL
                   value: "3"
+                - name: MONGODB_ENCRYPTION_KEY
+                  value: JUMqRi1KYU5jUmZValhuMnI1dTh4L0E/RChHK0tiUGU=
                 - name: CERTIFICATES_SERVICE_URL
                   value: "http://hub-certificates.hub.svc.cluster.local/internal"
                 - name: HYDRA_URL
@@ -351,3 +394,42 @@ spec:
             - name: gcr-access-token
           restartPolicy: Never
   schedule: '@daily'
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hub-api-management-sync-idp-job
+  namespace: hub
+spec:
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 5
+      parallelism: 1
+      template:
+        metadata:
+          labels:
+            cronjob: hub-api-management-sync-idp-job
+        spec:
+          containers:
+            - args:
+                - sync-idps
+              env:
+                - name: LOG_LEVEL
+                  value: debug
+                - name: LOG_FORMAT
+                  value: console
+                - name: MONGODB_URI
+                  value: mongodb://root:admin@mongodb.mongo.svc.cluster.local:27017/apimanagement?authSource=admin
+                - name: MONGODB_MINPOOL
+                  value: "1"
+                - name: MONGODB_MAXPOOL
+                  value: "3"
+                - name: MQ_URL
+                  value: nats://traefik-hub:traefik-hub@nats.nats.svc.cluster.local:4222
+              image: gcr.io/traefiklabs/hub-api-management:latest
+              name: hub-api-management-sync-idp-job
+          imagePullSecrets:
+            - name: gcr-access-token
+          restartPolicy: Never
+  schedule: '@hourly'

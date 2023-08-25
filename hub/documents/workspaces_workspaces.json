@@ -324,6 +324,16 @@
             "action": "delete",
             "resource": "api_rate_limit",
             "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "identity_provider",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "identity_provider",
+            "scope": "*"
           }
         ],
         "updatedAt": {
@@ -342,6 +352,11 @@
         "users": [],
         "permissions": [
           {
+            "action": "edit",
+            "resource": "subscription",
+            "scope": "*"
+          },
+          {
             "action": "view",
             "resource": "subscription",
             "scope": "*"
@@ -352,6 +367,26 @@
           },
           {
             "action": "create",
+            "resource": "api_token",
+            "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "api_token",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "api_token",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "api_token",
+            "scope": "*"
+          },
+          {
+            "action": "create",
             "resource": "edge_ingress",
             "scope": "*"
           },
@@ -428,6 +463,106 @@
           {
             "action": "delete",
             "resource": "acp",
+            "scope": "*"
+          },
+          {
+            "action": "create",
+            "resource": "api_gateway",
+            "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "api_gateway",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "api_gateway",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "api_gateway",
+            "scope": "*"
+          },
+          {
+            "action": "create",
+            "resource": "api_portal",
+            "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "api_portal",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "api_portal",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "api_portal",
+            "scope": "*"
+          },
+          {
+            "action": "create",
+            "resource": "api",
+            "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "api",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "api",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "api",
+            "scope": "*"
+          },
+          {
+            "action": "create",
+            "resource": "api_collection",
+            "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "api_collection",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "api_collection",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "api_collection",
+            "scope": "*"
+          },
+          {
+            "action": "create",
+            "resource": "api_access",
+            "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "api_access",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "api_access",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "api_access",
             "scope": "*"
           },
           {
@@ -454,6 +589,56 @@
             "scope": "*"
           },
           {
+            "action": "edit",
+            "resource": "owner"
+          },
+          {
+            "action": "edit",
+            "resource": "subscription"
+          },
+          {
+            "action": "delete",
+            "resource": "workspace"
+          },
+          {
+            "action": "create",
+            "resource": "api_group"
+          },
+          {
+            "action": "view",
+            "resource": "api_group",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "api_group",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "api_group",
+            "scope": "*"
+          },
+          {
+            "action": "create",
+            "resource": "api_user"
+          },
+          {
+            "action": "view",
+            "resource": "api_user",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "api_user",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "api_user",
+            "scope": "*"
+          },
+          {
             "action": "create",
             "resource": "api_rate_limit"
           },
@@ -470,6 +655,16 @@
           {
             "action": "delete",
             "resource": "api_rate_limit",
+            "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "identity_provider",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "identity_provider",
             "scope": "*"
           }
         ],
@@ -489,6 +684,11 @@
         "users": [],
         "permissions": [
           {
+            "action": "edit",
+            "resource": "subscription",
+            "scope": "*"
+          },
+          {
             "action": "view",
             "resource": "subscription",
             "scope": "*"
@@ -499,6 +699,26 @@
           },
           {
             "action": "create",
+            "resource": "api_token",
+            "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "api_token",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "api_token",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "api_token",
+            "scope": "*"
+          },
+          {
+            "action": "create",
             "resource": "edge_ingress",
             "scope": "*"
           },
@@ -575,6 +795,198 @@
           {
             "action": "delete",
             "resource": "acp",
+            "scope": "*"
+          },
+          {
+            "action": "create",
+            "resource": "api_gateway",
+            "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "api_gateway",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "api_gateway",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "api_gateway",
+            "scope": "*"
+          },
+          {
+            "action": "create",
+            "resource": "api_portal",
+            "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "api_portal",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "api_portal",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "api_portal",
+            "scope": "*"
+          },
+          {
+            "action": "create",
+            "resource": "api",
+            "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "api",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "api",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "api",
+            "scope": "*"
+          },
+          {
+            "action": "create",
+            "resource": "api_collection",
+            "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "api_collection",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "api_collection",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "api_collection",
+            "scope": "*"
+          },
+          {
+            "action": "create",
+            "resource": "api_access",
+            "scope": "*"
+          },
+          {
+            "action": "view",
+            "resource": "api_access",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "api_access",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "api_access",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "workspace"
+          },
+          {
+            "action": "create",
+            "resource": "invitation"
+          },
+          {
+            "action": "view",
+            "resource": "invitation",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "invitation",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "user",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "owner"
+          },
+          {
+            "action": "edit",
+            "resource": "subscription"
+          },
+          {
+            "action": "delete",
+            "resource": "workspace"
+          },
+          {
+            "action": "create",
+            "resource": "api_group"
+          },
+          {
+            "action": "view",
+            "resource": "api_group",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "api_group",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "api_group",
+            "scope": "*"
+          },
+          {
+            "action": "create",
+            "resource": "api_user"
+          },
+          {
+            "action": "view",
+            "resource": "api_user",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "api_user",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "api_user",
+            "scope": "*"
+          },
+          {
+            "action": "create",
+            "resource": "api_rate_limit"
+          },
+          {
+            "action": "view",
+            "resource": "api_rate_limit",
+            "scope": "*"
+          },
+          {
+            "action": "edit",
+            "resource": "api_rate_limit",
+            "scope": "*"
+          },
+          {
+            "action": "delete",
+            "resource": "api_rate_limit",
             "scope": "*"
           }
         ],

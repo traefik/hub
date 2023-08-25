@@ -13,6 +13,9 @@ create-user:
 helm-update:
 	@$(SCRIPT_DIR)/run_local.sh helm-update
 
+install-keycloak:
+	@$(SCRIPT_DIR)/run_local.sh install-keycloak
+
 install-broker:
 	@$(SCRIPT_DIR)/run_local.sh install-broker
 

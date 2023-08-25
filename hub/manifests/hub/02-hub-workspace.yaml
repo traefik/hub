@@ -60,8 +60,8 @@ spec:
               value: "1"
             - name: OFFER_SERVICE_URL
               value: "http://hub-offer.hub.svc.cluster.local/internal"
-            - name: TOPOLOGY_SERVICE_URL
-              value: "http://hub-topology.hub.svc.cluster.local/internal"
+            - name: API_MANAGEMENT_SERVICE_URL
+              value: "http://hub-api-management.hub.svc.cluster.local/internal"
             - name: NOTIFICATION_SERVICE_URL
               value: "http://hub-notification.hub.svc.cluster.local/internal"
             - name: USER_SERVICE_URL

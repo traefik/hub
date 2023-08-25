@@ -2,6 +2,7 @@
   {
     "_id": "6419ae6354bb9c86881df93d",
     "workspaceId": "6311c90bfce04bd29e473a20",
+    "externalId": "6419ae6354bb9c86881df93d",
     "firstName": "John",
     "lastName": "Doe",
     "company": "Traefik Labs",
@@ -13,9 +14,6 @@
     ],
     "status": "active",
     "resetCode": "",
-    "lastLogin": {
-      "$date": "2023-03-21T14:37:56.060Z"
-    },
     "createdAt": {
       "$date": "2023-03-21T14:37:56.060Z"
     },
@@ -26,6 +24,7 @@
   {
     "_id": "6419ae63581d868f93d4bb9c",
     "workspaceId": "6311c90bfce04bd29e473a20",
+    "externalId": "6419ae63581d868f93d4bb9c",
     "firstName": "Jane",
     "lastName": "Doe",
     "company": "Traefik Labs",
@@ -37,9 +36,6 @@
     ],
     "status": "active",
     "resetCode": "",
-    "lastLogin": {
-      "$date": "2023-03-21T14:37:56.060Z"
-    },
     "createdAt": {
       "$date": "2023-03-21T14:37:56.060Z"
     },

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 main() {
   checkTools
@@ -57,6 +57,10 @@ main() {
 
   if ${INSTALL_PETSTORE}; then
       installPetstore
+  fi
+
+  if ${INSTALL_KEYCLOAK}; then
+      installKeycloak
   fi
 }
 
@@ -294,6 +298,12 @@ installHydra() {
   kubectl -n hydra rollout status --watch --timeout="${TIMEOUT}" deployment/hydra
 }
 
+installKeycloak() {
+  echo "Deploying Keycloak."
+  kubectl apply -f "$PROJECT_DIR"/hub/manifests/keycloak/
+  kubectl -n keycloak rollout status --watch --timeout="${TIMEOUT}" deployment/keycloak
+}
+
 installTraefik() {
   echo "Deploying Traefik."
   kubectl apply -f "$PROJECT_DIR"/hub/manifests/traefik/
@@ -354,8 +364,8 @@ installTraefikHub() {
   --data-raw "{\"name\": \"cluster\"}" | jq -r '.token' | tr -d '\n')
 
   # Deploy custom resources.
-  kubectl apply -f "https://hub.traefik.io/install/crd"
-  kubectl apply -f "https://hub.traefik.io/install/rbac?serviceAccountName=traefik&serviceAccountNamespace=traefik"
+  kubectl apply -f "https://hub-preview.traefik.io/install/crd"
+  kubectl apply -f "https://hub-preview.traefik.io/install/rbac?serviceAccountName=traefik&serviceAccountNamespace=traefik"
 
   # Patch Traefik deployment.
   if [ "$TOKEN_CLUSTER" != "null" ]; then
@@ -422,10 +432,10 @@ initializeWorkspace() {
   --header 'Content-Type: application/json' \
   --data-raw "{\"userId\": \"fd016582-3e6a-4951-a9c5-e03e81d63761\", \"workspaceId\": \"${WORKSPACE_ID}\"}"
 
-  # Create topology
-    curl --silent --location --request POST 'http://platform.docker.localhost/topology/internal/workspaces' \
-    --header 'Content-Type: application/json' \
-    --data-raw "{\"id\": \"${WORKSPACE_ID}\"}"
+  # Create identity provider
+  curl --silent --location --request POST 'http://platform.docker.localhost/api-management/internal/identity-providers' \
+  --header 'Content-Type: application/json' \
+  --data-raw "{\"workspaceId\": \"${WORKSPACE_ID}\"}"
 }
 
 initializeVariables() {
@@ -469,6 +479,9 @@ case $cmd in
     ;;
     helm-update)
         helmUpdate
+    ;;
+    install-keycloak)
+        installKeycloak
     ;;
     install-broker)
         installBroker
