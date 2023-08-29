@@ -4,7 +4,10 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     hub-api-management.url = "git+ssh://git@github.com/juliens/hub-api-management?ref=nix";
-    hub-acp.url = "git+ssh://git@github.com/juliens/hub-acp?ref=nix";
+    hub-acp = {
+      url = "git+ssh://git@github.com/juliens/hub-acp?ref=nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     hub-workspace.url = "git+ssh://git@github.com/juliens/hub-workspace?ref=nix";
   };
 
@@ -14,12 +17,12 @@
       inherit system;
       config.allowUnfree = true;
     };
-    github_token = (builtins.fromTOML ./hub/.env).GITHUB_TOKEN;
+    #env_file = builtins.fromTOML ( builtins.readFile ./hub/.env );
+    #github_token = if builtins.hasAttr "GITHUB_TOKEN" env_file then env_file.GITHUB_TOKEN else throw "You need to define GITHUB_TOKEN in ./hub/.env";
   in {
       devShells.default = pkgs.mkShell {
         shellHook = ''
           export WORKSPACE_ID="6311c90bfce04bd29e473a20"
-          export GITHUB_TOKEN="${github_token}"
           docker load < ${hub-api-management.packages.${system}.image}
           docker load < ${hub-acp.packages.${system}.image}
           docker load < ${hub-workspace.packages.${system}.image}

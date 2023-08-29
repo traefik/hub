@@ -75,14 +75,17 @@
     "hub-acp": {
       "inputs": {
         "flake-utils": "flake-utils_2",
-        "nixpkgs": "nixpkgs"
+        "kpi": "kpi",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
       },
       "locked": {
-        "lastModified": 1693301903,
-        "narHash": "sha256-mPnnw1W0XvIeL8N9bHYGuXBJMo+kabjDEgLbHy1VGHo=",
+        "lastModified": 1693316099,
+        "narHash": "sha256-A+9TsAEABpR4RKyPUWODQP1YJkaZP2GK8goQ3EqUZdk=",
         "ref": "nix",
-        "rev": "ae884ff903892af5cd6bcb64e979d225380ce154",
-        "revCount": 75,
+        "rev": "d340dc0b2235da39c7304f9ace8cb53b98c42900",
+        "revCount": 76,
         "type": "git",
         "url": "ssh://git@github.com/juliens/hub-acp"
       },
@@ -95,7 +98,7 @@
     "hub-api-management": {
       "inputs": {
         "flake-utils": "flake-utils_3",
-        "nixpkgs": "nixpkgs_2"
+        "nixpkgs": "nixpkgs"
       },
       "locked": {
         "lastModified": 1693301878,
@@ -115,7 +118,7 @@
     "hub-workspace": {
       "inputs": {
         "flake-utils": "flake-utils_4",
-        "nixpkgs": "nixpkgs_3"
+        "nixpkgs": "nixpkgs_2"
       },
       "locked": {
         "lastModified": 1693301913,
@@ -130,6 +133,22 @@
         "ref": "nix",
         "type": "git",
         "url": "ssh://git@github.com/juliens/hub-workspace"
+      }
+    },
+    "kpi": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1675936207,
+        "narHash": "sha256-9FAhMeRN4eT4xF/7kaC+Z86Raji0D61ZKM2KPTp5ScY=",
+        "ref": "refs/heads/master",
+        "rev": "295e61c356b9c91d9d1dc746656545778cae12bf",
+        "revCount": 17,
+        "type": "git",
+        "url": "ssh://git@github.com/traefik/hub-trace-kpi"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/traefik/hub-trace-kpi"
       }
     },
     "nixpkgs": {
@@ -180,29 +199,13 @@
         "type": "github"
       }
     },
-    "nixpkgs_4": {
-      "locked": {
-        "lastModified": 1693145325,
-        "narHash": "sha256-Gat9xskErH1zOcLjYMhSDBo0JTBZKfGS0xJlIRnj6Rc=",
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "cddebdb60de376c1bdb7a4e6ee3d98355453fe56",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nixos",
-        "ref": "nixpkgs-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "flake-utils": "flake-utils",
         "hub-acp": "hub-acp",
         "hub-api-management": "hub-api-management",
         "hub-workspace": "hub-workspace",
-        "nixpkgs": "nixpkgs_4"
+        "nixpkgs": "nixpkgs_3"
       }
     },
     "systems": {

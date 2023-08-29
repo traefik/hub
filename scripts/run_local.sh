@@ -8,11 +8,14 @@ main() {
     updateLocalHosts
   fi
 
-  #if [[ $2 == "--nix" ]]; then
+  if [[ $2 == "--nix" ]]; then
+	echo "Import ACP image"
 	k3d image import gcr.io/traefiklabs/hub-acp:latest --cluster=k3s-default-hub
+	echo "Import api-management image"
 	k3d image import gcr.io/traefiklabs/hub-api-management:latest --cluster=k3s-default-hub
+	echo "Import workspace image"
 	k3d image import gcr.io/traefiklabs/hub-workspace:latest --cluster=k3s-default-hub
-  #fi
+  fi
 
   if [[ $2 == "--adsl" ]]; then
     prepareDockerImages
