@@ -43,7 +43,8 @@ data:
         "nats://$NATS_SERVER_USER:$NATS_SERVER_PASSWORD@nats-1.nats.nats.svc.cluster.local:6222",
         "nats://$NATS_SERVER_USER:$NATS_SERVER_PASSWORD@nats-2.nats.nats.svc.cluster.local:6222"
       ]
-      cluster_advertise: $CLUSTER_ADVERTISE
+      #cluster_advertise: $CLUSTER_ADVERTISE
+      no_advertise: true
 
       connect_retries: 120
     }

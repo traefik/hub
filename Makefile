@@ -42,12 +42,14 @@ renew-auth0-admin-token:
 
 renew-gcr-token:
 	@$(SCRIPT_DIR)/run_local.sh renew-gcr-token
-
 run:
 	@$(SCRIPT_DIR)/run_local.sh run
 
 run-adsl:
 	@$(SCRIPT_DIR)/run_local.sh run --adsl
+
+run-nix:
+	nix develop --impure . -c $(SCRIPT_DIR)/run_local.sh run --nix
 
 reset-all-images: reset-acp-image reset-admin-image reset-agent-image reset-alert-image reset-api-management-image \
 	reset-certificates-image reset-cluster-image reset-gslb-image reset-invitation-image reset-metrics-image \

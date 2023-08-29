@@ -8,6 +8,12 @@ main() {
     updateLocalHosts
   fi
 
+  #if [[ $2 == "--nix" ]]; then
+	k3d image import gcr.io/traefiklabs/hub-acp:latest --cluster=k3s-default-hub
+	k3d image import gcr.io/traefiklabs/hub-api-management:latest --cluster=k3s-default-hub
+	k3d image import gcr.io/traefiklabs/hub-workspace:latest --cluster=k3s-default-hub
+  #fi
+
   if [[ $2 == "--adsl" ]]; then
     prepareDockerImages
   fi
