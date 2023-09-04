@@ -9,12 +9,47 @@ main() {
   fi
 
   if [[ $2 == "--nix" ]]; then
-	echo "Import ACP image"
+	echo "Import acp image"
 	k3d image import gcr.io/traefiklabs/hub-acp:latest --cluster=k3s-default-hub
+	echo "Import admin image"
+	k3d image import gcr.io/traefiklabs/hub-admin:latest --cluster=k3s-default-hub
+	echo "Import alert image"
+	k3d image import gcr.io/traefiklabs/hub-alert:latest --cluster=k3s-default-hub
 	echo "Import api-management image"
 	k3d image import gcr.io/traefiklabs/hub-api-management:latest --cluster=k3s-default-hub
+	echo "Import certificates image"
+	k3d image import gcr.io/traefiklabs/hub-certificates:latest --cluster=k3s-default-hub
+	echo "Import check image"
+	k3d image import gcr.io/traefiklabs/hub-check:latest --cluster=k3s-default-hub
+	echo "Import cluster image"
+	k3d image import gcr.io/traefiklabs/hub-cluster:latest --cluster=k3s-default-hub
+	echo "Import gslb image"
+	k3d image import gcr.io/traefiklabs/hub-gslb:latest --cluster=k3s-default-hub
+	echo "Import invitation image"
+	k3d image import gcr.io/traefiklabs/hub-invitation:latest --cluster=k3s-default-hub
+	echo "Import mail image"
+	k3d image import gcr.io/traefiklabs/hub-mail:latest --cluster=k3s-default-hub
+	echo "Import metrics image"
+	k3d image import gcr.io/traefiklabs/hub-metrics:latest --cluster=k3s-default-hub
+	echo "Import notification image"
+	k3d image import gcr.io/traefiklabs/hub-notification:latest --cluster=k3s-default-hub
+	echo "Import offer image"
+	k3d image import gcr.io/traefiklabs/hub-offer:latest --cluster=k3s-default-hub
+	echo "Import token image"
+	k3d image import gcr.io/traefiklabs/hub-token:latest --cluster=k3s-default-hub
+	echo "Import topology image"
+	k3d image import gcr.io/traefiklabs/hub-topology:latest --cluster=k3s-default-hub
+	echo "Import user image"
+	k3d image import gcr.io/traefiklabs/hub-user:latest --cluster=k3s-default-hub
 	echo "Import workspace image"
 	k3d image import gcr.io/traefiklabs/hub-workspace:latest --cluster=k3s-default-hub
+
+  	images=$(find "${PROJECT_DIR}" -type f -name '*.yaml' | xargs grep 'image: ' | tr -d \" | awk -F '@' '{ print $1 }' | awk -F ':' '{ print $3":"$4 }' | sort | uniq)
+
+	  images=$(echo "${images}" | grep -v "hub-ui")
+
+	  echo "${images}" | grep -v "gcr.io/traefiklabs/hub" | xargs -P4 -n1 docker pull
+	  k3d image import -c k3s-default-hub ${images}
   fi
 
   if [[ $2 == "--adsl" ]]; then

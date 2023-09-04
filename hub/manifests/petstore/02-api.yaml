@@ -8,6 +8,10 @@ metadata:
     product: pets
 spec:
   pathPrefix: "/petstore"
+  allowedEndpoints:
+    - path: "/pet"
+      methods: "POST"
+
   service:
     openApiSpec:
       path: /api/v3/openapi.json
