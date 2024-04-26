@@ -57,7 +57,7 @@ kubectl wait --for=condition=ready nodes traefik-hub-control-plane
 Add a load balancer (LB) to this Kubernetes cluster:
 
 ```shell
-kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.11/config/manifests/metallb-native.yaml
+kubectl apply -f tutorials/0-prerequisites/kind/metallb-native.yaml
 kubectl wait --namespace metallb-system --for=condition=ready pod --selector=app=metallb --timeout=90s
 kubectl apply -f tutorials/0-prerequisites/kind/metallb-config.yaml
 ```

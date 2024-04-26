@@ -9,7 +9,7 @@ ifndef TRAEFIK_HUB_USE_CURRENT_KUBECTX
 	kind create cluster --config=tutorials/0-prerequisites/kind/config.yaml
 	kubectl cluster-info
 	kubectl wait --for=condition=ready nodes traefik-hub-control-plane
-	kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.11/config/manifests/metallb-native.yaml
+	kubectl apply -f tutorials/0-prerequisites/kind/metallb-native.yaml
 	kubectl wait --namespace metallb-system --for=condition=ready pod --selector=app=metallb --timeout=90s
 	kubectl apply -f tutorials/0-prerequisites/kind/metallb-config.yaml
 	export TRAEFIK_HUB_USE_CURRENT_KUBECTX=true
