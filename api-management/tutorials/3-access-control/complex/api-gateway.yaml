@@ -1,0 +1,9 @@
+apiVersion: hub.traefik.io/v1alpha1
+kind: APIGateway
+metadata:
+  name: api-gateway
+spec:
+  apiAccesses:
+    - admin
+    - forecast-admin
+    - forecast-licensed

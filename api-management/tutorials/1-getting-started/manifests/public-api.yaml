@@ -1,0 +1,12 @@
+---
+apiVersion: hub.traefik.io/v1alpha1
+kind: API
+metadata:
+  name: public-api
+  namespace: apps
+spec:
+  pathPrefix: "/weather/public"
+  service:
+    name: public-app
+    port:
+      number: 3000

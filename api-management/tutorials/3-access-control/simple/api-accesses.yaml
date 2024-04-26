@@ -1,0 +1,22 @@
+---
+apiVersion: hub.traefik.io/v1alpha1
+kind: APIAccess
+metadata:
+  name: admin
+spec:
+  groups:
+    - admin
+  apis:
+    - name: admin-api
+      namespace: admin
+---
+apiVersion: hub.traefik.io/v1alpha1
+kind: APIAccess
+metadata:
+  name: licensed
+spec:
+  groups:
+    - licensed
+  apiSelector:
+    matchLabels:
+      subscription: standard

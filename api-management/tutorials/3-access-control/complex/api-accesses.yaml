@@ -1,0 +1,40 @@
+---
+apiVersion: hub.traefik.io/v1alpha1
+kind: APIAccess
+metadata:
+  name: admin
+spec:
+  groups:
+    - admin
+  apis:
+    - name: admin-api
+      namespace: admin
+---
+apiVersion: hub.traefik.io/v1alpha1
+kind: APIAccess
+metadata:
+  name: forecast-admin
+spec:
+  groups:
+    - admin
+  apiSelector:
+    matchLabels:
+      subscription: standard
+  operationFilter:
+    include:
+      - get-forecast
+      - patch-forecast
+---
+apiVersion: hub.traefik.io/v1alpha1
+kind: APIAccess
+metadata:
+  name: forecast-licensed
+spec:
+  groups:
+    - licensed
+  apiSelector:
+    matchLabels:
+      subscription: standard
+  operationFilter:
+    include:
+      - get-forecast
