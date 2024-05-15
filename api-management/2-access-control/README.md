@@ -148,16 +148,16 @@ export EXTERNAL_TOKEN=
 
 ```shell
 # This call is allowed => 200
-curl -i -H "Authorization: Bearer ${ADMIN_TOKEN}" "http://api.docker.localhost/admin"
+curl -i -H "Authorization: Bearer $ADMIN_TOKEN" "http://api.docker.localhost/admin"
 # This call is forbidden => 403
-curl -i -H "Authorization: Bearer ${ADMIN_TOKEN}" "http://api.docker.localhost/weather"
+curl -i -H "Authorization: Bearer $ADMIN_TOKEN" "http://api.docker.localhost/weather"
 ```
 
 ```shell
 # This call is allowed => 200
-curl -i -H "Authorization: Bearer ${EXTERNAL_TOKEN}" "http://api.docker.localhost/weather"
+curl -i -H "Authorization: Bearer $EXTERNAL_TOKEN" "http://api.docker.localhost/weather"
 # This call is forbidden => 403
-curl -i -H "Authorization: Bearer ${EXTERNAL_TOKEN}" "http://api.docker.localhost/admin"
+curl -i -H "Authorization: Bearer $EXTERNAL_TOKEN" "http://api.docker.localhost/admin"
 ```
 
 ## Advanced access control
@@ -253,20 +253,20 @@ It can be tested with the API token of the admin:
 
 ```shell
 # This call is allowed.
-curl -i -H "Authorization: Bearer ${ADMIN_TOKEN}" "http://api.docker.localhost/admin/"
+curl -i -H "Authorization: Bearer $ADMIN_TOKEN" "http://api.docker.localhost/admin/"
 # This call is now allowed
-curl -i -H "Authorization: Bearer ${ADMIN_TOKEN}" "http://api.docker.localhost/weather"
+curl -i -H "Authorization: Bearer $ADMIN_TOKEN" "http://api.docker.localhost/weather"
 # And even PATCH is allowed
-curl -i -XPATCH -H "Authorization: Bearer ${ADMIN_TOKEN}" "http://api.docker.localhost/weather"
+curl -i -XPATCH -H "Authorization: Bearer $ADMIN_TOKEN" "http://api.docker.localhost/weather"
 ```
 
 And test it with the external user's token:
 
 ```shell
 # This one is allowed
-curl -i -H "Authorization: Bearer ${EXTERNAL_TOKEN}" "http://api.docker.localhost/weather"
+curl -i -H "Authorization: Bearer $EXTERNAL_TOKEN" "http://api.docker.localhost/weather"
 # And PATCH should be not allowed
-curl -i -XPATCH -H "Authorization: Bearer ${EXTERNAL_TOKEN}" "http://api.docker.localhost/weather"
+curl -i -XPATCH -H "Authorization: Bearer $EXTERNAL_TOKEN" "http://api.docker.localhost/weather"
 ```
 
 It can be explained quite easily if **PATCH** is still allowed. There is still an `APIAccess` created with the simple tutorial:
@@ -323,5 +323,5 @@ The first one allows all kinds of HTTP requests. If we delete it, the _external_
 ```shell
 kubectl delete apiaccess -n apps weather-api
 # This time, PATCH is not allowed
-curl -i -XPATCH -H "Authorization: Bearer ${EXTERNAL_TOKEN}" "http://api.docker.localhost/weather"
+curl -i -XPATCH -H "Authorization: Bearer $EXTERNAL_TOKEN" "http://api.docker.localhost/weather"
 ```

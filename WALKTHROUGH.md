@@ -10,7 +10,7 @@ First, clone this GitHub repository:
 
 ```shell
 git clone https://github.com/traefik/hub.git
-cd traefik-hub
+cd hub
 ```
 
 ### Using k3d
@@ -85,7 +85,7 @@ Once it's installed, we can access the local dashboard: http://dashboard.docker.
 
 Without Traefik Hub, an API can be deployed with an `Ingress`, an `IngressRoute` or a `HTTPRoute`.
 
-In this tutorial, APIs are implemented using a simple JSON server in Go; the source code is [here](../../src/api-server/).
+This tutorial implements APIs using a simple JSON server in Go; the source code is [here](../../src/api-server/).
 
 Let's deploy a [simple weather app](../../src/manifests/weather-app.yaml) exposing an API.
 
@@ -93,7 +93,7 @@ Let's deploy a [simple weather app](../../src/manifests/weather-app.yaml) exposi
 kubectl apply -f src/manifests/weather-app.yaml
 ```
 
-It should create the public app
+It should create the public app:
 
 ```shell
 namespace/apps created
@@ -215,9 +215,9 @@ curl -I http://api.docker.localhost/weather
 curl -I -u foo:bar http://api.docker.localhost/weather
 ```
 
-[Basic Authentication](https://datatracker.ietf.org/doc/html/rfc7617) works and it was widely used in the early days of the web. It has also a security risk: credentials can be visible to any observer when using HTTP. It's an hard coded credentials and it potentially give more authorization than required for a specific use case.
+[Basic Authentication](https://datatracker.ietf.org/doc/html/rfc7617) worked and was widely used in the early days of the web. However, it also has a security risk: credentials can be visible to any observer when using HTTP. It uses hard-coded credentials, potentially giving more authorization than required for a specific use case.
 
-Nowadays, those issues are adressed when using a [JSON Web Tokens (JWT)](https://datatracker.ietf.org/doc/html/rfc7519). A JWT token can be cryptographically verified, detach authentication from user credentials and has issue and expiration date. JWT can be used with Traefik Hub API Gateway, so let's upgrade our setup to Traefik Hub
+Nowadays, those issues are addressed when using [JSON Web Tokens (JWT)](https://datatracker.ietf.org/doc/html/rfc7519). A JWT can be cryptographically verified, detach authentication from user credentials, and has an issue and expiration date. JWT can be used with Traefik Hub API Gateway, so let's upgrade our setup to Traefik Hub
 
 ## Upgrade Traefik Proxy to Traefik Hub API Gateway
 
@@ -232,7 +232,7 @@ export TRAEFIK_HUB_TOKEN=
 ```
 
 ```shell
-kubectl create secret generic license --namespace traefik --from-literal=token=${TRAEFIK_HUB_TOKEN}
+kubectl create secret generic license --namespace traefik --from-literal=token=$TRAEFIK_HUB_TOKEN
 ```
 
 After, we can upgrade Traefik Proxy to Traefik Hub using the same Helm chart:
@@ -259,7 +259,7 @@ curl -I http://api.docker.localhost/weather
 curl -I -u foo:bar http://api.docker.localhost/weather
 ```
 
-Let's try to protect weather API with a JWT Token. For the sake of simplicity, we'll use only a shared signing secret and the online https://jwt.io to generate the Token.
+Let's try to protect the weather API with a JWT Token. For the sake of simplicity, we'll generate the token using only a shared signing secret and the online https://jwt.io tool.
 
 With Traefik Hub, we can use JWT as a middleware:
 
@@ -312,7 +312,7 @@ middleware.traefik.io/jwt-auth created
 ingressroute.traefik.io/weather-api configured
 ```
 
-Get the token from https://jwt.io :
+Get the token from https://jwt.io using the same signing secret:
 
 ![JWT Token](./src/images/jwt-token.png)
 
@@ -327,9 +327,9 @@ export JWT_TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwI
 curl -I -H "Authorization: Bearer $JWT_TOKEN" http://api.docker.localhost/weather
 ```
 
-In terms of security, it's way better, now. It's possible to handle users with an Identiy Provider, but what if we want to cover _internal_ and _external_ use cases ? to protect API on HTTP _verb_ level ? or to test a new version with a part of the production traffic ?
+It's way better now in terms of security. It's possible to handle users with an Identity Provider, but what if we want to cover _internal_ and _external_ use cases? To protect API on HTTP _verb_ level? Or to test a new version with part of the production traffic?
 
-We'll need Traefik Hub with API Management !
+We'll need Traefik Hub with API Management!
 
 ## Manage an API with Traefik Hub API Management
 
@@ -348,7 +348,7 @@ We can confirm it by taking a look at the local dashboard: http://dashboard.dock
 
 ![Local Traefik Hub Dashboard](./src/images/hub-dashboard.png)
 
-And also confirm _JWT Auth_ is still here:
+And also, confirm _JWT Auth_ is still here:
 
 ```shell
 # This call is not authorized => 401
@@ -405,6 +405,8 @@ spec:
       port: 3000
 ```
 
+:information_source: We've also removed the JWT authentication middleware, as we'll use Traefik Hub's built-in identity provider for user and credential management. Don't worry; the API is still secured, as you'll see it shortly.
+
 Let's apply it:
 
 ```shell
@@ -435,11 +437,11 @@ Content-Length: 0
 
 ## Create a user for this API
 
-User can be created in [Traefik Hub Online Dashboard](https://hub.traefik.io/users):
+Users can be created in the [Traefik Hub Online Dashboard](https://hub.traefik.io/users):
 
 ![Create user admin](./api-management/1-getting-started/images/create-user-admin.png)
 
-This user will connect to an API Portal, so let's deploy it!
+This user will connect to an API Portal to generate an API key, so let's deploy the API Portal!
 
 ```yaml
 ---
@@ -497,7 +499,7 @@ And create a token for this user:
 export ADMIN_TOKEN="XXX"
 ```
 
-With this token, it is possible to request the API :tada: :
+With this token, it is possible to request the API: :tada:
 
 ```shell
 curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.docker.localhost/weather
