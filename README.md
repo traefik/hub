@@ -27,10 +27,9 @@
 
 This repository contains source code showing how to use:
 
-1. Traefik Hub API Gateway (*WIP*)
+1. Traefik Hub API Gateway
 2. Traefik Hub API Management
 
-It's for **internal use** only!
 
 ## :alembic: APIs used in this repository
 
@@ -48,7 +47,8 @@ The journey can start [here](WALKTHROUGH.md) for a quickstart with a global over
 
 ```shell
 .
-├── api-gateway (WIP)                 # Traefik Hub API Gateway tutorials
+├── api-gateway                       # Traefik Hub API Gateway tutorials
+│   ├── 1-getting-started
 ├── api-management                    # Traefik Hub API Management tutorials
 │   ├── 1-getting-started
 │   ├── 2-access-control
