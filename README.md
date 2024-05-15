@@ -9,7 +9,7 @@
 
 <div align="center">
     <a href="https://hub.traefik.io">Log In</a> |
-    <a href="https://doc.traefik.io/traefik-hub/">Documentation</a>
+    <a href="https://doc.traefik.io/traefik-hub">Documentation</a>
 </div>
 </div>
 
@@ -23,23 +23,38 @@
 
 <div align="center">Welcome to this repository!</div>
 
-## ℹ️ About
+## :information_source: About
 
 This repository contains source code showing how to use:
 
 1. Traefik Hub API Gateway (*WIP*)
 2. Traefik Hub API Management
 
-GH actions ensure the code source on this repository works with current stable version of Traefik Hub.
+It's for **internal use** only!
+
+## :alembic: APIs used in this repository
+
+All APIs are implemented using a simple JSON server in Go; the source code is [here](./src/api-server).
+
+This JSON server is used to deploy simple JSON APIs using a configmap.
+
+The Kubernetes manifests (YAML) to deploy those apps are [here](./src/manifests).
+
+## :construction_worker: Where to start ?
+
+The journey can start [here](WALKTHROUGH.md) for a quickstart with a global overview
 
 ## 📒 Repository Structure
 
 ```shell
 .
-├── api-gateway                       # Traefik Hub API Gateway tutorials
+├── api-gateway (WIP)                 # Traefik Hub API Gateway tutorials
 ├── api-management                    # Traefik Hub API Management tutorials
+│   ├── 1-getting-started
+│   ├── 2-access-control
+│   ├── 3-api-lifecycle-management
+│   └── 4-protect-api-infrastructure (WIP)
+└── src
+    ├── api-server                    # API server source code
+    └── manifests                     # Yaml to deploy all apps
 ```
-
-## 📃 License
-
-The content in this repository is licensed under the [Apache 2 License](https://www.apache.org/licenses/LICENSE-2.0 "Link to Apache 2 license").

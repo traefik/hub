@@ -1,0 +1,37 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: basic-auth
+  namespace: apps
+data:
+  users: |
+    Zm9vOiRhcHIxJDJHR0RyLjJPJDdUVXJlOEt6anQ1WFFOUGRoby5CQjEKCg==
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: basic-auth
+  namespace: apps
+spec:
+  basicAuth:
+    secret: basic-auth
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: weather-api
+  namespace: apps
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`api.docker.localhost`) && PathPrefix(`/weather`)
+    kind: Rule
+    services:
+    - name: weather-app
+      port: 3000
+    middlewares:
+    - name: basic-auth

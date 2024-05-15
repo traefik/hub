@@ -1,9 +1,0 @@
----
-apiVersion: hub.traefik.io/v1alpha1
-kind: APIAccess
-metadata:
-  name: public-api
-spec:
-  apis:
-    - name: public-api
-      namespace: apps

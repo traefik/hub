@@ -1,0 +1,27 @@
+---
+apiVersion: hub.traefik.io/v1alpha1
+kind: APIPortal
+metadata:
+  name: apiportal
+spec:
+  title: API Portal
+  description: "Developer Portal"
+  trustedUrls:
+    - http://api.docker.localhost
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: apiportal
+  annotations:
+    hub.traefik.io/api-portal: apiportal
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`api.docker.localhost`)
+    kind: Rule
+    services:
+    - name: apiportal
+      port: 9903

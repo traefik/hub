@@ -1,9 +1,0 @@
-apiVersion: hub.traefik.io/v1alpha1
-kind: APIGateway
-metadata:
-  name: api-gateway
-spec:
-  apiAccesses:
-    - public-api
-  customDomains: # Custom domains to reach the API Gateway
-    - api.docker.localhost
