@@ -60,7 +60,6 @@ kubectl apply -f src/kind/metallb-config.yaml
 
 </details>
 
-
 ## Deploy an API with Traefik Proxy
 
 First, we will install Traefik Proxy with Helm:

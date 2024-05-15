@@ -42,7 +42,6 @@ To use API Version features, we'll need to:
 2. Reference it into the `API`
 3. Use it in the routing
 
-
 ```diff
 $ diff -Nau api-management/1-getting-started/manifests/api.yaml api-management/3-api-lifecycle-management/manifests/api-v1.yaml
 --- api-management/1-getting-started/manifests/api.yaml
