@@ -9,7 +9,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: weather-data
-  namespace: apps
+  namespace: traefik-hub
 data:
   api.json: |
     {
@@ -25,7 +25,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: weather-app
-  namespace: apps
+  namespace: traefik-hub
 spec:
   replicas: 1
   selector:
@@ -54,7 +54,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: weather-app
-  namespace: apps
+  namespace: traefik-hub
   labels:
     app: weather-app
 spec:

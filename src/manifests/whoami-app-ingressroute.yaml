@@ -2,14 +2,14 @@
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: weather-api
+  name: whoami
   namespace: traefik-hub
 spec:
   entryPoints:
     - web
   routes:
-  - match: Host(`api.docker.localhost`) && PathPrefix(`/weather`)
+  - match: Host(`whoami.docker.localhost`)
     kind: Rule
     services:
-    - name: weather-app
-      port: 3000
+    - name: whoami
+      port: 80

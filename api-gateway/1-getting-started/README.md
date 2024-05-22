@@ -7,8 +7,8 @@ In this tutorial, one can use [k3d](https://k3d.io/). Alternatives like [kind](h
 First, clone this GitHub repository:
 
 ```shell
-git clone https://github.com/traefik/hub.git
-cd traefik-hub
+git clone https://github.com/traefik/hub-preview.git
+cd hub-preview
 ```
 
 ### Using k3d
@@ -72,16 +72,15 @@ export TRAEFIK_HUB_TOKEN=
 
 ```shell
 kubectl create namespace traefik-hub
-kubectl create secret generic license --namespace traefik-hub --from-literal=token=${TRAEFIK_HUB_TOKEN}
+kubectl create secret generic license --namespace traefik-hub --from-literal=token=$TRAEFIK_HUB_TOKEN
 ```
 
 After, we can install Traefik Hub with Helm:
 
 ```shell
-
 # Add the Helm repository
-
 helm repo add --force-update traefik https://traefik.github.io/charts
+# Install the Helm chart
 helm install traefik-hub -n traefik-hub --wait \
   --set hub.token=license \
   --set hub.platformUrl=https://platform-preview.hub.traefik.io/agent \
@@ -101,9 +100,9 @@ helm install traefik-hub -n traefik-hub --wait \
 ```shell
 # Upgrade CRDs
 kubectl apply --server-side --force-conflicts -k https://github.com/traefik/traefik-helm-chart/traefik/crds/
-# Update Helm Repository
+# Update the Helm repository
 helm repo update
-# Upgrade Helm Chart
+# Upgrade the Helm chart
 helm upgrade traefik-hub -n traefik-hub --wait \
   --set hub.token=license \
   --set hub.platformUrl=https://platform-preview.hub.traefik.io/agent \
@@ -118,11 +117,11 @@ helm upgrade traefik-hub -n traefik-hub --wait \
   --devel --version v28.1.0-beta.3 traefik/traefik
 ```
 
-Now we can access the local dashboard: http://dashboard.docker.localhost/
+Now, we can access the local dashboard: http://dashboard.docker.localhost/
 
 ## Deploy an API without Traefik Hub
 
-Without Traefik Hub, an API can be deployed with an `Ingress`, an `IngressRoute` or a `HTTPRoute`.
+Without Traefik Hub, an API can be deployed with an `Ingress`, an `IngressRoute` or an `HTTPRoute`.
 
 In this tutorial, APIs are implemented using a simple JSON server in Go; the source code is [here](../../src/api-server/).
 
@@ -149,7 +148,7 @@ apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: weather-api
-  namespace: apps
+  namespace: traefik-hub
 spec:
   entryPoints:
     - web
@@ -199,7 +198,7 @@ diff -Nau src/manifests/weather-app-ingressroute.yaml src/manifests/weather-app-
 +kind: Secret
 +metadata:
 +  name: jwt-auth
-+  namespace: apps
++  namespace: traefik-hub
 +stringData:
 +  signingSecret: "JWT on Traefik Hub!"
 +
@@ -208,7 +207,7 @@ diff -Nau src/manifests/weather-app-ingressroute.yaml src/manifests/weather-app-
 +kind: Middleware
 +metadata:
 +  name: jwt-auth
-+  namespace: apps
++  namespace: traefik-hub
 +spec:
 +  plugin:
 +    jwt:
@@ -240,7 +239,7 @@ ingressroute.traefik.io/weather-api configured
 
 Get the token from https://jwt.io using the same signing secret:
 
-![JWT Token](./src/images/jwt-token.png)
+![JWT Token](../../src/images/jwt-token.png)
 
 With this token, we can test it:
 

@@ -52,7 +52,7 @@ $ diff -Nau api-management/1-getting-started/manifests/api.yaml api-management/3
 +kind: APIVersion
 +metadata:
 +  name: weather-api-v1
-+  namespace: apps
++  namespace: traefik-hub
 +spec:
 +  release: v1.0.0
 +
@@ -61,7 +61,7 @@ $ diff -Nau api-management/1-getting-started/manifests/api.yaml api-management/3
  kind: API
  metadata:
    name: weather-api
-   namespace: apps
+   namespace: traefik-hub
 -spec: {}
 +spec:
 +  versions:
@@ -71,7 +71,7 @@ $ diff -Nau api-management/1-getting-started/manifests/api.yaml api-management/3
  apiVersion: hub.traefik.io/v1alpha1
 @@ -24,7 +35,7 @@
    name: weather-app
-   namespace: apps
+   namespace: traefik-hub
    annotations:
 -    hub.traefik.io/api: weather-api
 +    hub.traefik.io/api-version: weather-api-v1
@@ -124,7 +124,7 @@ $ diff -Nau api-management/3-api-lifecycle-management/manifests/api-v1.yaml api-
 +kind: APIVersion
 +metadata:
 +  name: weather-api-v1-1
-+  namespace: apps
++  namespace: traefik-hub
 +spec:
 +  release: v1.1.0
 +
@@ -151,7 +151,7 @@ $ diff -Nau api-management/3-api-lifecycle-management/manifests/api-v1.yaml api-
 +kind: IngressRoute
 +metadata:
 +  name: weather-api-v1-1
-+  namespace: apps
++  namespace: traefik-hub
 +  annotations:
 +    hub.traefik.io/api-version: weather-api-v1-1
 +spec:
@@ -221,7 +221,7 @@ $ diff -Nau --color api-management/3-api-lifecycle-management/manifests/api-v1.1
 +kind: TraefikService
 +metadata:
 +  name: weather-api-wrr
-+  namespace: apps
++  namespace: traefik-hub
 +spec:
 +  weighted:
 +    services:
@@ -248,7 +248,7 @@ $ diff -Nau --color api-management/3-api-lifecycle-management/manifests/api-v1.1
 -kind: IngressRoute
 -metadata:
 -  name: weather-api-v1-1
--  namespace: apps
+-  namespace: traefik-hub
 -  annotations:
 -    hub.traefik.io/api-version: weather-api-v1-1
 -spec:

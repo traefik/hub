@@ -3,7 +3,7 @@ apiVersion: hub.traefik.io/v1alpha1
 kind: API
 metadata:
   name: weather-api
-  namespace: apps
+  namespace: traefik-hub
   labels:
     subscription: standard
 spec:
@@ -24,7 +24,7 @@ apiVersion: hub.traefik.io/v1alpha1
 kind: APIAccess
 metadata:
   name: weather-api-external
-  namespace: apps
+  namespace: traefik-hub
 spec:
   groups:
     - external
@@ -40,7 +40,7 @@ apiVersion: hub.traefik.io/v1alpha1
 kind: APIAccess
 metadata:
   name: weather-api-admin
-  namespace: apps
+  namespace: traefik-hub
 spec:
   groups:
     - admin
@@ -57,7 +57,7 @@ apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: weather-api
-  namespace: apps
+  namespace: traefik-hub
   annotations:
     hub.traefik.io/api: weather-api
 spec:

@@ -65,12 +65,12 @@ kubectl apply -f src/kind/metallb-config.yaml
 First, we will install Traefik Proxy with Helm:
 
 ```shell
-
 # Add the Helm repository
-
 helm repo add --force-update traefik https://traefik.github.io/charts
-kubectl create namespace traefik
-helm install traefik -n traefik --wait \
+# Create a namespace
+kubectl create namespace traefik-hub
+# Install the Helm chart
+helm install traefik -n traefik-hub --wait \
   --set ingressRoute.dashboard.matchRule='Host(`dashboard.docker.localhost`)' \
   --set ingressRoute.dashboard.entryPoints={web} \
   --set ports.web.nodePort=30000 \
@@ -109,7 +109,7 @@ apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: weather-api
-  namespace: apps
+  namespace: traefik-hub
 spec:
   entryPoints:
     - web
@@ -166,7 +166,7 @@ Zm9vOiRhcHIxJDJHR0RyLjJPJDdUVXJlOEt6anQ1WFFOUGRoby5CQjEKCg==
 +kind: Secret
 +metadata:
 +  name: basic-auth
-+  namespace: apps
++  namespace: traefik-hub
 +data:
 +  users: |
 +    Zm9vOiRhcHIxJDJHR0RyLjJPJDdUVXJlOEt6anQ1WFFOUGRoby5CQjEKCg==
@@ -176,7 +176,7 @@ Zm9vOiRhcHIxJDJHR0RyLjJPJDdUVXJlOEt6anQ1WFFOUGRoby5CQjEKCg==
 +kind: Middleware
 +metadata:
 +  name: basic-auth
-+  namespace: apps
++  namespace: traefik-hub
 +spec:
 +  basicAuth:
 +    secret: basic-auth
@@ -231,15 +231,18 @@ export TRAEFIK_HUB_TOKEN=
 ```
 
 ```shell
-kubectl create secret generic license --namespace traefik --from-literal=token=$TRAEFIK_HUB_TOKEN
+kubectl create secret generic license --namespace traefik-hub --from-literal=token=$TRAEFIK_HUB_TOKEN
 ```
 
 After, we can upgrade Traefik Proxy to Traefik Hub using the same Helm chart:
 
 ```shell
-helm upgrade traefik -n traefik --wait \
+helm upgrade traefik -n traefik-hub --wait \
   --reuse-values \
   --set hub.token=license \
+  --set image.registry=ghcr.io \
+  --set image.repository=traefik/traefik-hub \
+  --set image.tag=v3.0.0 \
    traefik/traefik
 ```
 
@@ -272,7 +275,7 @@ diff -Nau src/manifests/weather-app-ingressroute.yaml src/manifests/weather-app-
 +kind: Secret
 +metadata:
 +  name: jwt-auth
-+  namespace: apps
++  namespace: traefik-hub
 +stringData:
 +  signingSecret: "JWT on Traefik Hub!"
 +
@@ -281,7 +284,7 @@ diff -Nau src/manifests/weather-app-ingressroute.yaml src/manifests/weather-app-
 +kind: Middleware
 +metadata:
 +  name: jwt-auth
-+  namespace: apps
++  namespace: traefik-hub
 +spec:
 +  plugin:
 +    jwt:
@@ -335,7 +338,7 @@ We'll need Traefik Hub with API Management!
 First, we need to enable API Management on Traefik Traefik Hub using the same Helm chart:
 
 ```shell
-helm upgrade traefik -n traefik --wait \
+helm upgrade traefik -n traefik-hub --wait \
   --reuse-values \
   --set hub.apimanagement.enabled=true \
    traefik/traefik
@@ -366,7 +369,7 @@ apiVersion: hub.traefik.io/v1alpha1
 kind: API
 metadata:
   name: weather-api
-  namespace: apps
+  namespace: traefik-hub
 spec: {}
 
 ---
@@ -374,11 +377,11 @@ apiVersion: hub.traefik.io/v1alpha1
 kind: APIAccess
 metadata:
   name: weather-api
-  namespace: apps
+  namespace: traefik-hub
 spec:
   apis:
     - name: weather-api
-      namespace: apps
+      namespace: traefik-hub
   everyone: true
 ```
 
@@ -390,7 +393,7 @@ apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: weather-api
-  namespace: apps
+  namespace: traefik-hub
   annotations:
     hub.traefik.io/api: weather-api # <=== Link to the API using its name
 spec:
@@ -448,6 +451,7 @@ apiVersion: hub.traefik.io/v1alpha1
 kind: APIPortal
 metadata:
   name: apiportal
+  namespace: traefik-hub
 spec:
   title: API Portal
   description: "Developer Portal"
@@ -459,6 +463,7 @@ apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: apiportal
+  namespace: traefik-hub
   annotations:
     hub.traefik.io/api-portal: apiportal
 spec:
@@ -475,7 +480,7 @@ spec:
 :information_source: This API Portal is routed with the internal _ClusterIP_ `Service` named apiportal.
 
 ```shell
-kubectl apply -n traefik -f api-management/1-getting-started/manifests/api-portal.yaml
+kubectl apply -f api-management/1-getting-started/manifests/api-portal.yaml
 sleep 30
 ```
 

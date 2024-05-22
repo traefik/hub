@@ -8,7 +8,7 @@ First, clone this GitHub repository:
 
 ```shell
 git clone https://github.com/traefik/hub.git
-cd traefik-hub
+cd hub
 ```
 
 ### Using k3d
@@ -72,21 +72,23 @@ export TRAEFIK_HUB_TOKEN=
 
 ```shell
 kubectl create namespace traefik-hub
-kubectl create secret generic license --namespace traefik-hub --from-literal=token=${TRAEFIK_HUB_TOKEN}
+kubectl create secret generic license --namespace traefik-hub --from-literal=token=$TRAEFIK_HUB_TOKEN
 ```
 
 After, we can install Traefik Hub with Helm:
 
 ```shell
-
 # Add the Helm repository
-
 helm repo add --force-update traefik https://traefik.github.io/charts
+# Install the Helm chart
 helm install traefik-hub -n traefik-hub --wait \
   --set hub.token=license \
   --set hub.apimanagement.enabled=true \
   --set ingressRoute.dashboard.matchRule='Host(`dashboard.docker.localhost`)' \
   --set ingressRoute.dashboard.entryPoints={web} \
+  --set image.registry=ghcr.io \
+  --set image.repository=traefik/traefik-hub \
+  --set image.tag=v3.0.0 \
   --set ports.web.nodePort=30000 \
   --set ports.websecure.nodePort=30001 \
    traefik/traefik
@@ -97,24 +99,27 @@ helm install traefik-hub -n traefik-hub --wait \
 ```shell
 # Upgrade CRDs
 kubectl apply --server-side --force-conflicts -k https://github.com/traefik/traefik-helm-chart/traefik/crds/
-# Update Helm Repository
+# Update the Helm repository
 helm repo update
-# Upgrade Helm Chart
+# Upgrade the Helm chart
 helm upgrade traefik-hub -n traefik-hub --wait \
   --set hub.token=license \
   --set hub.apimanagement.enabled=true \
   --set ingressRoute.dashboard.matchRule='Host(`dashboard.docker.localhost`)' \
   --set ingressRoute.dashboard.entryPoints={web} \
+  --set image.registry=ghcr.io \
+  --set image.repository=traefik/traefik-hub \
+  --set image.tag=v3.0.0 \
   --set ports.web.nodePort=30000 \
   --set ports.websecure.nodePort=30001 \
    traefik/traefik
 ```
 
-Now we can access the local dashboard: http://dashboard.docker.localhost/
+Now, we can access the local dashboard: http://dashboard.docker.localhost/
 
 ## Deploy an API without Traefik Hub
 
-Without Traefik Hub, an API can be deployed with an `Ingress`, an `IngressRoute` or a `HTTPRoute`.
+Without Traefik Hub, an API can be deployed with an `Ingress`, an `IngressRoute` or an `HTTPRoute`.
 
 In this tutorial, APIs are implemented using a simple JSON server in Go; the source code is [here](../../src/api-server/).
 
@@ -141,7 +146,7 @@ apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: weather-api
-  namespace: apps
+  namespace: traefik-hub
 spec:
   entryPoints:
     - web
@@ -187,7 +192,7 @@ apiVersion: hub.traefik.io/v1alpha1
 kind: API
 metadata:
   name: weather-api
-  namespace: apps
+  namespace: traefik-hub
 spec: {}
 
 ---
@@ -195,11 +200,11 @@ apiVersion: hub.traefik.io/v1alpha1
 kind: APIAccess
 metadata:
   name: weather-api
-  namespace: apps
+  namespace: traefik-hub
 spec:
   apis:
     - name: weather-api
-      namespace: apps
+      namespace: traefik-hub
   everyone: true
 ```
 
@@ -211,7 +216,7 @@ apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: weather-api
-  namespace: apps
+  namespace: traefik-hub
   annotations:
     hub.traefik.io/api: weather-api # <=== Link to the API using its name
 spec:

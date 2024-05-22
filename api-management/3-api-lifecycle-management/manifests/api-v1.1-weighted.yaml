@@ -3,7 +3,7 @@ apiVersion: traefik.io/v1alpha1
 kind: TraefikService
 metadata:
   name: weather-api-wrr
-  namespace: apps
+  namespace: traefik-hub
 spec:
   weighted:
     services:
@@ -19,7 +19,7 @@ apiVersion: hub.traefik.io/v1alpha1
 kind: APIVersion
 metadata:
   name: weather-api-v1
-  namespace: apps
+  namespace: traefik-hub
 spec:
   release: v1.0.0
 
@@ -28,7 +28,7 @@ apiVersion: hub.traefik.io/v1alpha1
 kind: APIVersion
 metadata:
   name: weather-api-v1-1
-  namespace: apps
+  namespace: traefik-hub
 spec:
   release: v1.1.0
 
@@ -37,7 +37,7 @@ apiVersion: hub.traefik.io/v1alpha1
 kind: API
 metadata:
   name: weather-api
-  namespace: apps
+  namespace: traefik-hub
 spec:
   versions:
     - name: weather-api-v1
@@ -48,7 +48,7 @@ apiVersion: hub.traefik.io/v1alpha1
 kind: APIAccess
 metadata:
   name: weather-api
-  namespace: apps
+  namespace: traefik-hub
 spec:
   apis:
   - name: weather-api
@@ -59,7 +59,7 @@ apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: weather-api
-  namespace: apps
+  namespace: traefik-hub
   annotations:
     hub.traefik.io/api-version: weather-api-v1
 spec:
