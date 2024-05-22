@@ -160,6 +160,8 @@ curl -i -H "Authorization: Bearer $EXTERNAL_TOKEN" "http://api.docker.localhost/
 curl -i -H "Authorization: Bearer $EXTERNAL_TOKEN" "http://api.docker.localhost/admin"
 ```
 
+:information_source: If it fails, just wait one minute and try again. The token needs to be sync before it can be accepted by Traefik Hub.
+
 ## Advanced access control
 
 This second example is more complex, but it's also more secure, using Operation Filters.
@@ -321,7 +323,7 @@ spec:
 The first one allows all kinds of HTTP requests. If we delete it, the _external_ user can no longer call the API with the **PATCH** HTTP verb.
 
 ```shell
-kubectl delete apiaccess -n apps weather-api
+kubectl delete apiaccess -n traefik-hub weather-api
 # This time, PATCH is not allowed
 curl -i -XPATCH -H "Authorization: Bearer $EXTERNAL_TOKEN" "http://api.docker.localhost/weather"
 ```

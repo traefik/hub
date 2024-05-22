@@ -100,7 +100,7 @@ helm install traefik-hub -n traefik-hub --wait \
 # Upgrade CRDs
 kubectl apply --server-side --force-conflicts -k https://github.com/traefik/traefik-helm-chart/traefik/crds/
 # Update the Helm repository
-helm repo update
+helm repo add --force-update traefik https://traefik.github.io/charts
 # Upgrade the Helm chart
 helm upgrade traefik-hub -n traefik-hub --wait \
   --set hub.token=license \

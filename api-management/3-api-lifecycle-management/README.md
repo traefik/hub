@@ -12,7 +12,6 @@ kubectl apply -f api-management/1-getting-started/manifests/api.yaml
 ```
 
 ```shell
-namespace/apps created
 configmap/weather-data created
 deployment.apps/weather-app created
 service/weather-app created
@@ -267,7 +266,7 @@ $ diff -Nau --color api-management/3-api-lifecycle-management/manifests/api-v1.1
 Let's apply it:
 
 ```shell
-kubectl delete ingressroute -n apps weather-api-v1-1
+kubectl delete ingressroute -n traefik-hub weather-api-v1-1
 kubectl apply -f api-management/3-api-lifecycle-management/manifests/api-v1.1-weighted.yaml
 ```
 

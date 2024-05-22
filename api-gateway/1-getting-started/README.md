@@ -7,8 +7,8 @@ In this tutorial, one can use [k3d](https://k3d.io/). Alternatives like [kind](h
 First, clone this GitHub repository:
 
 ```shell
-git clone https://github.com/traefik/hub-preview.git
-cd hub-preview
+git clone https://github.com/traefik/hub.git
+cd hub
 ```
 
 ### Using k3d
@@ -60,7 +60,7 @@ kubectl apply -f src/kind/metallb-config.yaml
 
 ## Install Traefik Hub
 
-Log in to the [Traefik Hub Online Dashboard](https://hub-preview.traefik.io), open the page to [generate a new agent](https://hub-preview.traefik.io/agents/new).
+Log in to the [Traefik Hub Online Dashboard](https://hub.traefik.io), open the page to [generate a new agent](https://hub.traefik.io/agents/new).
 
 **:warning: Do not install the agent, but copy the token.**
 
@@ -83,16 +83,14 @@ helm repo add --force-update traefik https://traefik.github.io/charts
 # Install the Helm chart
 helm install traefik-hub -n traefik-hub --wait \
   --set hub.token=license \
-  --set hub.platformUrl=https://platform-preview.hub.traefik.io/agent \
   --set ingressRoute.dashboard.matchRule='Host(`dashboard.docker.localhost`)' \
   --set ingressRoute.dashboard.entryPoints={web} \
-  --set image.registry=europe-west9-docker.pkg.dev/traefiklabs \
-  --set image.repository=traefik-hub/traefik-hub \
-  --set image.tag=latest-v3 \
-  --set image.pullPolicy=Always \
+  --set image.registry=ghcr.io \
+  --set image.repository=traefik/traefik-hub \
+  --set image.tag=v3.0.0 \
   --set ports.web.nodePort=30000 \
   --set ports.websecure.nodePort=30001 \
-  --devel --version v28.1.0-beta.3 traefik/traefik
+   traefik/traefik
 ```
 
 **If** Traefik Hub is **already** installed, we can instead upgrade the Traefik Hub instance:
@@ -105,16 +103,14 @@ helm repo update
 # Upgrade the Helm chart
 helm upgrade traefik-hub -n traefik-hub --wait \
   --set hub.token=license \
-  --set hub.platformUrl=https://platform-preview.hub.traefik.io/agent \
   --set ingressRoute.dashboard.matchRule='Host(`dashboard.docker.localhost`)' \
   --set ingressRoute.dashboard.entryPoints={web} \
-  --set image.registry=europe-west9-docker.pkg.dev/traefiklabs \
-  --set image.repository=traefik-hub/traefik-hub \
-  --set image.tag=latest-v3 \
-  --set image.pullPolicy=Always \
+  --set image.registry=ghcr.io \
+  --set image.repository=traefik/traefik-hub \
+  --set image.tag=v3.0.0 \
   --set ports.web.nodePort=30000 \
   --set ports.websecure.nodePort=30001 \
-  --devel --version v28.1.0-beta.3 traefik/traefik
+   traefik/traefik
 ```
 
 Now, we can access the local dashboard: http://dashboard.docker.localhost/
