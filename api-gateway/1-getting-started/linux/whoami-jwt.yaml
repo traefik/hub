@@ -1,0 +1,19 @@
+http:
+  routers:
+    whoami:
+      rule: Host(`whoami.localhost`)
+      service: local
+      middlewares:
+      - jwtAuth
+
+  middlewares:
+    jwtAuth:
+      plugin:
+        jwt:
+          signingSecret: "JWT on Traefik Hub!"
+
+  services:
+    local:
+      loadBalancer:
+        servers:
+          - url: http://localhost:3000

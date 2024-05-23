@@ -1,6 +1,13 @@
 # Getting Started
 
-## Deploy Kubernetes
+Traefik Hub API Gateway is cloud-native and multi-platform.
+
+We can start:
+
+1. on [Kubernetes](#on-kubernetes)
+2. on [Linux](#on-linux)
+
+## On Kubernetes
 
 In this tutorial, one can use [k3d](https://k3d.io/). Alternatives like [kind](https://kind.sigs.k8s.io), cloud providers, or others can also be used.
 
@@ -233,7 +240,16 @@ middleware.traefik.io/jwt-auth created
 ingressroute.traefik.io/weather-api configured
 ```
 
-Get the token from https://jwt.io using the same signing secret:
+Get the token from https://jwt.io using the same signing secret or get one with command line:
+
+```bash
+jwt_header=$(echo -n '{"alg":"HS256","typ":"JWT"}' | base64 | sed s/\+/-/g | sed 's/\//_/g' | sed -E s/=+$//)
+payload=$(echo -n '{"sub": "123456789","name":"John Doe","iat":'$(date +%s)'}' | base64 | sed s/\+/-/g |sed 's/\//_/g' |  sed -E s/=+$//)
+secret='JWT on Traefik Hub!'
+hexsecret=$(echo -n "$secret" | od -A n -t x1  | sed 's/ *//g' | tr -d '\n')
+hmac_signature=$(echo -n "${jwt_header}.${payload}" |  openssl dgst -sha256 -mac HMAC -macopt hexkey:$hexsecret -binary | base64  | sed s/\+/-/g | sed 's/\//_/g' | sed -E s/=+$//)
+export JWT_TOKEN="${jwt_header}.${payload}.${hmac_signature}"
+```
 
 ![JWT Token](../../src/images/jwt-token.png)
 
@@ -246,4 +262,292 @@ curl -I http://api.docker.localhost/weather
 export JWT_TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.AuyxLr6YEAIdMxXujJ2icNvMCamR1SizrunWlyfLlJw"
 # This call with the token is allowed => 200
 curl -I -H "Authorization: Bearer $JWT_TOKEN" http://api.docker.localhost/weather
+```
+
+## On Linux
+
+This tutorial will show how to use Traefik Hub on Linux. It's using simple shell code for simplicity. In production, we recommend to use Infra-as-Code or even GitOps.
+
+:information_source: We will use a Debian Linux in this tutorial.
+
+First, clone this GitHub repository:
+
+```shell
+git clone https://github.com/traefik/hub.git
+cd hub
+```
+
+After, we'll need to get the Traefik Hub binary:
+
+```shell
+wget https://TODO
+```
+
+Now, we can move it to a binary `PATH` folder and set the expected rights on it:
+
+```shell
+sudo cp traefik-hub /usr/local/bin/traefik-hub
+sudo chown root:root /usr/local/bin/traefik-hub
+sudo chmod 755 /usr/local/bin/traefik-hub
+# Give the Traefik Hub binary ability to bind privileged ports like 80 or 443 as non-root
+sudo setcap 'cap_net_bind_service=+ep' /usr/local/bin/traefik-hub
+```
+
+Finally, we can create the config resources:
+
+```shell
+# Create a user
+sudo groupadd ---system traefik-hub
+sudo useradd \
+  -g traefik-hub --no-user-group \
+  --home-dir /var/www --no-create-home \
+  --shell /usr/sbin/nologin \
+  --system traefik-hub
+# Create a config directory
+sudo mkdir -p /etc/traefik-hub/dynamic
+sudo chown root:root /etc/traefik-hub
+sudo chown traefik-hub:traefik-hub /etc/traefik-hub/dynamic
+# Create a log file
+sudo touch /var/log/traefik-hub.log
+sudo chown traefik-hub:traefik-hub /var/log/traefik-hub.log
+```
+
+Log in to the [Traefik Hub Online Dashboard](https://hub.traefik.io), open the page to [generate a new gateway](https://hub.traefik.io/agents/new).
+
+**:warning: Do not install the gateway, but copy the token.**
+
+Export your token:
+
+```shell
+export TRAEFIK_HUB_TOKEN=SET_YOUR_TOKEN_HERE
+```
+
+With this token, we can add a [static configuration file](linux/traefik-hub.toml) for Traefik Hub and a [systemd service](linux/traefik-hub.service):
+
+```shell
+sudo cp api-gateway/1-getting-started/linux/traefik-hub.toml /etc/traefik-hub/traefik-hub.toml
+sudo sed -i -e "s/PASTE_YOUR_TOKEN_HERE/$TRAEFIK_HUB_TOKEN/g" /etc/traefik-hub/traefik-hub.toml
+sudo cp api-gateway/1-getting-started/linux/traefik-hub.service /etc/systemd/system/traefik-hub.service
+sudo chown root:root /etc/systemd/system/traefik-hub.service
+sudo chmod 644 /etc/systemd/system/traefik-hub.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now traefik-hub.service
+```
+
+We can check it is running with the following command:
+
+```shell
+sudo systemctl status traefik-hub.service
+```
+
+```shell
+● traefik-hub.service - Traefik Hub
+     Loaded: loaded (/etc/systemd/system/traefik-hub.service; enabled; preset: enabled)
+     Active: active (running) since [...]; 2s ago
+   Main PID: 2516 (traefik-hub)
+      Tasks: 7 (limit: 1141)
+     Memory: 30.6M
+        CPU: 401ms
+     CGroup: /system.slice/traefik-hub.service
+             └─2516 /usr/local/bin/traefik-hub --configfile=/etc/traefik-hub/traefik-hub.toml
+
+[...] systemd[1]: Started traefik-hub.service - Traefik Hub.
+```
+
+On Linux, we can use all the providers supported by Traefik Proxy and all the providers supported by Traefik Hub.
+
+Let's begin with a simple file provider.
+
+We will deploy a simple _whoami_ app on systemd and try to reach it from Traefik Proxy.
+
+```shell
+# Install whoami
+curl -L https://github.com/traefik/whoami/releases/download/v1.10.2/whoami_v1.10.2_linux_amd64.tar.gz -o /tmp/whoami.tar.gz
+tar xvzf /tmp/whoami.tar.gz -C /tmp whoami
+sudo mv /tmp/whoami /usr/local/bin/whoami
+sudo chown root:root /usr/local/bin/whoami
+sudo chmod 755 /usr/local/bin/whoami
+# Create a user for whoami
+sudo groupadd --system whoami
+sudo useradd \
+  -g whoami --no-user-group \
+  --home-dir /var/www --no-create-home \
+  --shell /usr/sbin/nologin \
+  --system whoami
+```
+
+We will enable this app with a [systemd unit file](linux/whoami.service):
+
+```shell
+sudo cp api-gateway/1-getting-started/linux/whoami.service /etc/systemd/system/whoami.service
+sudo chmod 644 /etc/systemd/system/whoami.service
+sudo chown root:root /etc/systemd/system/whoami.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now whoami
+sudo systemctl status whoami
+```
+
+And check that it's working as expected:
+
+```shell
+curl http://localhost:3000
+```
+
+```shell
+Hostname: ip-172-31-26-184
+IP: 127.0.0.1
+IP: ::1
+IP: 172.31.26.184
+IP: fe80::8ff:eeff:fed5:2389
+IP: 172.17.0.1
+IP: 172.18.0.1
+IP: fe80::42:92ff:fe17:7a6d
+IP: fe80::4418:56ff:fe7b:4a46
+RemoteAddr: 127.0.0.1:52412
+GET / HTTP/1.1
+Host: localhost:3000
+User-Agent: curl/7.88.1
+Accept: */*
+```
+
+Now, we can add a [simple dynamic configuration file](linux/whoami.yaml) to expose it with Traefik Hub.
+
+Let's apply this tutorial configuration and test it:
+
+```shell
+# Not configured => 404
+curl -I http://whoami.localhost
+sudo cp api-gateway/1-getting-started/linux/whoami.yaml /etc/traefik-hub/dynamic/whoami.yaml
+sleep 5
+# Configured => 200
+curl http://whoami.localhost
+```
+
+```shell
+Hostname: ip-172-31-26-184
+IP: 127.0.0.1
+IP: ::1
+IP: 172.31.26.184
+IP: fe80::8ff:eeff:fed5:2389
+IP: 172.17.0.1
+IP: 172.18.0.1
+IP: fe80::42:92ff:fe17:7a6d
+IP: fe80::4418:56ff:fe7b:4a46
+RemoteAddr: [::1]:59954
+GET / HTTP/1.1
+Host: whoami.localhost
+User-Agent: curl/7.88.1
+Accept: */*
+Accept-Encoding: gzip
+X-Forwarded-For: 127.0.0.1
+X-Forwarded-Host: whoami.localhost
+X-Forwarded-Port: 80
+X-Forwarded-Proto: http
+X-Forwarded-Server: ip-172-31-26-184
+X-Real-Ip: 127.0.0.1
+```
+
+## Secure authentication using JWTs with Traefik Hub
+
+Now, let's try to secure its access with a JWT token.
+
+```diff
+diff -Nau api-gateway/1-getting-started/linux/whoami.yaml api-gateway/1-getting-started/linux/whoami-jwt.yaml
+--- api-gateway/1-getting-started/linux/whoami.yaml
++++ api-gateway/1-getting-started/linux/whoami-jwt.yaml
+@@ -3,6 +3,14 @@
+     whoami:
+       rule: Host(`whoami.localhost`)
+       service: local
++      middlewares:
++      - jwtAuth
++
++  middlewares:
++    jwtAuth:
++      plugin:
++        jwt:
++          signingSecret: "JWT on Traefik Hub!"
+
+   services:
+     local:
+
+```
+
+Let's apply it:
+
+```shell
+sudo cp api-gateway/1-getting-started/linux/whoami-jwt.yaml /etc/traefik-hub/dynamic/whoami.yaml
+sleep 5
+```
+
+Get the token from https://jwt.io using the same signing secret or get one with command line:
+
+```bash
+jwt_header=$(echo -n '{"alg":"HS256","typ":"JWT"}' | base64 | sed s/\+/-/g | sed 's/\//_/g' | sed -E s/=+$//)
+payload=$(echo -n '{"sub": "123456789","name":"John Doe","iat":'$(date +%s)'}' | base64 | sed s/\+/-/g |sed 's/\//_/g' |  sed -E s/=+$//)
+secret='JWT on Traefik Hub!'
+hexsecret=$(echo -n "$secret" | od -A n -t x1  | sed 's/ *//g' | tr -d '\n')
+hmac_signature=$(echo -n "${jwt_header}.${payload}" |  openssl dgst -sha256 -mac HMAC -macopt hexkey:$hexsecret -binary | base64  | sed s/\+/-/g | sed 's/\//_/g' | sed -E s/=+$//)
+export JWT_TOKEN="${jwt_header}.${payload}.${hmac_signature}"
+```
+
+![JWT Token](../../src/images/jwt-token.png)
+
+With this token, we can test it:
+
+```shell
+# This call is not authorized => 401
+curl -I http://whoami.localhost
+# Let's set the token
+export JWT_TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.AuyxLr6YEAIdMxXujJ2icNvMCamR1SizrunWlyfLlJw"
+# This call with the token is allowed => 200
+curl -I -H "Authorization: Bearer $JWT_TOKEN" http://whoami.localhost
+```
+
+## Docker providers
+
+We can also use the docker provider. You may have noticed that we already enabled it in the static configuration.
+
+Let's see how it works. First, let's install docker:
+
+```shell
+sudo apt-get update
+sudo apt-get install -y docker.io docker-compose
+```
+
+And give the _traefik-hub_ user access to docker resources:
+
+```shell
+sudo usermod -aG docker traefik-hub
+sudo systemctl restart traefik-hub.service
+```
+
+Now we can test the service with a simple [docker compose](linux/docker-compose.yaml) file:
+
+```shell
+sudo docker-compose -f $(pwd)/api-gateway/1-getting-started/linux/docker-compose.yaml up -d
+```
+
+Since we already enabled the docker provider in Traefik Hub configuration, we should now be able to curl it:
+
+```shell
+curl http://whoami.docker.localhost
+```
+
+```shell
+Hostname: cfd52cc4b3a6
+IP: 127.0.0.1
+IP: 172.18.0.2
+RemoteAddr: 172.18.0.1:35766
+GET / HTTP/1.1
+Host: whoami.docker.localhost
+User-Agent: curl/7.88.1
+Accept: */*
+Accept-Encoding: gzip
+X-Forwarded-For: 127.0.0.1
+X-Forwarded-Host: whoami.docker.localhost
+X-Forwarded-Port: 80
+X-Forwarded-Proto: http
+X-Forwarded-Server: ip-172-31-26-184
+X-Real-Ip: 127.0.0.1
 ```

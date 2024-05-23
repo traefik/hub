@@ -1,0 +1,11 @@
+http:
+  routers:
+    whoami:
+      rule: Host(`whoami.localhost`)
+      service: local
+
+  services:
+    local:
+      loadBalancer:
+        servers:
+          - url: http://localhost:3000

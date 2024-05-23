@@ -1,0 +1,12 @@
+[Unit]
+Description=Whoami
+After=network-online.target
+Wants=network-online.target systemd-networkd-wait-online.service
+
+[Service]
+User=whoami
+Group=whoami
+ExecStart=/usr/local/bin/whoami -port 3000
+
+[Install]
+WantedBy=multi-user.target

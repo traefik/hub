@@ -1,0 +1,26 @@
+[Unit]
+Description=Traefik Hub
+After=network-online.target
+Wants=network-online.target systemd-networkd-wait-online.service
+
+[Service]
+Restart=on-abnormal
+User=traefik-hub
+Group=traefik-hub
+ExecStart=/usr/local/bin/traefik-hub --configfile=/etc/traefik-hub/traefik-hub.toml
+; Use private /tmp and /var/tmp, which are discarded after traefik stops.
+PrivateTmp=true
+; Hide /home, /root, and /run/user. Nobody may have access to SSH-keys.
+ProtectHome=true
+; Make /usr, /boot, /etc and possibly some more folders read-only.
+ProtectSystem=full
+; The following additional security directives only work with systemd v229 or later.
+; They further restrict privileges that can be gained by traefik. Uncomment if you like.
+; Note that you may have to add capabilities required by any plugins in use.
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
+
