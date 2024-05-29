@@ -126,9 +126,9 @@ Now, we can access the local dashboard: http://dashboard.docker.localhost/
 
 Without Traefik Hub, an API can be deployed with an `Ingress`, an `IngressRoute` or an `HTTPRoute`.
 
-In this tutorial, APIs are implemented using a simple JSON server in Go; the source code is [here](../../src/api-server/).
+In this tutorial, APIs are implemented using a JSON server in Go; the source code is [here](../../src/api-server/).
 
-Let's deploy a [simple weather app](../../src/manifests/weather-app.yaml) exposing an API.
+Let's deploy a [weather app](../../src/manifests/weather-app.yaml) exposing an API.
 
 ```shell
 kubectl apply -f src/manifests/weather-app.yaml
