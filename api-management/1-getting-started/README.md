@@ -4,7 +4,7 @@
 
 In this tutorial, one can use [k3d](https://k3d.io/). Alternatives like [kind](https://kind.sigs.k8s.io), cloud providers, or others can also be used.
 
-First, clone this GitHub repository:
+First, clone the GitHub repository dedicated to tutorials:
 
 ```shell
 git clone https://github.com/traefik/hub.git
@@ -319,7 +319,7 @@ And create a token for this user:
 ![API Portal Create Token](./images/api-portal-create-token.png)
 
 ```shell
-export ADMIN_TOKEN="XXX"
+export ADMIN_TOKEN=
 ```
 
 With this token, it is possible to request the API :tada: :
