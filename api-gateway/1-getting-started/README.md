@@ -280,13 +280,15 @@ cd hub
 After, we'll need to get the Traefik Hub binary:
 
 ```shell
-wget https://TODO
+curl -L https://github.com/traefik/hub/releases/download/v3.0.1/traefik-hub_v3.0.1_linux_amd64.tar.gz -o /tmp/traefik-hub.tar.gz
+tar xvzf /tmp/traefik-hub.tar.gz -C /tmp traefik-hub
+rm -f /tmp/traefik-hub.tar.gz
+sudo mv traefik-hub /usr/local/bin/traefik-hub
 ```
 
 Now, we can move it to a binary `PATH` folder and set the expected rights on it:
 
 ```shell
-sudo cp traefik-hub /usr/local/bin/traefik-hub
 sudo chown root:root /usr/local/bin/traefik-hub
 sudo chmod 755 /usr/local/bin/traefik-hub
 # Give the Traefik Hub binary ability to bind privileged ports like 80 or 443 as non-root
@@ -364,7 +366,8 @@ We will deploy a simple _whoami_ app on systemd and try to reach it from Traefik
 # Install whoami
 curl -L https://github.com/traefik/whoami/releases/download/v1.10.2/whoami_v1.10.2_linux_amd64.tar.gz -o /tmp/whoami.tar.gz
 tar xvzf /tmp/whoami.tar.gz -C /tmp whoami
-sudo mv /tmp/whoami /usr/local/bin/whoami
+rm -f /tmp/whoami.tar.gz
+sudo mv whoami /usr/local/bin/whoami
 sudo chown root:root /usr/local/bin/whoami
 sudo chmod 755 /usr/local/bin/whoami
 # Create a user for whoami
