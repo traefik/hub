@@ -1,0 +1,36 @@
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: oidc
+  namespace: traefik-hub
+spec:
+  plugin:
+    oidc:
+      issuer: http://hydra.hydra.svc:4444
+      clientID: $CLIENT_ID
+      clientSecret: $CLIENT_SECRET
+      loginUrl: /login
+      logoutUrl: /logout
+      redirectUrl: /callback
+      csrf: {}
+      session:
+        name: "oidc-session"
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: whoami
+  namespace: traefik-hub
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`whoami.docker.localhost`)
+    kind: Rule
+    services:
+    - name: whoami
+      port: 80
+    middlewares:
+    - name: oidc

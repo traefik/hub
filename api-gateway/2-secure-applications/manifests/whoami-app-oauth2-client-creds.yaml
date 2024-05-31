@@ -1,0 +1,31 @@
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: oauth2-creds
+  namespace: traefik-hub
+spec:
+  plugin:
+    oAuthClientCredentials:
+      url: http://hydra.hydra.svc:4444/oauth2/token
+      audience: https://traefik.io
+      clientId: ${CLIENT_ID}
+      clientSecret: ${CLIENT_SECRET}
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: whoami
+  namespace: traefik-hub
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`whoami.docker.localhost`)
+    kind: Rule
+    services:
+    - name: whoami
+      port: 80
+    middlewares:
+    - name: oauth2-creds
