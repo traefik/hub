@@ -1,8 +1,6 @@
 # Getting Started
 
-## Deploy Kubernetes
-
-In this tutorial, one can use [k3d](https://k3d.io/). Alternatives like [kind](https://kind.sigs.k8s.io), cloud providers, or others can also be used.
+For this tutorial, we can use [k3d](https://k3d.io/) or alternatives like [kind](https://kind.sigs.k8s.io), cloud providers, and others.
 
 First, clone the GitHub repository dedicated to tutorials:
 
@@ -10,6 +8,8 @@ First, clone the GitHub repository dedicated to tutorials:
 git clone https://github.com/traefik/hub.git
 cd hub
 ```
+
+## Deploy Kubernetes
 
 ### Using k3d
 
@@ -48,7 +48,7 @@ kubectl cluster-info
 kubectl wait --for=condition=ready nodes traefik-hub-control-plane
 ```
 
-And add a load balancer (LB) to it:
+Now, add a load balancer (LB) to it:
 
 ```shell
 kubectl apply -f src/kind/metallb-native.yaml
@@ -60,11 +60,11 @@ kubectl apply -f src/kind/metallb-config.yaml
 
 ## Install Traefik Hub
 
-Log in to the [Traefik Hub Online Dashboard](https://hub.traefik.io), open the page to [generate a new agent](https://hub.traefik.io/agents/new).
+First, log in to the [Traefik Hub Online Dashboard](https://hub.traefik.io) and open the page to [generate a new agent](https://hub.traefik.io/agents/new).
 
 **:warning: Do not install the agent, but copy the token.**
 
-Now, open a terminal and run these commands to create the secret for Traefik Hub.
+Then, open a terminal and run these commands to create the secret for Traefik Hub:
 
 ```shell
 export TRAEFIK_HUB_TOKEN=
@@ -75,7 +75,7 @@ kubectl create namespace traefik-hub
 kubectl create secret generic license --namespace traefik-hub --from-literal=token=$TRAEFIK_HUB_TOKEN
 ```
 
-After, we can install Traefik Hub with Helm:
+Now, install Traefik Hub with Helm:
 
 ```shell
 # Add the Helm repository
@@ -115,21 +115,21 @@ helm upgrade traefik-hub -n traefik-hub --wait \
    traefik/traefik
 ```
 
-Now, we can access the local dashboard: http://dashboard.docker.localhost/
+Now, we can access the local dashboard at http://dashboard.docker.localhost/.
 
 ## Deploy an API without Traefik Hub
 
-Without Traefik Hub, an API can be deployed with an `Ingress`, an `IngressRoute` or an `HTTPRoute`.
+Without Traefik Hub, we can deploy an API with `Ingress`, `IngressRoute`, or `HTTPRoute` resources.
 
-In this tutorial, APIs are implemented using a JSON server in Go; the source code is [here](https://github.com/traefik/hub-preview/tree/main/src/api-server/).
+:information_source: This tutorial implements API using a JSON server in Go; check out the source code [here](https://github.com/traefik/hub-preview/tree/main/src/api-server/).
 
-Let's deploy a [weather app](https://github.com/traefik/hub-preview/blob/main/src/manifests/weather-app.yaml) exposing an API.
+First, let's deploy a [weather app](https://github.com/traefik/hub-preview/blob/main/src/manifests/weather-app.yaml) exposing an API:
 
 ```shell
 kubectl apply -f src/manifests/weather-app.yaml
 ```
 
-It should create the public app
+It should create the public app:
 
 ```shell
 namespace/apps created
@@ -138,7 +138,7 @@ deployment.apps/weather-app created
 service/weather-app created
 ```
 
-It can be exposed with an `IngressRoute`:
+Then, use `IngressRoute` to expose the weather app:
 
 ```yaml
 ---
@@ -166,7 +166,7 @@ kubectl apply -f src/manifests/weather-app-ingressroute.yaml
 ingressroute.traefik.io/weather-api created
 ```
 
-This API can be accessed using curl:
+Now, we can access the API using curl:
 
 ```shell
 curl http://api.docker.localhost/weather
@@ -184,7 +184,7 @@ curl http://api.docker.localhost/weather
 
 ## Manage an API with Traefik Hub
 
-Now, let's try to manage it with Traefik Hub using `API` and `APIAccess` resources:
+Let's try to manage the weather API with Traefik Hub using `API` and `APIAccess` resources:
 
 ```yaml
 ---
@@ -208,7 +208,7 @@ spec:
   everyone: true
 ```
 
-We'll need to reference this API in the `IngressRoute` with an annotation:
+First, we need to reference the API in the `IngressRoute` with an annotation:
 
 ```yaml
 ---
@@ -230,13 +230,13 @@ spec:
       port: 3000
 ```
 
-Let's apply it:
+Now, we can apply the above resources:
 
 ```shell
 kubectl apply -f api-management/1-getting-started/manifests/api.yaml
 ```
 
-It will create `API`, `APIAccess` and link `IngressRoute` to this API.
+It will create `API`, `APIAccess`, and link `IngressRoute` to the weather API:
 
 ```shell
 api.hub.traefik.io/weather-api created
@@ -244,13 +244,11 @@ apiaccess.hub.traefik.io/weather-api created
 ingressroute.traefik.io/weather-api configured
 ```
 
-Now, when one tries to access the API:
+Now, if someone tries to access the API, it returns the expected `401 Unauthorized` HTTP code:
 
 ```shell
 curl -i http://api.docker.localhost/weather
 ```
-
-It returns the expected 401 Unauthorized HTTP code:
 
 ```shell
 HTTP/1.1 401 Unauthorized
@@ -258,13 +256,13 @@ Date: Mon, 06 May 2024 12:09:56 GMT
 Content-Length: 0
 ```
 
-## Create a user for this API
+## Create a user for the API
 
-User can be created in [Traefik Hub Online Dashboard](https://hub.traefik.io/users):
+We can create a user in the [Traefik Hub Online Dashboard](https://hub.traefik.io/users):
 
 ![Create user admin](./images/create-user-admin.png)
 
-This user will connect to an API Portal, so let's deploy it!
+This user will connect to an API Portal, so let's deploy it:
 
 ```yaml
 ---
@@ -308,13 +306,11 @@ apiportal.hub.traefik.io/apiportal created
 ingressroute.traefik.io/apiportal created
 ```
 
-The API Portal should be accessible on http://api.docker.localhost
+The API Portal should be accessible on http://api.docker.localhost.
 
-You should be able to log in with the admin user.
+Now, we should be able to log in with the admin user and create a token for the user:
 
 ![API Portal Log in](./images/api-portal-login.png)
-
-And create a token for this user:
 
 ![API Portal Create Token](./images/api-portal-create-token.png)
 
@@ -322,7 +318,7 @@ And create a token for this user:
 export ADMIN_TOKEN=
 ```
 
-With this token, it is possible to request the API :tada: :
+With this token, we can request the weather API :tada: :
 
 ```shell
 curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.docker.localhost/weather
