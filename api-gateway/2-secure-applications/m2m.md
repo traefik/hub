@@ -89,7 +89,7 @@ To secure it with OAuth2, we can use the OAuth2 Client Credentials middleware:
 +kind: Middleware
 +metadata:
 +  name: oauth2-creds
-+  namespace: traefik-hub
++  namespace: apps
 +spec:
 +  plugin:
 +    oAuthClientCredentials:

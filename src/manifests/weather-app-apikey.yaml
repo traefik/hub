@@ -2,21 +2,25 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: basic-auth
+  name: apikey-auth
   namespace: apps
-data:
-  users: |
-    Zm9vOiRhcHIxJDJHR0RyLjJPJDdUVXJlOEt6anQ1WFFOUGRoby5CQjEKCg==
+stringData:
+  secretKey: "{SHA}dhiZGvSW60OMQ+J6hPEyJ+jfUoU="
 
 ---
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
-  name: basic-auth
+  name: apikey-auth
   namespace: apps
 spec:
-  basicAuth:
-    secret: basic-auth
+  plugin:
+    apiKey:
+      keySource:
+        header: Authorization
+        headerAuthScheme: Bearer
+      secretValues:
+        - urn:k8s:secret:apikey-auth:secretKey
 
 ---
 apiVersion: traefik.io/v1alpha1
@@ -34,4 +38,4 @@ spec:
     - name: weather-app
       port: 3000
     middlewares:
-    - name: basic-auth
+    - name: apikey-auth

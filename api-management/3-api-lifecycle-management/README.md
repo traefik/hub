@@ -51,7 +51,7 @@ $ diff -Nau api-management/1-getting-started/manifests/api.yaml api-management/3
 +kind: APIVersion
 +metadata:
 +  name: weather-api-v1
-+  namespace: traefik-hub
++  namespace: apps
 +spec:
 +  release: v1.0.0
 +
@@ -60,7 +60,7 @@ $ diff -Nau api-management/1-getting-started/manifests/api.yaml api-management/3
  kind: API
  metadata:
    name: weather-api
-   namespace: traefik-hub
+   namespace: apps
 -spec: {}
 +spec:
 +  versions:
@@ -70,7 +70,7 @@ $ diff -Nau api-management/1-getting-started/manifests/api.yaml api-management/3
  apiVersion: hub.traefik.io/v1alpha1
 @@ -24,7 +35,7 @@
    name: weather-app
-   namespace: traefik-hub
+   namespace: apps
    annotations:
 -    hub.traefik.io/api: weather-api
 +    hub.traefik.io/api-version: weather-api-v1
@@ -123,7 +123,7 @@ $ diff -Nau api-management/3-api-lifecycle-management/manifests/api-v1.yaml api-
 +kind: APIVersion
 +metadata:
 +  name: weather-api-v1-1
-+  namespace: traefik-hub
++  namespace: apps
 +spec:
 +  release: v1.1.0
 +
@@ -150,7 +150,7 @@ $ diff -Nau api-management/3-api-lifecycle-management/manifests/api-v1.yaml api-
 +kind: IngressRoute
 +metadata:
 +  name: weather-api-v1-1
-+  namespace: traefik-hub
++  namespace: apps
 +  annotations:
 +    hub.traefik.io/api-version: weather-api-v1-1
 +spec:
@@ -220,7 +220,7 @@ $ diff -Nau --color api-management/3-api-lifecycle-management/manifests/api-v1.1
 +kind: TraefikService
 +metadata:
 +  name: weather-api-wrr
-+  namespace: traefik-hub
++  namespace: apps
 +spec:
 +  weighted:
 +    services:
@@ -247,7 +247,7 @@ $ diff -Nau --color api-management/3-api-lifecycle-management/manifests/api-v1.1
 -kind: IngressRoute
 -metadata:
 -  name: weather-api-v1-1
--  namespace: traefik-hub
+-  namespace: apps
 -  annotations:
 -    hub.traefik.io/api-version: weather-api-v1-1
 -spec:
@@ -266,7 +266,7 @@ $ diff -Nau --color api-management/3-api-lifecycle-management/manifests/api-v1.1
 Let's apply it:
 
 ```shell
-kubectl delete ingressroute -n traefik-hub weather-api-v1-1
+kubectl delete ingressroute -n apps weather-api-v1-1
 kubectl apply -f api-management/3-api-lifecycle-management/manifests/api-v1.1-weighted.yaml
 ```
 

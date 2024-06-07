@@ -78,8 +78,8 @@ export TRAEFIK_HUB_TOKEN=
 ```
 
 ```shell
-kubectl create namespace traefik-hub
-kubectl create secret generic license --namespace traefik-hub --from-literal=token=$TRAEFIK_HUB_TOKEN
+kubectl create namespace traefik
+kubectl create secret generic license --namespace traefik --from-literal=token=$TRAEFIK_HUB_TOKEN
 ```
 
 After, we can install Traefik Hub with Helm:
@@ -88,8 +88,9 @@ After, we can install Traefik Hub with Helm:
 # Add the Helm repository
 helm repo add --force-update traefik https://traefik.github.io/charts
 # Install the Helm chart
-helm install traefik-hub -n traefik-hub --wait \
+helm install traefik-hub -n traefik --wait \
   --set hub.token=license \
+  --set ingressClass.enabled=false \
   --set ingressRoute.dashboard.matchRule='Host(`dashboard.docker.localhost`)' \
   --set ingressRoute.dashboard.entryPoints={web} \
   --set image.registry=ghcr.io \
@@ -110,6 +111,7 @@ helm repo update
 # Upgrade the Helm chart
 helm upgrade traefik-hub -n traefik-hub --wait \
   --set hub.token=license \
+  --set ingressClass.enabled=false \
   --set ingressRoute.dashboard.matchRule='Host(`dashboard.docker.localhost`)' \
   --set ingressRoute.dashboard.entryPoints={web} \
   --set image.registry=ghcr.io \
@@ -151,7 +153,7 @@ apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: weather-api
-  namespace: traefik-hub
+  namespace: apps
 spec:
   entryPoints:
     - web
@@ -201,7 +203,7 @@ diff -Nau src/manifests/weather-app-ingressroute.yaml src/manifests/weather-app-
 +kind: Secret
 +metadata:
 +  name: jwt-auth
-+  namespace: traefik-hub
++  namespace: apps
 +stringData:
 +  signingSecret: "JWT on Traefik Hub!"
 +
@@ -210,7 +212,7 @@ diff -Nau src/manifests/weather-app-ingressroute.yaml src/manifests/weather-app-
 +kind: Middleware
 +metadata:
 +  name: jwt-auth
-+  namespace: traefik-hub
++  namespace: apps
 +spec:
 +  plugin:
 +    jwt:

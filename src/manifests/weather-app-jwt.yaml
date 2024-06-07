@@ -3,7 +3,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: jwt-auth
-  namespace: traefik-hub
+  namespace: apps
 stringData:
   signingSecret: "JWT on Traefik Hub!"
 
@@ -12,7 +12,7 @@ apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
   name: jwt-auth
-  namespace: traefik-hub
+  namespace: apps
 spec:
   plugin:
     jwt:
@@ -23,7 +23,7 @@ apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: weather-api
-  namespace: traefik-hub
+  namespace: apps
 spec:
   entryPoints:
     - web

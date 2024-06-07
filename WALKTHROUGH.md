@@ -4,7 +4,7 @@ This document covers a complete journey: Traefik Proxy => Traefik Hub API Gatewa
 
 ## Deploy Kubernetes
 
-In this tutorial, one can use [k3d](https://k3d.io/). Alternatives like [kind](https://kind.sigs.k8s.io), cloud providers, or others can also be used.
+For this tutorial, we deploy Traefik Hub API Gateway on a [k3d](https://k3d.io/) cluster. It's possible to use alternatives such as [kind](https://kind.sigs.k8s.io), cloud providers, and others.
 
 First, clone this GitHub repository:
 
@@ -60,7 +60,7 @@ kubectl apply -f src/kind/metallb-config.yaml
 
 </details>
 
-## Deploy an API with Traefik Proxy
+## Step 1: Deploy an API with Traefik Proxy
 
 First, we will install Traefik Proxy with Helm:
 
@@ -68,9 +68,10 @@ First, we will install Traefik Proxy with Helm:
 # Add the Helm repository
 helm repo add --force-update traefik https://traefik.github.io/charts
 # Create a namespace
-kubectl create namespace traefik-hub
+kubectl create namespace traefik
 # Install the Helm chart
-helm install traefik -n traefik-hub --wait \
+helm install traefik -n traefik --wait \
+  --set ingressClass.enabled=false \
   --set ingressRoute.dashboard.matchRule='Host(`dashboard.docker.localhost`)' \
   --set ingressRoute.dashboard.entryPoints={web} \
   --set ports.web.nodePort=30000 \
@@ -109,7 +110,7 @@ apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: weather-api
-  namespace: traefik-hub
+  namespace: apps
 spec:
   entryPoints:
     - web
@@ -145,7 +146,7 @@ curl http://api.docker.localhost/weather
 }
 ```
 
-With Traefik Proxy, we can protect this API with a simple Basic Authentication. To create an encoded user:password pair, the following command can be used: `htpasswd -nb user password | openssl base64`
+With Traefik Proxy, we can secure the access to this API using the Basic Authentication. To create an encoded user:password pair, the following command can be used: `htpasswd -nb user password | openssl base64`
 
 So let's do it:
 
@@ -166,7 +167,7 @@ Zm9vOiRhcHIxJDJHR0RyLjJPJDdUVXJlOEt6anQ1WFFOUGRoby5CQjEKCg==
 +kind: Secret
 +metadata:
 +  name: basic-auth
-+  namespace: traefik-hub
++  namespace: apps
 +data:
 +  users: |
 +    Zm9vOiRhcHIxJDJHR0RyLjJPJDdUVXJlOEt6anQ1WFFOUGRoby5CQjEKCg==
@@ -176,7 +177,7 @@ Zm9vOiRhcHIxJDJHR0RyLjJPJDdUVXJlOEt6anQ1WFFOUGRoby5CQjEKCg==
 +kind: Middleware
 +metadata:
 +  name: basic-auth
-+  namespace: traefik-hub
++  namespace: apps
 +spec:
 +  basicAuth:
 +    secret: basic-auth
@@ -205,7 +206,7 @@ middleware.traefik.io/basic-auth created
 ingressroute.traefik.io/weather-api configured
 ```
 
-And now, we can confirm it's protected with a simple basic auth :
+And now, we can confirm it's secured using BASIC Authentication :
 
 ```shell
 # This call is not authorized => 401
@@ -218,11 +219,11 @@ curl -I -u foo:bar http://api.docker.localhost/weather
 
 Nowadays, those issues are addressed when using [JSON Web Tokens (JWT)](https://datatracker.ietf.org/doc/html/rfc7519). A JWT can be cryptographically verified, detach authentication from user credentials, and has an issue and expiration date. JWT can be used with Traefik Hub API Gateway, so let's upgrade our setup to Traefik Hub
 
-## Upgrade Traefik Proxy to Traefik Hub API Gateway
+## Step 2: Upgrade Traefik Proxy to Traefik Hub API Gateway
 
-Log in to the [Traefik Hub Online Dashboard](https://hub.traefik.io), open the page to [generate a new agent](https://hub.traefik.io/agents/new).
+Log in to the [Traefik Hub Online Dashboard](https://hub.traefik.io), open the page to [generate a new Hub API Gateway](https://hub.traefik.io/gateways/new).
 
-**:warning: Do not install the agent, but copy the token.**
+**:warning: Do not install the Hub API Gateway, but copy the token.**
 
 Now, open a terminal and run these commands to create the secret for Traefik Hub.
 
@@ -231,13 +232,13 @@ export TRAEFIK_HUB_TOKEN=
 ```
 
 ```shell
-kubectl create secret generic license --namespace traefik-hub --from-literal=token=$TRAEFIK_HUB_TOKEN
+kubectl create secret generic license --namespace traefik --from-literal=token=$TRAEFIK_HUB_TOKEN
 ```
 
-After, we can upgrade Traefik Proxy to Traefik Hub using the same Helm chart:
+Then, upgrade Traefik Proxy to Traefik Hub using the same Helm chart:
 
 ```shell
-helm upgrade traefik -n traefik-hub --wait \
+helm upgrade traefik -n traefik --wait \
   --reuse-values \
   --set hub.token=license \
   --set image.registry=ghcr.io \
@@ -248,7 +249,7 @@ helm upgrade traefik -n traefik-hub --wait \
 
 Traefik Hub is 100% compatible with Traefik Proxy v3.
 
-We can confirm it by taking a look at the local dashboard: http://dashboard.docker.localhost/
+The dashboard is reachable (http://dashboard.docker.localhost/), which confirms that Traefik Hub API Gateway is successfully deployed.
 
 ![Local Traefik Hub Dashboard](./src/images/hub-dashboard.png)
 
@@ -261,34 +262,46 @@ curl -I http://api.docker.localhost/weather
 curl -I -u foo:bar http://api.docker.localhost/weather
 ```
 
-Let's try to protect the weather API with a JWT Token. For the sake of simplicity, we'll generate the token using only a shared signing secret and the online https://jwt.io tool.
+Let's secure the weather API with an API Key.
 
-With Traefik Hub, we can use JWT as a middleware:
+With Traefik Hub, we can use API Key as a middleware. First, we'll need to generate hash of our password. It can be done with `htpasswd` :
+
+```shell
+htpasswd -nbs "" "Let's use API Key with Traefik Hub" | cut -c 2-
+{SHA}dhiZGvSW60OMQ+J6hPEyJ+jfUoU=
+```
+
+```shell
+{SHA}dhiZGvSW60OMQ+J6hPEyJ+jfUoU=
+```
+
+We can now put this password in the API Key middleware:
 
 ```diff
-diff -Nau src/manifests/weather-app-ingressroute.yaml src/manifests/weather-app-jwt.yaml
+diff -Nau src/manifests/weather-app-ingressroute.yaml src/manifests/weather-app-apikey.yaml
 --- src/manifests/weather-app-ingressroute.yaml
-+++ src/manifests/weather-app-jwt.yaml
++++ src/manifests/weather-app-apikey.yaml
 @@ -1,4 +1,24 @@
  ---
 +apiVersion: v1
 +kind: Secret
 +metadata:
-+  name: jwt-auth
-+  namespace: traefik-hub
++  name: apikey-auth
++  namespace: apps
 +stringData:
-+  signingSecret: "JWT on Traefik Hub!"
++  secretKey: "{SHA}dhiZGvSW60OMQ+J6hPEyJ+jfUoU="
 +
 +---
 +apiVersion: traefik.io/v1alpha1
 +kind: Middleware
 +metadata:
-+  name: jwt-auth
-+  namespace: traefik-hub
++  name: apikey-auth
++  namespace: apps
 +spec:
 +  plugin:
-+    jwt:
-+      signingsecret: urn:k8s:secret:jwt-auth:signingSecret
++    apikey:
++      secretValues:
++        - urn:k8s:secret:apikey-auth:secretKey
 +
 +---
  apiVersion: traefik.io/v1alpha1
@@ -299,46 +312,44 @@ diff -Nau src/manifests/weather-app-ingressroute.yaml src/manifests/weather-app-
      - name: weather-app
        port: 3000
 +    middlewares:
-+    - name: jwt-auth
++    - name: apikey-auth
 ```
 
 Let's apply it:
 
 ```shell
-kubectl apply -f src/manifests/weather-app-jwt.yaml
+kubectl apply -f src/manifests/weather-app-apikey.yaml
 ```
 
 ```shell
-secret/jwt-auth created
-middleware.traefik.io/jwt-auth created
+secret/apikey-auth created
+middleware.traefik.io/apikey-auth created
 ingressroute.traefik.io/weather-api configured
 ```
 
-Get the token from https://jwt.io using the same signing secret:
-
-![JWT Token](./src/images/jwt-token.png)
-
-With this token, we can test it:
+And test it:
 
 ```shell
 # This call is not authorized => 401
 curl -I http://api.docker.localhost/weather
 # Let's set the token
-export JWT_TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.AuyxLr6YEAIdMxXujJ2icNvMCamR1SizrunWlyfLlJw"
+export API_KEY=$(echo -n "Let's use API Key with Traefik Hub" | base64)
 # This call with the token is allowed => 200
-curl -I -H "Authorization: Bearer $JWT_TOKEN" http://api.docker.localhost/weather
+curl -I -H "Authorization: Bearer $API_KEY" http://api.docker.localhost/weather
 ```
 
-It's way better now in terms of security. It's possible to handle users with an Identity Provider, but what if we want to cover _internal_ and _external_ use cases? To protect API on HTTP _verb_ level? Or to test a new version with part of the production traffic?
+The API is now secured.
+
+It's possible to handle users with an Identity Provider, but what if we want to cover _internal_ and _external_ use cases? To protect API on HTTP _verb_ level? Or to test a new version with part of the production traffic?
 
 We'll need Traefik Hub with API Management!
 
-## Manage an API with Traefik Hub API Management
+## Step 3: Manage an API with Traefik Hub API Management
 
-First, we need to enable API Management on Traefik Traefik Hub using the same Helm chart:
+First, we enable API Management on Traefik Traefik Hub using the same Helm chart:
 
 ```shell
-helm upgrade traefik -n traefik-hub --wait \
+helm upgrade traefik -n traefik --wait \
   --reuse-values \
   --set hub.apimanagement.enabled=true \
    traefik/traefik
@@ -346,19 +357,19 @@ helm upgrade traefik -n traefik-hub --wait \
 
 Traefik Hub API Management is 100% compatible with Traefik Proxy v3 and Traefik Hub API Gateway.
 
-We can confirm it by taking a look at the local dashboard: http://dashboard.docker.localhost/
+The dashboard is reachable (http://dashboard.docker.localhost/), which confirms that Traefik Hub API Gateway is successfuly deployed.
 
 ![Local Traefik Hub Dashboard](./src/images/hub-dashboard.png)
 
-And also, confirm _JWT Auth_ is still here:
+And also confirm that the API is still secured using an API Key:
 
 ```shell
 # This call is not authorized => 401
 curl -I http://api.docker.localhost/weather
 # Let's set the token
-export JWT_TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.AuyxLr6YEAIdMxXujJ2icNvMCamR1SizrunWlyfLlJw"
+export API_KEY=$(echo -n "Let's use API Key with Traefik Hub" | base64)
 # This call with the token is allowed => 200
-curl -I -H "Authorization: Bearer $JWT_TOKEN" http://api.docker.localhost/weather
+curl -I -H "Authorization: Bearer $API_KEY" http://api.docker.localhost/weather
 ```
 
 Now, let's try to manage it with Traefik Hub using `API` and `APIAccess` resources:
@@ -369,7 +380,7 @@ apiVersion: hub.traefik.io/v1alpha1
 kind: API
 metadata:
   name: weather-api
-  namespace: traefik-hub
+  namespace: apps
 spec: {}
 
 ---
@@ -377,11 +388,10 @@ apiVersion: hub.traefik.io/v1alpha1
 kind: APIAccess
 metadata:
   name: weather-api
-  namespace: traefik-hub
+  namespace: apps
 spec:
   apis:
     - name: weather-api
-      namespace: traefik-hub
   everyone: true
 ```
 
@@ -393,7 +403,7 @@ apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: weather-api
-  namespace: traefik-hub
+  namespace: apps
   annotations:
     hub.traefik.io/api: weather-api # <=== Link to the API using its name
 spec:
@@ -407,7 +417,7 @@ spec:
       port: 3000
 ```
 
-:information_source: We've also removed the JWT authentication middleware, as we'll use Traefik Hub's built-in identity provider for user and credential management. Don't worry; the API is still secured, as you'll see it shortly.
+:information_source: We've also removed the API Key authentication middleware, as we'll use Traefik Hub's built-in identity provider for user and credential management. The API is still secured, as we'll see it shortly.
 
 Let's apply it:
 
@@ -437,13 +447,15 @@ Date: Mon, 06 May 2024 12:09:56 GMT
 Content-Length: 0
 ```
 
-## Create a user for this API
+## Step 4: Create a user for this API
 
-Users can be created in the [Traefik Hub Online Dashboard](https://hub.traefik.io/users):
+Users are created in the [Traefik Hub Online Dashboard](https://hub.traefik.io/users):
 
 ![Create user admin](./api-management/1-getting-started/images/create-user-admin.png)
 
-This user will connect to an API Portal to generate an API key, so let's deploy the API Portal!
+## Step 5: Deploy the API Portal
+
+The user created previously will connect to an API Portal to generate an API key, so let's deploy the API Portal!
 
 ```yaml
 ---
@@ -451,7 +463,7 @@ apiVersion: hub.traefik.io/v1alpha1
 kind: APIPortal
 metadata:
   name: apiportal
-  namespace: traefik-hub
+  namespace: traefik
 spec:
   title: API Portal
   description: "Developer Portal"
@@ -459,22 +471,26 @@ spec:
     - api.docker.localhost
 
 ---
-apiVersion: traefik.io/v1alpha1
-kind: IngressRoute
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
   name: apiportal
-  namespace: traefik-hub
+  namespace: traefik
   annotations:
-    hub.traefik.io/api-portal: apiportal
+    # This annotation link this Ingress to the API Portal using <name>@<namespace> format.
+    hub.traefik.io/api-portal: apiportal@apps
 spec:
-  entryPoints:
-    - web
-  routes:
-  - match: Host(`api.docker.localhost`)
-    kind: Rule
-    services:
-    - name: apiportal
-      port: 9903
+  rules:
+  - host: api.docker.localhost
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: apiportal
+              port:
+                number: 9903
 ```
 
 :information_source: This API Portal is routed with the internal _ClusterIP_ `Service` named apiportal.
@@ -489,9 +505,9 @@ apiportal.hub.traefik.io/apiportal created
 ingressroute.traefik.io/apiportal created
 ```
 
-The API Portal should be accessible on http://api.docker.localhost
+The API Portal should be reachable on http://api.docker.localhost
 
-You should be able to log in with the admin user.
+We log in with the admin user.
 
 ![API Portal Log in](./api-management/1-getting-started/images/api-portal-login.png)
 
@@ -503,7 +519,7 @@ And create a token for this user:
 export ADMIN_TOKEN="XXX"
 ```
 
-With this token, it is possible to request the API: :tada:
+Request the API with this token: :tada:
 
 ```shell
 curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.docker.localhost/weather
@@ -520,3 +536,47 @@ curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.docker.localhost/weather
 ```
 
 :information_source: If it fails with 401, just wait one minute and try again. The token needs to be sync before it can be accepted by Traefik Hub.
+
+We can see the API available in the `apps` namespace in the portal. This first API does not come with an OpenAPI specification (OAS):
+
+![API Portal without OAS](./api-management/1-getting-started/images/api-portal-without-oas.png)
+
+Although not setting an OAS for an API is possible, it severely hurts getting started with API consumption. Let's see what features are unlocked if we set one. Let's deploy a [forecast app](https://github.com/traefik/hub-preview/blob/main/src/manifests/weather-app-forecast.yaml) with an OpenAPI specification:
+
+```shell
+kubectl apply -f src/manifests/weather-app-forecast.yaml
+```
+
+This time, we will specify how to get the OAS in the API _CRD_:
+
+```yaml
+---
+apiVersion: hub.traefik.io/v1alpha1
+kind: API
+metadata:
+  name: weather-api-forecast
+  namespace: apps
+spec:
+  openApiSpec:
+    path: /openapi.yaml
+    override:
+      servers:
+        - url: http://api.docker.localhost
+```
+
+The other resources are built on the same model, as we can see in [the complete file](https://github.com/traefik/hub-preview/blob/main/api-management/1-getting-started/manifests/forecast.yaml). Let's apply it:
+
+```shell
+kubectl apply -f api-management/1-getting-started/manifests/forecast.yaml
+```
+
+```shell
+api.hub.traefik.io/weather-api-forecast created
+apiaccess.hub.traefik.io/weather-api-forecast created
+ingressroute.traefik.io/weather-api-forecast created
+```
+
+And that's it! This time, we have documentation built from the OpenAPI specification, and we can also interactively try the API with the Try Out functionality.
+
+![API Portal With OAS](./api-management/1-getting-started/images/api-portal-with-oas.png)
+

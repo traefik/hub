@@ -88,7 +88,7 @@ apiVersion: hub.traefik.io/v1alpha1
 kind: API
 metadata:
   name: weather-api
-  namespace: traefik-hub
+  namespace: apps
   labels:
     subscription: external
 spec: {}
@@ -98,7 +98,7 @@ apiVersion: hub.traefik.io/v1alpha1
 kind: APIAccess
 metadata:
   name: weather-api-external
-  namespace: traefik-hub
+  namespace: apps
 spec:
   groups:
     - external
@@ -111,7 +111,7 @@ apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: weather-api
-  namespace: traefik-hub
+  namespace: apps
   annotations:
     hub.traefik.io/api: weather-api
 spec:
@@ -213,7 +213,7 @@ $ diff -Nau --color api-management/2-access-control/simple/weather-api.yaml api-
  metadata:
 -  name: weather-api
 +  name: weather-api-external
-   namespace: traefik-hub
+   namespace: apps
  spec:
    groups:
 @@ -22,6 +31,26 @@
@@ -229,7 +229,7 @@ $ diff -Nau --color api-management/2-access-control/simple/weather-api.yaml api-
 +kind: APIAccess
 +metadata:
 +  name: weather-api-admin
-+  namespace: traefik-hub
++  namespace: apps
 +spec:
 +  groups:
 +    - admin
@@ -291,7 +291,7 @@ apiVersion: hub.traefik.io/v1alpha1
 kind: APIAccess
 metadata:
   name: weather-api
-  namespace: traefik-hub
+  namespace: apps
 spec:
   groups:
     - external
@@ -308,7 +308,7 @@ apiVersion: hub.traefik.io/v1alpha1
 kind: APIAccess
 metadata:
   name: weather-api-external
-  namespace: traefik-hub
+  namespace: apps
 spec:
   groups:
     - external
@@ -323,7 +323,7 @@ spec:
 The first one allows all kinds of HTTP requests. If we delete it, the _external_ user can no longer call the API with the **PATCH** HTTP verb.
 
 ```shell
-kubectl delete apiaccess -n traefik-hub weather-api
+kubectl delete apiaccess -n apps weather-api
 # This time, PATCH is not allowed
 curl -i -XPATCH -H "Authorization: Bearer $EXTERNAL_TOKEN" "http://api.docker.localhost/weather"
 ```

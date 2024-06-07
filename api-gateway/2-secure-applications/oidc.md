@@ -104,7 +104,7 @@ diff -Nau src/manifests/whoami-app-ingressroute.yaml api-gateway/2-secure-applic
 +kind: Middleware
 +metadata:
 +  name: oidc
-+  namespace: traefik-hub
++  namespace: apps
 +spec:
 +  plugin:
 +    oidc:
