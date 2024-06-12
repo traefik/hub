@@ -345,13 +345,15 @@ curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.docker.localhost/weather
 }
 ```
 
-:information_source: If it fails with 401, just wait one minute and try again. The token needs to be sync before it can be accepted by Traefik Hub.
+:information_source: If it fails with 401, wait a minute and try again. The token needs to be sync before it can be accepted by Traefik Hub.
 
 We can see the API available in the `apps` namespace in the portal. This first API does not come with an OpenAPI specification (OAS):
 
 ![API Portal without OAS](./images/api-portal-without-oas.png)
 
-Although not setting an OAS for an API is possible, it severely hurts getting started with API consumption. Let's see what features are unlocked if we set one. Let's deploy a [forecast app](https://github.com/traefik/hub-preview/blob/main/src/manifests/weather-app-forecast.yaml) with an OpenAPI specification:
+Although not setting an OAS for an API is possible, it severely hurts getting started with API consumption.
+Let's see what features are unlocked if we set one.
+Let's deploy a [forecast app](https://github.com/traefik/hub-preview/blob/main/src/manifests/weather-app-forecast.yaml) with an OpenAPI specification:
 
 ```shell
 kubectl apply -f src/manifests/weather-app-forecast.yaml
@@ -389,4 +391,3 @@ ingressroute.traefik.io/weather-api-forecast created
 And that's it! This time, we have documentation built from the OpenAPI specification, and we can also interactively try the API with the Try Out functionality.
 
 ![API Portal With OAS](./images/api-portal-with-oas.png)
-

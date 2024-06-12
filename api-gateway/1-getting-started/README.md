@@ -65,7 +65,7 @@ kubectl apply -f src/kind/metallb-config.yaml
 
 </details>
 
-## Step 1: Install Traefik Hub API Gateway
+### Step 1: Install Traefik Hub API Gateway
 
 Log in to the [Traefik Hub Online Dashboard](https://hub.traefik.io), open the page to [generate a new agent](https://hub.traefik.io/agents/new).
 
@@ -124,7 +124,7 @@ helm upgrade traefik-hub -n traefik-hub --wait \
 
 Now, we can access the local dashboard: http://dashboard.docker.localhost/
 
-## Step 2: Deploy an API as an Ingress
+### Step 2: Deploy an API as an Ingress
 
 Without Traefik Hub API Gateway, an API can be deployed as an `Ingress`, an `IngressRoute` or an `HTTPRoute`.
 
@@ -189,7 +189,7 @@ curl http://api.docker.localhost/weather
 }
 ```
 
-## Step 3: Secure authentication on this API with Traefik Hub
+### Step 3: Secure authentication on this API with Traefik Hub
 
 Let's secure the weather API with an API Key.
 
@@ -283,7 +283,7 @@ git clone https://github.com/traefik/hub.git
 cd hub
 ```
 
-## Step 1: Install Traefik Hub API Gateway
+### Step 1: Install Traefik Hub API Gateway
 
 Get the Traefik Hub API Gateway binary:
 
@@ -360,7 +360,7 @@ sudo systemctl status traefik-hub.service
 
 [...] systemd[1]: Started traefik-hub.service - Traefik Hub.
 ```
-## Step 2: Expose an API
+### Step 2: Expose an API
 
 :information_source: On Linux, we can use all the providers supported by Traefik Proxy and Traefik Hub API Gateway.
 
@@ -455,7 +455,7 @@ X-Forwarded-Server: ip-172-31-26-184
 X-Real-Ip: 127.0.0.1
 ```
 
-## Step 3: Secure the access using an API Key
+### Step 3: Secure the access using an API Key
 
 Let's secure the access with an API Key.
 
