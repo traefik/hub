@@ -6,7 +6,7 @@ This document covers a complete journey: Traefik Proxy => Traefik Hub API Gatewa
 
 For this tutorial, we deploy Traefik Hub API Gateway on a [k3d](https://k3d.io/) cluster. It's possible to use alternatives such as [kind](https://kind.sigs.k8s.io), cloud providers, and others.
 
-First, clone this GitHub repository:
+First, clone the GitHub repository dedicated to tutorials:
 
 ```shell
 git clone https://github.com/traefik/hub.git

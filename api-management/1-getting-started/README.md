@@ -1,6 +1,6 @@
 # Getting Started
 
-For this tutorial, we can use [k3d](https://k3d.io/) or alternatives like [kind](https://kind.sigs.k8s.io), cloud providers, and others.
+For this tutorial, we deploy Traefik Hub API Gateway on a [k3d](https://k3d.io/) cluster. It's possible to use alternatives such as [kind](https://kind.sigs.k8s.io), cloud providers, and others.
 
 First, clone the GitHub repository dedicated to tutorials:
 
@@ -58,7 +58,7 @@ kubectl apply -f src/kind/metallb-config.yaml
 
 </details>
 
-## Install Traefik Hub
+## Step 1: Install Traefik Hub
 
 First, log in to the [Traefik Hub Online Dashboard](https://hub.traefik.io) and open the page to [create a new gateway](https://hub.traefik.io/gateways/new).
 
@@ -119,7 +119,7 @@ helm upgrade traefik-hub -n traefik --wait \
 
 Now, we can access the local dashboard at http://dashboard.docker.localhost/.
 
-## Deploy an API without Traefik Hub
+## Step 2: Deploy an API as an Ingress
 
 :information_source: This tutorial implements API using a JSON server in Go; check out the source code [here](https://github.com/traefik/hub-preview/tree/main/src/api-server/).
 
@@ -182,7 +182,7 @@ curl http://api.docker.localhost/weather
 }
 ```
 
-## Manage an API with Traefik Hub
+## Step 3: Manage the API using Traefik Hub API Management
 
 Let's manage the weather API with Traefik Hub using `API` and `APIAccess` resources:
 
@@ -255,7 +255,7 @@ Date: Mon, 06 May 2024 12:09:56 GMT
 Content-Length: 0
 ```
 
-## Create a user for the API
+## Step 4: Create a user for this API
 
 We can create a user in the [Traefik Hub Online Dashboard](https://hub.traefik.io/users):
 
@@ -263,7 +263,7 @@ We can create a user in the [Traefik Hub Online Dashboard](https://hub.traefik.i
 
 We can provide an API Portal to this user.
 
-### Deploy an API Portal
+## Step 5: Deploy the API Portal
 
 An API Portal use the same logic as an API for the routing, using `Ingress` and dedicated annotation.
 

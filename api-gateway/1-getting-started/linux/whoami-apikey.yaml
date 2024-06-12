@@ -1,0 +1,22 @@
+http:
+  routers:
+    whoami:
+      rule: Host(`whoami.localhost`)
+      service: local
+      middlewares:
+      - apikey-auth
+
+  middlewares:
+    apikey-auth:
+      plugin:
+        apikey:
+          keySource:
+            header: Authorization
+            headerAuthScheme: Bearer
+          secretValues: "{SHA}dhiZGvSW60OMQ+J6hPEyJ+jfUoU="
+
+  services:
+    local:
+      loadBalancer:
+        servers:
+          - url: http://localhost:3000

@@ -9,22 +9,22 @@ We can start:
 
 ## On Kubernetes
 
-In this tutorial, one can use [k3d](https://k3d.io/). Alternatives like [kind](https://kind.sigs.k8s.io), cloud providers, or others can also be used.
+For this tutorial, we deploy Traefik Hub API Gateway on a [k3d](https://k3d.io/) cluster. It's possible to use alternatives such as [kind](https://kind.sigs.k8s.io), cloud providers, and others.
 
-First, clone this GitHub repository:
+First, clone the GitHub repository dedicated to tutorials:
 
 ```shell
 git clone https://github.com/traefik/hub.git
 cd hub
 ```
 
-### Using k3d
+### Create a Kubernetes cluster using k3d
 
 ```shell
 k3d cluster create traefik-hub --port 80:80@loadbalancer --port 443:443@loadbalancer --port 8000:8000@loadbalancer --k3s-arg "--disable=traefik@server:0"
 ```
 
-### Using Kind
+### Create a Kubernetes cluster using kind
 
 kind requires some configuration to use an IngressController on localhost. See the following example:
 
@@ -65,13 +65,13 @@ kubectl apply -f src/kind/metallb-config.yaml
 
 </details>
 
-## Install Traefik Hub
+## Step 1: Install Traefik Hub API Gateway
 
 Log in to the [Traefik Hub Online Dashboard](https://hub.traefik.io), open the page to [generate a new agent](https://hub.traefik.io/agents/new).
 
 **:warning: Do not install the agent, but copy the token.**
 
-Now, open a terminal and run these commands to create the secret for Traefik Hub.
+Open a terminal and run the following commands to create the required secret.
 
 ```shell
 export TRAEFIK_HUB_TOKEN=
@@ -82,7 +82,7 @@ kubectl create namespace traefik
 kubectl create secret generic license --namespace traefik --from-literal=token=$TRAEFIK_HUB_TOKEN
 ```
 
-After, we can install Traefik Hub with Helm:
+Install Traefik Hub API Gateway using Helm:
 
 ```shell
 # Add the Helm repository
@@ -101,7 +101,7 @@ helm install traefik-hub -n traefik --wait \
    traefik/traefik
 ```
 
-**If** Traefik Hub is **already** installed, we can instead upgrade the Traefik Hub instance:
+**If** Traefik Hub API Gateway is **already** installed, we can instead upgrade the Traefik Hub API Gateway instance:
 
 ```shell
 # Upgrade CRDs
@@ -124,9 +124,9 @@ helm upgrade traefik-hub -n traefik-hub --wait \
 
 Now, we can access the local dashboard: http://dashboard.docker.localhost/
 
-## Deploy an API without Traefik Hub
+## Step 2: Deploy an API as an Ingress
 
-Without Traefik Hub, an API can be deployed with an `Ingress`, an `IngressRoute` or an `HTTPRoute`.
+Without Traefik Hub API Gateway, an API can be deployed as an `Ingress`, an `IngressRoute` or an `HTTPRoute`.
 
 In this tutorial, APIs are implemented using a JSON server in Go; the source code is [here](../../src/api-server/).
 
@@ -189,34 +189,48 @@ curl http://api.docker.localhost/weather
 }
 ```
 
-## Secure authentication using JWTs on this API with Traefik Hub
+## Step 3: Secure authentication on this API with Traefik Hub
 
-In order to keep this getting started short, we'll generate the token using only a shared signing secret and the online https://jwt.io tool.
+Let's secure the weather API with an API Key.
+
+Generate the hash of our password. It can be done with `htpasswd` :
+
+```shell
+htpasswd -nbs "" "Let's use API Key with Traefik Hub" | cut -c 2-
+{SHA}dhiZGvSW60OMQ+J6hPEyJ+jfUoU=
+```
+
+```shell
+{SHA}dhiZGvSW60OMQ+J6hPEyJ+jfUoU=
+```
+
+Put this hash in the API Key `Middleware`:
 
 ```diff
-diff -Nau src/manifests/weather-app-ingressroute.yaml src/manifests/weather-app-jwt.yaml
+diff -Nau src/manifests/weather-app-ingressroute.yaml src/manifests/weather-app-apikey.yaml
 --- src/manifests/weather-app-ingressroute.yaml
-+++ src/manifests/weather-app-jwt.yaml
++++ src/manifests/weather-app-apikey.yaml
 @@ -1,4 +1,24 @@
  ---
 +apiVersion: v1
 +kind: Secret
 +metadata:
-+  name: jwt-auth
++  name: apikey-auth
 +  namespace: apps
 +stringData:
-+  signingSecret: "JWT on Traefik Hub!"
++  secretKey: "{SHA}dhiZGvSW60OMQ+J6hPEyJ+jfUoU="
 +
 +---
 +apiVersion: traefik.io/v1alpha1
 +kind: Middleware
 +metadata:
-+  name: jwt-auth
++  name: apikey-auth
 +  namespace: apps
 +spec:
 +  plugin:
-+    jwt:
-+      signingsecret: urn:k8s:secret:jwt-auth:signingSecret
++    apikey:
++      secretValues:
++        - urn:k8s:secret:apikey-auth:secretKey
 +
 +---
  apiVersion: traefik.io/v1alpha1
@@ -227,48 +241,38 @@ diff -Nau src/manifests/weather-app-ingressroute.yaml src/manifests/weather-app-
      - name: weather-app
        port: 3000
 +    middlewares:
-+    - name: jwt-auth
++    - name: apikey-auth
 ```
 
 Let's apply it:
 
 ```shell
-kubectl apply -f src/manifests/weather-app-jwt.yaml
+kubectl apply -f src/manifests/weather-app-apikey.yaml
 ```
 
 ```shell
-secret/jwt-auth created
-middleware.traefik.io/jwt-auth created
+secret/apikey-auth created
+middleware.traefik.io/apikey-auth created
 ingressroute.traefik.io/weather-api configured
 ```
 
-Get the token from https://jwt.io using the same signing secret or get one with command line:
-
-```bash
-jwt_header=$(echo -n '{"alg":"HS256","typ":"JWT"}' | base64 | sed s/\+/-/g | sed 's/\//_/g' | sed -E s/=+$//)
-payload=$(echo -n '{"sub": "123456789","name":"John Doe","iat":'$(date +%s)'}' | base64 | sed s/\+/-/g |sed 's/\//_/g' |  sed -E s/=+$//)
-secret='JWT on Traefik Hub!'
-hexsecret=$(echo -n "$secret" | od -A n -t x1  | sed 's/ *//g' | tr -d '\n')
-hmac_signature=$(echo -n "${jwt_header}.${payload}" |  openssl dgst -sha256 -mac HMAC -macopt hexkey:$hexsecret -binary | base64  | sed s/\+/-/g | sed 's/\//_/g' | sed -E s/=+$//)
-export JWT_TOKEN="${jwt_header}.${payload}.${hmac_signature}"
-```
-
-![JWT Token](../../src/images/jwt-token.png)
-
-With this token, we can test it:
+And test it:
 
 ```shell
 # This call is not authorized => 401
 curl -I http://api.docker.localhost/weather
-# Let's set the token
-export JWT_TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.AuyxLr6YEAIdMxXujJ2icNvMCamR1SizrunWlyfLlJw"
+# Let's set the API key
+export API_KEY=$(echo -n "Let's use API Key with Traefik Hub" | base64)
 # This call with the token is allowed => 200
-curl -I -H "Authorization: Bearer $JWT_TOKEN" http://api.docker.localhost/weather
+curl -I -H "Authorization: Bearer $API_KEY" http://api.docker.localhost/weather
 ```
+
+The API is now secured.
 
 ## On Linux
 
-This tutorial will show how to use Traefik Hub on Linux. It's using simple shell code for simplicity. In production, we recommend to use Infra-as-Code or even GitOps.
+This tutorial will show how to use Traefik Hub API Gateway on Linux using a shell command (for simplicity).
+In production, we recommend using Infra-as-Code or even GitOps.
 
 :information_source: We will use a Debian Linux in this tutorial.
 
@@ -279,25 +283,24 @@ git clone https://github.com/traefik/hub.git
 cd hub
 ```
 
-After, we'll need to get the Traefik Hub binary:
+## Step 1: Install Traefik Hub API Gateway
+
+Get the Traefik Hub API Gateway binary:
 
 ```shell
+# Download the binary
 curl -L https://github.com/traefik/hub/releases/download/v3.0.1/traefik-hub_v3.0.1_linux_amd64.tar.gz -o /tmp/traefik-hub.tar.gz
 tar xvzf /tmp/traefik-hub.tar.gz -C /tmp traefik-hub
 rm -f /tmp/traefik-hub.tar.gz
+# Install the binary with the required rights
 sudo mv traefik-hub /usr/local/bin/traefik-hub
-```
-
-Now, we can move it to a binary `PATH` folder and set the expected rights on it:
-
-```shell
 sudo chown root:root /usr/local/bin/traefik-hub
 sudo chmod 755 /usr/local/bin/traefik-hub
 # Give the Traefik Hub binary ability to bind privileged ports like 80 or 443 as non-root
 sudo setcap 'cap_net_bind_service=+ep' /usr/local/bin/traefik-hub
 ```
 
-Finally, we can create the config resources:
+Create the config resources:
 
 ```shell
 # Create a user
@@ -326,7 +329,7 @@ Export your token:
 export TRAEFIK_HUB_TOKEN=SET_YOUR_TOKEN_HERE
 ```
 
-With this token, we can add a [static configuration file](linux/traefik-hub.toml) for Traefik Hub and a [systemd service](linux/traefik-hub.service):
+With this token, we can add a [static configuration file](linux/traefik-hub.toml) for Traefik Hub API Gateway and a [systemd service](linux/traefik-hub.service):
 
 ```shell
 sudo cp api-gateway/1-getting-started/linux/traefik-hub.toml /etc/traefik-hub/traefik-hub.toml
@@ -338,7 +341,7 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now traefik-hub.service
 ```
 
-We can check it is running with the following command:
+Ensure the service is working as expected using the dedicated command:
 
 ```shell
 sudo systemctl status traefik-hub.service
@@ -357,12 +360,12 @@ sudo systemctl status traefik-hub.service
 
 [...] systemd[1]: Started traefik-hub.service - Traefik Hub.
 ```
+## Step 2: Expose an API
 
-On Linux, we can use all the providers supported by Traefik Proxy and all the providers supported by Traefik Hub.
+:information_source: On Linux, we can use all the providers supported by Traefik Proxy and Traefik Hub API Gateway.
 
-Let's begin with a simple file provider.
-
-We will deploy a simple _whoami_ app on systemd and try to reach it from Traefik Proxy.
+In this example, we'll set a configuration using a YAML file.
+We will deploy a _whoami_ application on systemd and reach it from Traefik Proxy.
 
 ```shell
 # Install whoami
@@ -381,7 +384,7 @@ sudo useradd \
   --system whoami
 ```
 
-We will enable this app with a [systemd unit file](linux/whoami.service):
+Enable this app with a [systemd unit file](linux/whoami.service):
 
 ```shell
 sudo cp api-gateway/1-getting-started/linux/whoami.service /etc/systemd/system/whoami.service
@@ -415,7 +418,7 @@ User-Agent: curl/7.88.1
 Accept: */*
 ```
 
-Now, we can add a [simple dynamic configuration file](linux/whoami.yaml) to expose it with Traefik Hub.
+Now, add a [dynamic configuration file](linux/whoami.yaml) to expose it through Traefik Hub API Gateway.
 
 Let's apply this tutorial configuration and test it:
 
@@ -452,26 +455,42 @@ X-Forwarded-Server: ip-172-31-26-184
 X-Real-Ip: 127.0.0.1
 ```
 
-## Secure authentication using JWTs with Traefik Hub
+## Step 3: Secure the access using an API Key
 
-Now, let's try to secure its access with a JWT token.
+Let's secure the access with an API Key.
+
+Generate hash of our password. It can be done with `htpasswd` :
+
+```shell
+htpasswd -nbs "" "Let's use API Key with Traefik Hub" | cut -c 2-
+{SHA}dhiZGvSW60OMQ+J6hPEyJ+jfUoU=
+```
+
+```shell
+{SHA}dhiZGvSW60OMQ+J6hPEyJ+jfUoU=
+```
+
+Put this password in the API Key middleware:
 
 ```diff
-diff -Nau api-gateway/1-getting-started/linux/whoami.yaml api-gateway/1-getting-started/linux/whoami-jwt.yaml
+diff -Nau api-gateway/1-getting-started/linux/whoami.yaml api-gateway/1-getting-started/linux/whoami-apikey.yaml
 --- api-gateway/1-getting-started/linux/whoami.yaml
-+++ api-gateway/1-getting-started/linux/whoami-jwt.yaml
++++ api-gateway/1-getting-started/linux/whoami-apikey.yaml
 @@ -3,6 +3,14 @@
      whoami:
        rule: Host(`whoami.localhost`)
        service: local
 +      middlewares:
-+      - jwtAuth
++      - apikey-auth
 +
 +  middlewares:
-+    jwtAuth:
++    apikey-auth:
 +      plugin:
-+        jwt:
-+          signingSecret: "JWT on Traefik Hub!"
++        apikey:
++          keySource:
++            header: Authorization
++            headerAuthScheme: Bearer
++          secretValues: "{SHA}dhiZGvSW60OMQ+J6hPEyJ+jfUoU="
 
    services:
      local:
@@ -481,33 +500,22 @@ diff -Nau api-gateway/1-getting-started/linux/whoami.yaml api-gateway/1-getting-
 Let's apply it:
 
 ```shell
-sudo cp api-gateway/1-getting-started/linux/whoami-jwt.yaml /etc/traefik-hub/dynamic/whoami.yaml
+sudo cp api-gateway/1-getting-started/linux/whoami-apikey.yaml /etc/traefik-hub/dynamic/whoami.yaml
 sleep 5
 ```
 
-Get the token from https://jwt.io using the same signing secret or get one with command line:
-
-```bash
-jwt_header=$(echo -n '{"alg":"HS256","typ":"JWT"}' | base64 | sed s/\+/-/g | sed 's/\//_/g' | sed -E s/=+$//)
-payload=$(echo -n '{"sub": "123456789","name":"John Doe","iat":'$(date +%s)'}' | base64 | sed s/\+/-/g |sed 's/\//_/g' |  sed -E s/=+$//)
-secret='JWT on Traefik Hub!'
-hexsecret=$(echo -n "$secret" | od -A n -t x1  | sed 's/ *//g' | tr -d '\n')
-hmac_signature=$(echo -n "${jwt_header}.${payload}" |  openssl dgst -sha256 -mac HMAC -macopt hexkey:$hexsecret -binary | base64  | sed s/\+/-/g | sed 's/\//_/g' | sed -E s/=+$//)
-export JWT_TOKEN="${jwt_header}.${payload}.${hmac_signature}"
-```
-
-![JWT Token](../../src/images/jwt-token.png)
-
-With this token, we can test it:
+And test it:
 
 ```shell
 # This call is not authorized => 401
-curl -I http://whoami.localhost
+curl -I http://api.docker.localhost/weather
 # Let's set the token
-export JWT_TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.AuyxLr6YEAIdMxXujJ2icNvMCamR1SizrunWlyfLlJw"
+export API_KEY=$(echo -n "Let's use API Key with Traefik Hub" | base64)
 # This call with the token is allowed => 200
-curl -I -H "Authorization: Bearer $JWT_TOKEN" http://whoami.localhost
+curl -I -H "Authorization: Bearer $API_KEY" http://api.docker.localhost/weather
 ```
+
+The API is now secured.
 
 ## Docker providers
 
@@ -533,7 +541,7 @@ Now we can test the service with a simple [docker compose](linux/docker-compose.
 sudo docker-compose -f $(pwd)/api-gateway/1-getting-started/linux/docker-compose.yaml up -d
 ```
 
-Since we already enabled the docker provider in Traefik Hub configuration, we should now be able to curl it:
+Since we already enabled the docker provider in Traefik Hub API Gateway configuration, we should now be able to curl it:
 
 ```shell
 curl http://whoami.docker.localhost
