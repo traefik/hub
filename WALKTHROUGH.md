@@ -363,7 +363,7 @@ curl -I http://walkthrough.docker.localhost/api-key
 # Let's set the token
 export API_KEY=$(echo -n "Let's use API Key with Traefik Hub" | base64)
 # This call with the token is allowed => 200
-curl -I -H "Authorization: Bearer $API_KEY"  http://walkthrough.docker.localhost/api-key
+curl -I -H "Authorization: Bearer $API_KEY" http://walkthrough.docker.localhost/api-key
 ```
 
 The API is now secured.
