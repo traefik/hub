@@ -1,4 +1,4 @@
-module github.com/traefik/hub-preview/tests
+module github.com/traefik/hub/tests
 
 go 1.22.0
 

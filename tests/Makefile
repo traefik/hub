@@ -12,10 +12,10 @@ test: clean
 	go test -v -race -cover ./...
 
 test-apigw:
-	go test -run TestAPIGatewayTestSuite github.com/traefik/hub-preview/tests/apigateway
+	go test -run TestAPIGatewayTestSuite github.com/traefik/hub/tests/apigateway
 
 test-apim:
-	go test -run TestAPIManagementTestSuite github.com/traefik/hub-preview/tests/apimanagement
+	go test -run TestAPIManagementTestSuite github.com/traefik/hub/tests/apimanagement
 
 test-walkthrough:
-	go test -run TestWalkthroughTestSuite github.com/traefik/hub-preview/tests/walkthrough
+	go test -run TestWalkthroughTestSuite github.com/traefik/hub/tests/walkthrough

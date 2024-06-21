@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/k3s"
-	"github.com/traefik/hub-preview/tests/testhelpers"
+	"github.com/traefik/hub/tests/testhelpers"
 	"github.com/traefik/traefik/v3/integration/try"
 	"k8s.io/client-go/tools/clientcmd"
 	"sigs.k8s.io/controller-runtime/pkg/client"

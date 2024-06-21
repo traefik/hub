@@ -121,9 +121,9 @@ Now, we can access the local dashboard at http://dashboard.docker.localhost/.
 
 ## Step 2: Deploy an API as an Ingress
 
-:information_source: This tutorial implements API using a JSON server in Go; check out the source code [here](https://github.com/traefik/hub-preview/tree/main/src/api-server/).
+:information_source: This tutorial implements API using a JSON server in Go; check out the source code [here](https://github.com/traefik/hub/tree/main/src/api-server/).
 
-First, let's deploy a [weather app](https://github.com/traefik/hub-preview/blob/main/src/manifests/weather-app.yaml) exposing an API:
+First, let's deploy a [weather app](https://github.com/traefik/hub/blob/main/src/manifests/weather-app.yaml) exposing an API:
 
 ```shell
 kubectl apply -f src/manifests/weather-app.yaml
@@ -353,7 +353,7 @@ We can see the API available in the `apps` namespace in the portal. This first A
 
 Although not setting an OAS for an API is possible, it severely hurts getting started with API consumption.
 Let's see what features are unlocked if we set one.
-Let's deploy a [forecast app](https://github.com/traefik/hub-preview/blob/main/src/manifests/weather-app-forecast.yaml) with an OpenAPI specification:
+Let's deploy a [forecast app](https://github.com/traefik/hub/blob/main/src/manifests/weather-app-forecast.yaml) with an OpenAPI specification:
 
 ```shell
 kubectl apply -f src/manifests/weather-app-forecast.yaml
@@ -376,7 +376,7 @@ spec:
         - url: http://api.getting-started.apimanagement.docker.localhost
 ```
 
-The other resources are built on the same model, as we can see in [the complete file](https://github.com/traefik/hub-preview/blob/main/api-management/1-getting-started/manifests/forecast.yaml). Let's apply it:
+The other resources are built on the same model, as we can see in [the complete file](https://github.com/traefik/hub/blob/main/api-management/1-getting-started/manifests/forecast.yaml). Let's apply it:
 
 ```shell
 kubectl apply -f api-management/1-getting-started/manifests/forecast.yaml
