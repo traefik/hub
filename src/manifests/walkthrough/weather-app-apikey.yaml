@@ -2,36 +2,40 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: jwt-auth
+  name: apikey-auth
   namespace: apps
 stringData:
-  signingSecret: "JWT on Traefik Hub!"
+  secretKey: "{SHA}dhiZGvSW60OMQ+J6hPEyJ+jfUoU="
 
 ---
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
-  name: jwt-auth
+  name: apikey-auth
   namespace: apps
 spec:
   plugin:
-    jwt:
-      signingSecret: urn:k8s:secret:jwt-auth:signingSecret
+    apiKey:
+      keySource:
+        header: Authorization
+        headerAuthScheme: Bearer
+      secretValues:
+        - urn:k8s:secret:apikey-auth:secretKey
 
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: weather-api
+  name: walkthrough-weather-api-api-key
   namespace: apps
 spec:
   entryPoints:
     - web
   routes:
-  - match: Host(`api.docker.localhost`) && PathPrefix(`/weather`)
+  - match: Host(`walkthrough.docker.localhost`) && Path(`/api-key`)
     kind: Rule
     services:
     - name: weather-app
       port: 3000
     middlewares:
-    - name: jwt-auth
+    - name: apikey-auth

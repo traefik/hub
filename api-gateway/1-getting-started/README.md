@@ -147,18 +147,18 @@ service/weather-app created
 
 It can be exposed with an `IngressRoute`:
 
-```yaml
+```yaml :manifests/weather-app-ingressroute.yaml
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: weather-api
+  name: getting-started-apigateway
   namespace: apps
 spec:
   entryPoints:
     - web
   routes:
-  - match: Host(`api.docker.localhost`) && PathPrefix(`/weather`)
+  - match: HostRegexp(`getting-started.apigateway.docker.localhost`)
     kind: Rule
     services:
     - name: weather-app
@@ -166,17 +166,17 @@ spec:
 ```
 
 ```shell
-kubectl apply -f src/manifests/weather-app-ingressroute.yaml
+kubectl apply -f api-gateway/1-getting-started/manifests/weather-app-ingressroute.yaml
 ```
 
 ```shell
-ingressroute.traefik.io/weather-api created
+ingressroute.traefik.io/gw-1-weather-api created
 ```
 
 This API can be accessed using curl:
 
 ```shell
-curl http://api.docker.localhost/weather
+curl http://getting-started.apigateway.docker.localhost/
 ```
 
 ```json
@@ -206,11 +206,10 @@ htpasswd -nbs "" "Let's use API Key with Traefik Hub" | cut -c 2-
 
 Put this hash in the API Key `Middleware`:
 
-```diff
-diff -Nau src/manifests/weather-app-ingressroute.yaml src/manifests/weather-app-apikey.yaml
---- src/manifests/weather-app-ingressroute.yaml
-+++ src/manifests/weather-app-apikey.yaml
-@@ -1,4 +1,24 @@
+```diff :../../hack/diff.sh -r -a "manifests/weather-app-ingressroute.yaml manifests/weather-app-apikey.yaml"
+--- manifests/weather-app-ingressroute.yaml
++++ manifests/weather-app-apikey.yaml
+@@ -1,15 +1,41 @@
  ---
 +apiVersion: v1
 +kind: Secret
@@ -228,7 +227,10 @@ diff -Nau src/manifests/weather-app-ingressroute.yaml src/manifests/weather-app-
 +  namespace: apps
 +spec:
 +  plugin:
-+    apikey:
++    apiKey:
++      keySource:
++        header: Authorization
++        headerAuthScheme: Bearer
 +      secretValues:
 +        - urn:k8s:secret:apikey-auth:secretKey
 +
@@ -236,7 +238,16 @@ diff -Nau src/manifests/weather-app-ingressroute.yaml src/manifests/weather-app-
  apiVersion: traefik.io/v1alpha1
  kind: IngressRoute
  metadata:
-@@ -13,3 +33,5 @@
+-  name: getting-started-apigateway
++  name: getting-started-apigateway-api-key
+   namespace: apps
+ spec:
+   entryPoints:
+     - web
+   routes:
+-  - match: HostRegexp(`getting-started.apigateway.docker.localhost`)
++  - match: Host(`getting-started.apigateway.docker.localhost`) && Path(`/api-key`)
+     kind: Rule
      services:
      - name: weather-app
        port: 3000
@@ -244,27 +255,28 @@ diff -Nau src/manifests/weather-app-ingressroute.yaml src/manifests/weather-app-
 +    - name: apikey-auth
 ```
 
+
 Let's apply it:
 
 ```shell
-kubectl apply -f src/manifests/weather-app-apikey.yaml
+kubectl apply -f api-gateway/1-getting-started/manifests/weather-app-apikey.yaml
 ```
 
 ```shell
 secret/apikey-auth created
 middleware.traefik.io/apikey-auth created
-ingressroute.traefik.io/weather-api configured
+ingressroute.traefik.io/gw-1-weather-api-api-key created
 ```
 
 And test it:
 
 ```shell
 # This call is not authorized => 401
-curl -I http://api.docker.localhost/weather
+curl -I http://getting-started.apigateway.docker.localhost/api-key
 # Let's set the API key
 export API_KEY=$(echo -n "Let's use API Key with Traefik Hub" | base64)
 # This call with the token is allowed => 200
-curl -I -H "Authorization: Bearer $API_KEY" http://api.docker.localhost/weather
+curl -I -H "Authorization: Bearer $API_KEY" http://getting-started.apigateway.docker.localhost/api-key
 ```
 
 The API is now secured.
@@ -472,11 +484,10 @@ htpasswd -nbs "" "Let's use API Key with Traefik Hub" | cut -c 2-
 
 Put this password in the API Key middleware:
 
-```diff
-diff -Nau api-gateway/1-getting-started/linux/whoami.yaml api-gateway/1-getting-started/linux/whoami-apikey.yaml
---- api-gateway/1-getting-started/linux/whoami.yaml
-+++ api-gateway/1-getting-started/linux/whoami-apikey.yaml
-@@ -3,6 +3,14 @@
+```diff :../../hack/diff.sh -r -a "-Nau ../../api-gateway/1-getting-started/linux/whoami.yaml ../../api-gateway/1-getting-started/linux/whoami-apikey.yaml"
+--- ../../api-gateway/1-getting-started/linux/whoami.yaml
++++ ../../api-gateway/1-getting-started/linux/whoami-apikey.yaml
+@@ -3,6 +3,17 @@
      whoami:
        rule: Host(`whoami.localhost`)
        service: local
@@ -491,10 +502,9 @@ diff -Nau api-gateway/1-getting-started/linux/whoami.yaml api-gateway/1-getting-
 +            header: Authorization
 +            headerAuthScheme: Bearer
 +          secretValues: "{SHA}dhiZGvSW60OMQ+J6hPEyJ+jfUoU="
-
+ 
    services:
      local:
-
 ```
 
 Let's apply it:
@@ -508,11 +518,11 @@ And test it:
 
 ```shell
 # This call is not authorized => 401
-curl -I http://api.docker.localhost/weather
+curl -I http://whoami.localhost
 # Let's set the token
 export API_KEY=$(echo -n "Let's use API Key with Traefik Hub" | base64)
 # This call with the token is allowed => 200
-curl -I -H "Authorization: Bearer $API_KEY" http://api.docker.localhost/weather
+curl -I -H "Authorization: Bearer $API_KEY" http://whoami.localhost
 ```
 
 The API is now secured.

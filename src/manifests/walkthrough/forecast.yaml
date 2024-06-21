@@ -2,39 +2,39 @@
 apiVersion: hub.traefik.io/v1alpha1
 kind: API
 metadata:
-  name: getting-started-apimanagement-weather-api-forecast
+  name: walkthrough-weather-api-forecast
   namespace: apps
 spec:
   openApiSpec:
     path: /openapi.yaml
     override:
       servers:
-        - url: http://api.getting-started.apimanagement.docker.localhost
+        - url: http://api.walkthrough.docker.localhost
 
 ---
 apiVersion: hub.traefik.io/v1alpha1
 kind: APIAccess
 metadata:
-  name: getting-started-apimanagement-weather-api-forecast
+  name: walkthrough-weather-api-forecast
   namespace: apps
 spec:
   apis:
-  - name: getting-started-apimanagement-weather-api-forecast
+  - name: walkthrough-weather-api-forecast
   everyone: true
 
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: getting-started-apimanagement-weather-api-forecast
+  name: walkthrough-weather-api-forecast
   namespace: apps
   annotations:
-    hub.traefik.io/api: getting-started-apimanagement-weather-api-forecast
+    hub.traefik.io/api: walkthrough-weather-api-forecast
 spec:
   entryPoints:
   - web
   routes:
-  - match: Host(`api.getting-started.apimanagement.docker.localhost`) && Path(`/forecast`)
+  - match: Host(`api.walkthrough.docker.localhost`) && Path(`/forecast`)
     kind: Rule
     services:
     - name: weather-app-forecast

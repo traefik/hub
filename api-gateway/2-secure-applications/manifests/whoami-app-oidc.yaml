@@ -2,17 +2,17 @@
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
-  name: oidc
+  name: oidc-login
   namespace: apps
 spec:
   plugin:
     oidc:
       issuer: http://hydra.hydra.svc:4444
-      clientID: $CLIENT_ID
-      clientSecret: $CLIENT_SECRET
-      loginUrl: /login
-      logoutUrl: /logout
-      redirectUrl: /callback
+      clientID: ${CLIENT_ID}
+      clientSecret: ${CLIENT_SECRET}
+      loginUrl: /oidc/login
+      logoutUrl: /oidc/logout
+      redirectUrl: /oidc/callback
       csrf: {}
       session:
         name: "oidc-session"
@@ -21,16 +21,16 @@ spec:
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: whoami
+  name: secure-applications-apigateway-whoami-oidc
   namespace: apps
 spec:
   entryPoints:
     - web
   routes:
-  - match: Host(`whoami.docker.localhost`)
+  - match: Host(`secure-applications.apigateway.docker.localhost`) && (Path(`/oidc`) || Path(`/oidc/login`) || Path(`/oidc/logout`) || Path(`/oidc/callback`))
     kind: Rule
     services:
     - name: whoami
       port: 80
     middlewares:
-    - name: oidc
+    - name: oidc-login

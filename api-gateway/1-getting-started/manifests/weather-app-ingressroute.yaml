@@ -2,13 +2,13 @@
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: weather-api
+  name: getting-started-apigateway
   namespace: apps
 spec:
   entryPoints:
     - web
   routes:
-  - match: Host(`api.docker.localhost`) && PathPrefix(`/weather`)
+  - match: HostRegexp(`getting-started.apigateway.docker.localhost`)
     kind: Rule
     services:
     - name: weather-app

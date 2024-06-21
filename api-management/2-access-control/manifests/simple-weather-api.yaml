@@ -2,7 +2,7 @@
 apiVersion: hub.traefik.io/v1alpha1
 kind: API
 metadata:
-  name: weather-api
+  name: access-control-apimanagement-simple-weather
   namespace: apps
   labels:
     subscription: standard
@@ -14,12 +14,12 @@ spec:
 apiVersion: hub.traefik.io/v1alpha1
 kind: APIAccess
 metadata:
-  name: weather-api
+  name: access-control-apimanagement-simple-weather
   namespace: apps
 spec:
   groups:
     - external
-  apiSelector:
+  apiSelector: # <======== Select all APIs with label subscription=external
     matchLabels:
       subscription: standard
 
@@ -27,15 +27,15 @@ spec:
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: weather-api
+  name: access-control-apimanagement-simple-weather
   namespace: apps
   annotations:
-    hub.traefik.io/api: weather-api
+    hub.traefik.io/api: access-control-apimanagement-simple-weather
 spec:
   entryPoints:
     - web
   routes:
-  - match: Host(`api.docker.localhost`) && PathPrefix(`/weather`)
+  - match: Host(`api.access-control.apimanagement.docker.localhost`) && Path(`/simple/weather`)
     kind: Rule
     services:
     - name: weather-app

@@ -30,7 +30,7 @@ In this tutorial, we will use [Ory Hydra](https://www.ory.sh/hydra/), an OAuth 2
 We can deploy it:
 
 ```shell
-kubectl apply -f api-gateway/2-secure-applications/manifests/hydra.yaml
+kubectl apply -f src/manifests/hydra.yaml
 kubectl wait -n hydra --for=condition=ready pod --selector=app=hydra --timeout=90s
 kubectl wait -n hydra --for=condition=ready pod --selector=app=consent --timeout=90s
 ```
@@ -41,7 +41,7 @@ First, let's deploy and expose it:
 
 ```shell
 kubectl apply -f src/manifests/whoami-app.yaml
-kubectl apply -f src/manifests/whoami-app-ingressroute.yaml
+kubectl apply -f api-gateway/2-secure-applications/manifests/whoami-app-ingressroute.yaml
 sleep 5
 ```
 
@@ -49,46 +49,46 @@ sleep 5
 namespace/apps created
 deployment.apps/whoami created
 service/whoami created
-ingressroute.traefik.io/whoami
+ingressroute.traefik.io/secure-applications-apigateway-no-auth created
 ```
 
-It should be accessible with curl on http://whoami.docker.localhost/
+It should be accessible with curl on http://secure-applications.apigateway.docker.localhost/no-auth
 
 ```shell
-curl http://whoami.docker.localhost/
+curl http://secure-applications.apigateway.docker.localhost/no-auth
 ```
 
 ```shell
-Hostname: whoami-697f8c6cbc-8wqq8
+Hostname: whoami-6f57d5d6b5-bgmfl
 IP: 127.0.0.1
 IP: ::1
-IP: 10.244.0.9
-IP: fe80::7c41:ceff:fe38:23e7
-RemoteAddr: 10.244.0.10:41222
-GET / HTTP/1.1
-Host: whoami.docker.localhost
-User-Agent: curl/7.88.1
+IP: 10.42.0.10
+IP: fe80::c8f6:84ff:fe66:3158
+RemoteAddr: 10.42.0.6:38110
+GET /no-auth HTTP/1.1
+Host: secure-applications.apigateway.docker.localhost
+User-Agent: curl/8.5.0
 Accept: */*
 Accept-Encoding: gzip
-X-Forwarded-For: 10.244.0.1
-X-Forwarded-Host: whoami.docker.localhost
+X-Forwarded-For: 10.42.0.1
+X-Forwarded-Host: secure-applications.apigateway.docker.localhost
 X-Forwarded-Port: 80
 X-Forwarded-Proto: http
-X-Forwarded-Server: traefik-hub-54fc878695-8r696
-X-Real-Ip: 10.244.0.1
+X-Forwarded-Server: traefik-hub-6f5bbd6568-rp882
+X-Real-Ip: 10.42.0.1
 ```
 
 To secure it with OAuth2, we can use the OAuth2 Client Credentials middleware:
 
-```diff
---- src/manifests/whoami-app-ingressroute.yaml
-+++ api-gateway/2-secure-applications/manifests/whoami-app-oauth2.yaml
-@@ -1,5 +1,20 @@
+```diff :../../hack/diff.sh -r -a "manifests/whoami-app-ingressroute.yaml manifests/whoami-app-oauth2-client-creds.yaml"
+--- manifests/whoami-app-ingressroute.yaml
++++ manifests/whoami-app-oauth2-client-creds.yaml
+@@ -1,15 +1,32 @@
  ---
  apiVersion: traefik.io/v1alpha1
 +kind: Middleware
 +metadata:
-+  name: oauth2-creds
++  name: oauth2-client-creds
 +  namespace: apps
 +spec:
 +  plugin:
@@ -103,24 +103,32 @@ To secure it with OAuth2, we can use the OAuth2 Client Credentials middleware:
 +apiVersion: traefik.io/v1alpha1
  kind: IngressRoute
  metadata:
-   name: whoami
-@@ -13,3 +28,5 @@
+-  name: secure-applications-apigateway-no-auth
++  name: secure-applications-apigateway-oauth2-client-credentials
+   namespace: apps
+ spec:
+   entryPoints:
+     - web
+   routes:
+-  - match: Host(`secure-applications.apigateway.docker.localhost`) && Path(`/no-auth`)
++  - match: Host(`secure-applications.apigateway.docker.localhost`) && Path(`/oauth2-client-credentials`)
+     kind: Rule
      services:
      - name: whoami
        port: 80
 +    middlewares:
-+    - name: oauth2-creds
++    - name: oauth2-client-creds
 ```
 
 We can deploy the secured `IngressRoute`:
 
 ```shell
-kubectl apply -f api-gateway/2-secure-applications/manifests/whoami-app-oauth2.yaml
+kubectl apply -f api-gateway/2-secure-applications/manifests/whoami-app-oauth2-client-creds.yaml
 ```
 
 ```shell
 middleware.traefik.io/oauth2-creds created
-ingressroute.traefik.io/whoami configured
+ingressroute.traefik.io/gw-2-whoami-m2m-oauth2 created
 ```
 
 Once it's ready, we can create a Hydra OAuth2 client with _client_credentials_ grant type and test the authentication with it:
@@ -135,35 +143,35 @@ echo $client | jq -r '{ "client_id": .client_id, "client_secret": .client_secret
 client_id=$(echo $client | jq -r '.client_id')
 client_secret=$(echo $client | jq -r '.client_secret')
 auth=$(echo -n "$client_id:$client_secret" | base64 -w 0)
-curl -H "Authorization: Basic $auth" whoami.docker.localhost
+curl -H "Authorization: Basic $auth" http://secure-applications.apigateway.docker.localhost/oauth2-client-credentials
 ```
 
 It should output something like this:
 
 ```shell
 {
-  "client_id": "4a3265b7-ac47-4f84-b7ad-dffa4f907ffb",
+  "client_id": "fee56775-bab3-4152-ad37-e2114ade6449",
   "client_secret": "traefiklabs"
 }
-Hostname: whoami-697f8c6cbc-kbtls
+Hostname: whoami-6f57d5d6b5-bgmfl
 IP: 127.0.0.1
 IP: ::1
-IP: 10.244.0.19
-IP: fe80::a8a4:1aff:fe79:dd55
-RemoteAddr: 10.244.0.20:37702
-GET / HTTP/1.1
-Host: whoami.docker.localhost
-User-Agent: curl/7.88.1
+IP: 10.42.0.10
+IP: fe80::c8f6:84ff:fe66:3158
+RemoteAddr: 10.42.0.6:37870
+GET /oauth2-client-credentials HTTP/1.1
+Host: secure-applications.apigateway.docker.localhost
+User-Agent: curl/8.5.0
 Accept: */*
 Accept-Encoding: gzip
-Authorization: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImQ4ZDVkNTNhLWNiNmEtNDhlMi1iMzUxLTA0ZTc3N2U0Njk2YiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiaHR0cHM6Ly90cmFlZmlrLmlvIl0sImNsaWVudF9pZCI6IjRhMzI2NWI3LWFjNDctNGY4NC1iN2FkLWRmZmE0ZjkwN2ZmYiIsImV4cCI6MTcxNTg3NDg0NSwiZXh0Ijp7fSwiaWF0IjoxNzE1ODcxMjQ1LCJpc3MiOiJodHRwOi8vaHlkcmE6NDQ0NCIsImp0aSI6ImIxYzI5ODFiLWViZmUtNDZlMS04ZDQ2LTY1NjE0N2RlMzUzNCIsIm5iZiI6MTcxNTg3MTI0NSwic2NwIjpbXSwic3ViIjoiNGEzMjY1YjctYWM0Ny00Zjg0LWI3YWQtZGZmYTRmOTA3ZmZiIn0.fXt8SslskPIjjgh9gYfC2sjkfjDpjZ_n3m2oQ5EG1PqPHdVkV2kcc00R3bJXXi5kabNRoIvluJX4K_kx93w6Q8OoZ-MCO0TnkitzRduVVw6QqfkCDCWh7v2bLv3Kev6e_U3jmMcXXWkS7CA2tJycSkficK_wIUvMyO2RCDoChwvk_xDFPHf9zmnOGPEJsppMK16wMfE1MYz67sPiLGnU3x3pKIlyTLd7FsPw-GqpXzC1hbHEvoL3cmjCpHm4AQ1ksxJct0fI70Gd2UDSA6j4j0W5ma2fa8ugp6pCHVOnuvNjlfFWod0lX7Izff9RatWpakFlkzNH3JgmdnYwSbnYUuukIGVYaggZNWsu8jaX5jT0nXK_F-sIpuO5shRVNfT3hQUmf2pw_lOZC10p8ZKxzS91rG-8haWGfwJvbtft7LMSs47300832y1PNcri8PS5n9oCh4yNF94WgEwrqKU-iRUkd73SKAYVcFDtU7HeQ9yN0e_Itg6GpbnzgWMxKpLfT-iYV3TuX42S-wimcvxSmB22_IfVbXlwtJOi7IijkJpGcetcShz6R8CHu9upK-78IVQa_eRhw9VAwx2iTLrkjr8Q6xdxCGd1ajSvjQOahlDIO7Va1vxUsZXRNjHRUCSP1vKGJVcXI6xGG5r2wt_87BYsH6d3pLFmd89Q_MfAWn0
-Sub: 4a3265b7-ac47-4f84-b7ad-dffa4f907ffb
-X-Forwarded-For: 10.244.0.1
-X-Forwarded-Host: whoami.docker.localhost
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjU2ZDdkMzliLTdhNTUtNDFkZi1iNjZkLTRjYzU0YmQ1YmZmOCIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiaHR0cHM6Ly90cmFlZmlrLmlvIl0sImNsaWVudF9pZCI6ImZlZTU2Nzc1LWJhYjMtNDE1Mi1hZDM3LWUyMTE0YWRlNjQ0OSIsImV4cCI6MTcxODgxNzQ5MiwiZXh0Ijp7fSwiaWF0IjoxNzE4ODEzODkyLCJpc3MiOiJodHRwOi8vaHlkcmEuaHlkcmEuc3ZjOjQ0NDQiLCJqdGkiOiI3Y2NmNzAxNC04OWM0LTQ1OTYtYWFjNS0wNTdlZjIzYjVjNjkiLCJuYmYiOjE3MTg4MTM4OTIsInNjcCI6W10sInN1YiI6ImZlZTU2Nzc1LWJhYjMtNDE1Mi1hZDM3LWUyMTE0YWRlNjQ0OSJ9.AwT-3_XQvScKzcfK-HumGZn9AfD9BofzfMxraT4Nmvb7OPamkPwhn6i_hwYtvcxth0TUx6W4gziMX867rw3jPS_KZPeq33GYWkIlmVJbmE90jWcST7MOm5_Pl-KfmV9YKioWD1RFGGM3rkIrobmtH1JM3Oxbxi5bbcPOrdFGlpIiAst5V6LC8e93vwga9mvh86TCT7ZnaxVHNN5Rrz_KdkCnidpUcc5Vev1GlTGOyhK4uolqu7fyQiyckeSNGB_BLB-bk1JBPEApgPWRjKIXLwhmR-xg4WXFl3kWY4nBI7ECmbClMMCfpXa1zYWF_kjDHodWxL7n7dEsrsZuykXRTKT10iT2VxH7QrPS-lHOu_sg6svCCGObB_lkv0rHBP6P9K-nD3tkJi_uPbVEIFkzjxDe6CEIZ2Xrn8H1GVmig-NoNGpflMYVu41wb_6eRv-PPACD_GI-YQOQvpMJXPFIjMIUMmvIWg-vD0bzrd_YUipa0HfruP_ENnHeIXwhJBMCWeVNwGCslsSj8uO7KaTF1NrTDuIHZNBnAp2WxZFQ4RPC5O1T3TJOpPn7dj5PKN-XgUGQlmUCUGPazfvFFBFQymoDSL88ijXDTkbzYGD2TnrbcqyCWV6uJdyEoV1Q8OA_lGtN39XcUuyiMGavSGdQY5yyBoULXo8oAwprOIdAy68
+Sub: fee56775-bab3-4152-ad37-e2114ade6449
+X-Forwarded-For: 10.42.0.1
+X-Forwarded-Host: secure-applications.apigateway.docker.localhost
 X-Forwarded-Port: 80
 X-Forwarded-Proto: http
-X-Forwarded-Server: traefik-hub-54458bcb46-bwwvc
-X-Real-Ip: 10.244.0.1
+X-Forwarded-Server: traefik-hub-6f5bbd6568-rp882
+X-Real-Ip: 10.42.0.1
 ```
 
 As we can see:
@@ -196,19 +204,41 @@ sequenceDiagram
 
 We will remove the forward headers block and set the client's credentials directly in the middleware. We are using environment variables to substitute them according to your credentials to generate the applied configuration.
 
-```diff
-diff -Nau api-gateway/2-secure-applications/manifests/whoami-app-oauth2.yaml api-gateway/2-secure-applications/manifests/whoami-app-oauth2-client-creds.yaml
---- api-gateway/2-secure-applications/manifests/whoami-app-oauth2.yaml
-+++ api-gateway/2-secure-applications/manifests/whoami-app-oauth2-client-creds.yaml
-@@ -9,9 +9,8 @@
-     oAuthClientCredentials:
-       url: http://hydra.hydra.svc:4444/oauth2/token
-       audience: https://traefik.io
--      usernameClaim: sub
--      forwardHeaders:
--        Sub: sub
-+      clientId: $CLIENT_ID
-+      clientSecret: $CLIENT_SECRET
+```diff :../../hack/diff.sh -r -a "manifests/whoami-app-oauth2.yaml manifests/whoami-app-oauth2-client-creds-nologin.yaml"
+--- manifests/whoami-app-oauth2.yaml
++++ manifests/whoami-app-oauth2-client-creds-nologin.yaml
+@@ -0,0 +1,31 @@
++---
++apiVersion: traefik.io/v1alpha1
++kind: Middleware
++metadata:
++  name: oauth2-client-creds-nologin
++  namespace: apps
++spec:
++  plugin:
++    oAuthClientCredentials:
++      url: http://hydra.hydra.svc:4444/oauth2/token
++      audience: https://traefik.io
++      clientId: ${CLIENT_ID}
++      clientSecret: ${CLIENT_SECRET}
++
++---
++apiVersion: traefik.io/v1alpha1
++kind: IngressRoute
++metadata:
++  name: secure-applications-apigateway-oauth2-client-credentials-nologin
++  namespace: apps
++spec:
++  entryPoints:
++    - web
++  routes:
++  - match: Host(`secure-applications.apigateway.docker.localhost`) && Path(`/oauth2-client-credentials-nologin`)
++    kind: Rule
++    services:
++    - name: whoami
++      port: 80
++    middlewares:
++    - name: oauth2-client-creds-nologin
 ```
 
 Let's try it with a new user:
@@ -221,38 +251,35 @@ client=$(kubectl exec -it -n hydra deploy/hydra -- \
 echo $client | jq -r '{ "client_id": .client_id, "client_secret": .client_secret }'
 export CLIENT_ID=$(echo $client | jq -r '.client_id')
 export CLIENT_SECRET=$(echo $client | jq -r '.client_secret')
-cat api-gateway/2-secure-applications/manifests/whoami-app-oauth2-client-creds.yaml | envsubst | kubectl apply -f -
+cat api-gateway/2-secure-applications/manifests/whoami-app-oauth2-client-creds-nologin.yaml | envsubst | kubectl apply -f -
 sleep 2
-curl whoami.docker.localhost
+curl http://secure-applications.apigateway.docker.localhost/oauth2-client-credentials-nologin
 ```
 
 As we can see, there is no authentication required now *and* there is a JWT access token transmitted to the application:
 
 ```shell
 {
-  "client_id": "bcd19bc4-240d-4a1c-93fa-64f2818590f8",
+  "client_id": "3d3604eb-cd92-4012-989a-01167277c4f1",
   "client_secret": "traefiklabs"
 }
-middleware.traefik.io/oauth2-creds configured
-ingressroute.traefik.io/whoami unchanged
-Hostname: whoami-697f8c6cbc-kbtls
+Hostname: whoami-6f57d5d6b5-bgmfl
 IP: 127.0.0.1
 IP: ::1
-IP: 10.244.0.19
-IP: fe80::a8a4:1aff:fe79:dd55
-RemoteAddr: 10.244.0.20:55802
-GET / HTTP/1.1
-Host: whoami.docker.localhost
-User-Agent: curl/7.88.1
+IP: 10.42.0.10
+IP: fe80::c8f6:84ff:fe66:3158
+RemoteAddr: 10.42.0.6:50004
+GET /oauth2-client-credentials-nologin HTTP/1.1
+Host: secure-applications.apigateway.docker.localhost
+User-Agent: curl/8.5.0
 Accept: */*
 Accept-Encoding: gzip
-Authorization: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImQ4ZDVkNTNhLWNiNmEtNDhlMi1iMzUxLTA0ZTc3N2U0Njk2YiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiaHR0cHM6Ly90cmFlZmlrLmlvIl0sImNsaWVudF9pZCI6ImJjZDE5YmM0LTI0MGQtNGExYy05M2ZhLTY0ZjI4MTg1OTBmOCIsImV4cCI6MTcxNTg3NjE2NywiZXh0Ijp7fSwiaWF0IjoxNzE1ODcyNTY3LCJpc3MiOiJodHRwOi8vaHlkcmE6NDQ0NCIsImp0aSI6IjVjZmUyMWQ3LWZkMGQtNDE5Ny05YzBlLWNhZDMwYTk2ZmYzNiIsIm5iZiI6MTcxNTg3MjU2Nywic2NwIjpbXSwic3ViIjoiYmNkMTliYzQtMjQwZC00YTFjLTkzZmEtNjRmMjgxODU5MGY4In0.JCMmt_RQiJuzdxJS0DLFsMt8jX3zDiHsD0iQnm3k4T-nCvUAev3ij4D0zeuhnXSmCs7Xr69gJkmbbGLemc19huioklPja4mLgKyxbU_lr3ua7n66nMWt5miq4VXk10xsUAJzB4tqbZMfX_GWL66u1XD8G3kgFN5JZ5zVVUmYFfF6sYT-bsOOfJcHWORlMNJUniIat-GaobkapW_knH38AU7JMiXxoek4GjB3rthXGVtyKQpsY1azmJ6LBx5_pWEiOjvq5pne3qdogTTeCsl9u9KMZuOVIPCYS3NH34ILgx4NbMZgD_PvU1D_encRuFMYlu2rNsWFdW6aAIh_RbfxlQZm1T-MjghTr0QJT8e4d6SLGWB_AUUnR7ANxUmZjN-lLrv_G0tiLKYJfx6HTRhejGxR13xrUKYr8HknxysUMjexXqVgwlkML8l13xPHBJQddIeDUcqCrVTPWq4BzYOFVTGFOrJ24vqpGeCQPWGuv59DcanYYsOYpxrFbXlrjgjX12q6ONo5Oi94_hgo-wKWfS0yjuirsnO8Rpcl47J03lvwjhqbNKUFBfPqWJaSYukVhfgZc4aTD0xVc4GiHVgy6x6MkiuI8FL62EF1MQEhQrWD-1KF_siYDL0mAW0NvcxgA4aAxtNwV71brIjfHQejtwZ0Sk-OJnFvsJ0iHoMq7Rg
-X-Forwarded-For: 10.244.0.1
-X-Forwarded-Host: whoami.docker.localhost
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjU2ZDdkMzliLTdhNTUtNDFkZi1iNjZkLTRjYzU0YmQ1YmZmOCIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiaHR0cHM6Ly90cmFlZmlrLmlvIl0sImNsaWVudF9pZCI6IjNkMzYwNGViLWNkOTItNDAxMi05ODlhLTAxMTY3Mjc3YzRmMSIsImV4cCI6MTcxODgxNzYyMiwiZXh0Ijp7fSwiaWF0IjoxNzE4ODE0MDIyLCJpc3MiOiJodHRwOi8vaHlkcmEuaHlkcmEuc3ZjOjQ0NDQiLCJqdGkiOiJmYTcwZDBlMy1hM2E4LTQ4ZDYtYmNmNi1mMGYyZDEwY2ZkYTUiLCJuYmYiOjE3MTg4MTQwMjIsInNjcCI6W10sInN1YiI6IjNkMzYwNGViLWNkOTItNDAxMi05ODlhLTAxMTY3Mjc3YzRmMSJ9.fVM8ba7cSLBC-2J5t72sp8bzbZF5hGZRvaiWsKeJQxqcslQrB05nzZHhKvkg5Bqsw-0wycFVvYuc_1DWRai0jE7mG73vgiTuuBe38NaAh4hVt9vTORzvKtm_V1Wx4ZAtniGB-6o5ta6TyLc68tq78KHUeWTzZ0f5ugteZVmrflvBgWQWWjM612op2nbA9m6ArDurWRst6FAvJ_lSja60XHjmHSan78Q9ps7PzH1PB2zkmrsaI6Y-c81CtMR6KOdBmO0iD4eRoHGh2GP0iCiozv9r_8pLc7xkdFBDeFoswGIVRQhqEvOLchE5Ca7DnI6PQupX8NtXRrPY-blS8d-WT4UwHVUOc_nEQHhZuIZk3IG7iE6JMmtc_0dOWdBlu5m-XVHe1mC5XSb55McuY0ckp2mb2pbPgQJCcra67prcqQqpXZc0syOCTlvjk6mHBXYMmiISIsunGttKmNuZKFteUiaPsqgRJf_B2JQvG4RknEk1Nl5VKr8ouneP0xunSCRCZyGScZ_qt5XPbhBqLOA4dedATWqtQ7UT8hp5TWOmE0_1bZM3CKSOQeX3aPQWA6NFsJHKxY2IZsohes_QXACCI2qfHa5CVueRzgBYPkECtWC1pXhBWy4E5p4Jp-2mMBvEpTjltcprndfaGbFHxOw1nj1p24ESES7P9IUK73DQca8
+X-Forwarded-For: 10.42.0.1
+X-Forwarded-Host: secure-applications.apigateway.docker.localhost
 X-Forwarded-Port: 80
 X-Forwarded-Proto: http
-X-Forwarded-Server: traefik-hub-54458bcb46-bwwvc
-X-Real-Ip: 10.244.0.1
-```
+X-Forwarded-Server: traefik-hub-6f5bbd6568-rp882
+X-Real-Ip: 10.42.0.1
 
-This mode is clearly less secure. Nevertheless, it's possible to secure requests between applications and Traefik Hub using other techniques (not exhaustive): IP restriction with `IPAllowList`, other authentication mechanisms like `BasicAuth`, or using mTLS.
+```

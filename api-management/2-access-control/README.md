@@ -30,12 +30,12 @@ kubectl apply -f src/manifests/admin-app.yaml
 
 To ensure isolation between access, there is a versatile `APIAccess` CRD, allowing the linking of user groups and APIs. So, let's declare the _admin_ API with its `APIAccess`:
 
-```yaml
+```yaml :manifests/simple-admin-api.yaml
 ---
 apiVersion: hub.traefik.io/v1alpha1
 kind: API
 metadata:
-  name: admin-api
+  name: access-control-apimanagement-simple-admin
   namespace: admin
 spec: {}
 
@@ -43,82 +43,85 @@ spec: {}
 apiVersion: hub.traefik.io/v1alpha1
 kind: APIAccess
 metadata:
-  name: admin
+  name: access-control-apimanagement-simple-admin
   namespace: admin
 spec:
-  apis: # <===== Select only this API
-    - name: admin-api
   groups: # <=== Allow access only for this group
     - admin
+  apis: # <=== Select only this API
+    - name: access-control-apimanagement-simple-admin
 
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: admin-api
+  name: access-control-apimanagement-simple-admin
   namespace: admin
   annotations:
-    hub.traefik.io/api: admin-api
+    hub.traefik.io/api: access-control-apimanagement-simple-admin
 spec:
   entryPoints:
     - web
   routes:
-  - match: Host(`api.docker.localhost`) && PathPrefix(`/admin`)
+  - match: Host(`api.access-control.apimanagement.docker.localhost`) && Path(`/simple/admin`)
     kind: Rule
     services:
     - name: admin-app
       port: 3000
+
 ```
 
 ```shell
-kubectl apply -f api-management/2-access-control/simple/admin-api.yaml
+kubectl apply -f api-management/2-access-control/manifests/simple-admin-api.yaml
 ```
 
 ```shell
-api.hub.traefik.io/admin-api created
-apiaccess.hub.traefik.io/admin created
-ingressroute.traefik.io/admin-api created
+api.hub.traefik.io/access-control-apimanagement-simple-admin created
+apiaccess.hub.traefik.io/access-control-apimanagement-admin-simple created
+ingressroute.traefik.io/access-control-apimanagement-simple-admin created
 ```
 
 For the _external_ `API` with its `APIAccess`, we'll see how to use a label selector:
 
-```yaml
+```yaml :manifests/simple-weather-api.yaml
 ---
 apiVersion: hub.traefik.io/v1alpha1
 kind: API
 metadata:
-  name: weather-api
+  name: access-control-apimanagement-simple-weather
   namespace: apps
   labels:
-    subscription: external
-spec: {}
+    subscription: standard
+spec:
+  openApiSpec:
+    path: /openapi.yaml
 
 ---
 apiVersion: hub.traefik.io/v1alpha1
 kind: APIAccess
 metadata:
-  name: weather-api-external
+  name: access-control-apimanagement-simple-weather
   namespace: apps
 spec:
   groups:
     - external
   apiSelector: # <======== Select all APIs with label subscription=external
     matchLabels:
-      subscription: external
+      subscription: standard
 
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: weather-api
+  name: access-control-apimanagement-simple-weather
   namespace: apps
   annotations:
-    hub.traefik.io/api: weather-api
+    hub.traefik.io/api: access-control-apimanagement-simple-weather
 spec:
   entryPoints:
     - web
   routes:
-  - match: Host(`api.docker.localhost`) && PathPrefix(`/weather`)
+  - match: Host(`api.access-control.apimanagement.docker.localhost`) && Path(`/simple/weather`)
     kind: Rule
     services:
     - name: weather-app
@@ -126,13 +129,13 @@ spec:
 ```
 
 ```shell
-kubectl apply -f api-management/2-access-control/simple/weather-api.yaml
+kubectl apply -f api-management/2-access-control/manifests/simple-weather-api.yaml
 ```
 
 ```shell
-api.hub.traefik.io/weather-api created
-apiaccess.hub.traefik.io/weather-api created
-ingressroute.traefik.io/weather-api created
+api.hub.traefik.io/access-control-apimanagement-simple-weather created
+apiaccess.hub.traefik.io/access-control-apimanagement-simple-weather created
+ingressroute.traefik.io/access-control-apimanagement-simple-weather created
 ```
 
 ### Test it
@@ -148,16 +151,16 @@ export EXTERNAL_TOKEN=
 
 ```shell
 # This call is allowed => 200
-curl -i -H "Authorization: Bearer $ADMIN_TOKEN" "http://api.docker.localhost/admin"
+curl -i -H "Authorization: Bearer $ADMIN_TOKEN" "http://api.access-control.apimanagement.docker.localhost/simple/admin"
 # This call is forbidden => 403
-curl -i -H "Authorization: Bearer $ADMIN_TOKEN" "http://api.docker.localhost/weather"
+curl -i -H "Authorization: Bearer $ADMIN_TOKEN" "http://api.access-control.apimanagement.docker.localhost/simple/weather"
 ```
 
 ```shell
 # This call is allowed => 200
-curl -i -H "Authorization: Bearer $EXTERNAL_TOKEN" "http://api.docker.localhost/weather"
+curl -i -H "Authorization: Bearer $EXTERNAL_TOKEN" "http://api.access-control.apimanagement.docker.localhost/simple/weather"
 # This call is forbidden => 403
-curl -i -H "Authorization: Bearer $EXTERNAL_TOKEN" "http://api.docker.localhost/admin"
+curl -i -H "Authorization: Bearer $EXTERNAL_TOKEN" "http://api.access-control.apimanagement.docker.localhost/simple/admin"
 ```
 
 :information_source: If it fails, just wait one minute and try again. The token needs to be sync before it can be accepted by Traefik Hub.
@@ -187,39 +190,45 @@ graph LR
 
 One needs to define operationSets to configure operationFilters. Here, we'll differentiate **GET** and **PATCH** HTTP methods.
 
-```diff
-$ diff -Nau --color api-management/2-access-control/simple/weather-api.yaml api-management/2-access-control/complex/weather-api.yaml
---- api-management/2-access-control/simple/weather-api.yaml
-+++ api-management/2-access-control/complex/weather-api.yaml
-@@ -9,6 +9,15 @@
+```diff :../../hack/diff.sh -r -a "manifests/simple-weather-api.yaml manifests/complex-weather-api.yaml"
+--- manifests/simple-weather-api.yaml
++++ manifests/complex-weather-api.yaml
+@@ -2,41 +2,71 @@
+ apiVersion: hub.traefik.io/v1alpha1
+ kind: API
+ metadata:
+-  name: access-control-apimanagement-simple-weather
++  name: access-control-apimanagement-complex-weather
+   namespace: apps
+   labels:
+     subscription: standard
  spec:
    openApiSpec:
      path: /openapi.yaml
 +    operationSets:
 +      - name: get-forecast
 +        matchers:
-+          - pathPrefix: "/weather"
++          - pathPrefix: "/complex/weather"
 +            methods: [ "GET" ]
 +      - name: patch-forecast
 +        matchers:
-+          - pathPrefix: "/weather"
++          - pathPrefix: "/complex/weather"
 +            methods: [ "PATCH" ]
-
- ---
- apiVersion: hub.traefik.io/v1alpha1
+ 
  ---
  apiVersion: hub.traefik.io/v1alpha1
  kind: APIAccess
  metadata:
--  name: weather-api
-+  name: weather-api-external
+-  name: access-control-apimanagement-simple-weather
++  name: access-control-apimanagement-complex-weather-external
    namespace: apps
  spec:
    groups:
-@@ -22,6 +31,26 @@
-   apiSelector:
+     - external
+-  apiSelector: # <======== Select all APIs with label subscription=external
++  apiSelector:
      matchLabels:
-       subscription: external
+       subscription: standard
 +  operationFilter:
 +    include:
 +      - get-forecast
@@ -228,18 +237,40 @@ $ diff -Nau --color api-management/2-access-control/simple/weather-api.yaml api-
 +apiVersion: hub.traefik.io/v1alpha1
 +kind: APIAccess
 +metadata:
-+  name: weather-api-admin
++  name: access-control-apimanagement-complex-weather-admin
 +  namespace: apps
 +spec:
 +  groups:
 +    - admin
 +  apiSelector:
 +    matchLabels:
-+      subscription: external
++      subscription: standard
 +  operationFilter:
 +    include:
 +      - get-forecast
 +      - patch-forecast
+ 
+ ---
+ apiVersion: traefik.io/v1alpha1
+ kind: IngressRoute
+ metadata:
+-  name: access-control-apimanagement-simple-weather
++  name: access-control-apimanagement-complex-weather
+   namespace: apps
+   annotations:
+-    hub.traefik.io/api: access-control-apimanagement-simple-weather
++    hub.traefik.io/api: access-control-apimanagement-complex-weather
+ spec:
+   entryPoints:
+     - web
+   routes:
+-  - match: Host(`api.access-control.apimanagement.docker.localhost`) && Path(`/simple/weather`)
++  - match: Host(`api.access-control.apimanagement.docker.localhost`) && Path(`/complex/weather`)
+     kind: Rule
+     services:
+     - name: weather-app
+       port: 3000
++
 ```
 
 ### Deploy and test it
@@ -247,74 +278,76 @@ $ diff -Nau --color api-management/2-access-control/simple/weather-api.yaml api-
 After deploying it:
 
 ```shell
-kubectl apply -f api-management/2-access-control/complex/weather-api.yaml
-kubectl apply -f api-management/2-access-control/complex/admin-api.yaml
+kubectl apply -f api-management/2-access-control/manifests/complex-weather-api.yaml
+kubectl apply -f api-management/2-access-control/manifests/complex-admin-api.yaml
 ```
 
 It can be tested with the API token of the admin:
 
 ```shell
 # This call is allowed.
-curl -i -H "Authorization: Bearer $ADMIN_TOKEN" "http://api.docker.localhost/admin/"
+curl -i -H "Authorization: Bearer $ADMIN_TOKEN" "http://api.access-control.apimanagement.docker.localhost/complex/admin/"
 # This call is now allowed
-curl -i -H "Authorization: Bearer $ADMIN_TOKEN" "http://api.docker.localhost/weather"
+curl -i -H "Authorization: Bearer $ADMIN_TOKEN" "http://api.access-control.apimanagement.docker.localhost/complex/weather"
 # And even PATCH is allowed
-curl -i -XPATCH -H "Authorization: Bearer $ADMIN_TOKEN" "http://api.docker.localhost/weather"
+curl -i -XPATCH -H "Authorization: Bearer $ADMIN_TOKEN" "http://api.access-control.apimanagement.docker.localhost/complex/weather"
 ```
 
 And test it with the external user's token:
 
 ```shell
 # This one is allowed
-curl -i -H "Authorization: Bearer $EXTERNAL_TOKEN" "http://api.docker.localhost/weather"
+curl -i -H "Authorization: Bearer $EXTERNAL_TOKEN" "http://api.access-control.apimanagement.docker.localhost/complex/weather"
 # And PATCH should be not allowed
-curl -i -XPATCH -H "Authorization: Bearer $EXTERNAL_TOKEN" "http://api.docker.localhost/weather"
+curl -i -XPATCH -H "Authorization: Bearer $EXTERNAL_TOKEN" "http://api.access-control.apimanagement.docker.localhost/complex/weather"
 ```
 
 It can be explained quite easily if **PATCH** is still allowed. There is still an `APIAccess` created with the simple tutorial:
 
 ```yaml
 kubectl get apiaccess -n apps
-NAME                    AGE
-weather-api            16m
-weather-api-admin      16m
-weather-api-external   16m
+NAME                          AGE
+mgmt-1-weather-api            28m
+mgmt-1-weather-api-forecast   15m
+access-control-apimanagement-simple-weather     6m38s
+access-control-apimanagement-weather-api-external   90s
+access-control-apimanagement-weather-api-admin      90s
 ```
 
 It means that for the `external` user group, there are two `APIAccess` applying:
 
 This is the first one:
 
-```yaml
+```yaml :manifests/simple-weather-api.yaml -s 13 -e 24
 ---
 apiVersion: hub.traefik.io/v1alpha1
 kind: APIAccess
 metadata:
-  name: weather-api
+  name: access-control-apimanagement-simple-weather
   namespace: apps
 spec:
   groups:
     - external
-  apiSelector:
+  apiSelector: # <======== Select all APIs with label subscription=external
     matchLabels:
-      subscription: external
+      subscription: standard
 ```
 
 And this is the second one:
 
-```yaml
+```yaml :manifests/complex-weather-api.yaml -s 22 -e 36
 ---
 apiVersion: hub.traefik.io/v1alpha1
 kind: APIAccess
 metadata:
-  name: weather-api-external
+  name: access-control-apimanagement-complex-weather-external
   namespace: apps
 spec:
   groups:
     - external
   apiSelector:
     matchLabels:
-      subscription: external
+      subscription: standard
   operationFilter:
     include:
       - get-forecast
@@ -323,7 +356,7 @@ spec:
 The first one allows all kinds of HTTP requests. If we delete it, the _external_ user can no longer call the API with the **PATCH** HTTP verb.
 
 ```shell
-kubectl delete apiaccess -n apps weather-api
+kubectl delete apiaccess -n apps access-control-apimanagement-simple-weather
 # This time, PATCH is not allowed
-curl -i -XPATCH -H "Authorization: Bearer $EXTERNAL_TOKEN" "http://api.docker.localhost/weather"
+curl -i -XPATCH -H "Authorization: Bearer $EXTERNAL_TOKEN" "http://api.access-control.apimanagement.docker.localhost/complex/weather"
 ```

@@ -1,0 +1,90 @@
+name: Integration Tests
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '**.yaml'
+
+env:
+  API_TOKEN: ${{ secrets.API_TOKEN }}
+  PLATFORM_URL: ${{ secrets.PLATFORM_URL }}
+  ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+  EXTERNAL_TOKEN: ${{ secrets.EXTERNAL_TOKEN }}
+  DOCKER_NON_INTERACTIVE: true
+  LOG_LEVEL: info
+jobs:
+  walkthrough:
+    runs-on: buildjet-2vcpu-ubuntu-2204
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: tests/go.mod
+          cache-dependency-path: tests/go.sum
+      - name: docker hub login
+        uses: docker/login-action@v3
+        with:
+          username: traefiker
+          password: ${{ secrets.TRAEFIKER_DOCKERHUB_TOKEN }}
+      - name: docker login on artifact registry
+        uses: docker/login-action@v3
+        with:
+          registry: europe-west9-docker.pkg.dev
+          username: _json_key
+          password: ${{ secrets.TRAEFIKER_GCP_SA_KEY }}
+      - name: run tests
+        working-directory: tests
+        run: make test-walkthrough
+  apigateway:
+    runs-on: buildjet-2vcpu-ubuntu-2204
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: tests/go.mod
+          cache-dependency-path: tests/go.sum
+      - name: docker hub login
+        uses: docker/login-action@v3
+        with:
+          username: traefiker
+          password: ${{ secrets.TRAEFIKER_DOCKERHUB_TOKEN }}
+      - name: docker login on artifact registry
+        uses: docker/login-action@v3
+        with:
+          registry: europe-west9-docker.pkg.dev
+          username: _json_key
+          password: ${{ secrets.TRAEFIKER_GCP_SA_KEY }}
+      - name: run tests
+        working-directory: tests
+        run: make test-apigw
+  apimanagement:
+    runs-on: buildjet-2vcpu-ubuntu-2204
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: tests/go.mod
+          cache-dependency-path: tests/go.sum
+      - name: docker hub login
+        uses: docker/login-action@v3
+        with:
+          username: traefiker
+          password: ${{ secrets.TRAEFIKER_DOCKERHUB_TOKEN }}
+      - name: docker login on artifact registry
+        uses: docker/login-action@v3
+        with:
+          registry: europe-west9-docker.pkg.dev
+          username: _json_key
+          password: ${{ secrets.TRAEFIKER_GCP_SA_KEY }}
+      - name: run tests
+        working-directory: tests
+        run: make test-apim
+

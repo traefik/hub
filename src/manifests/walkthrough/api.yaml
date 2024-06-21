@@ -2,7 +2,7 @@
 apiVersion: hub.traefik.io/v1alpha1
 kind: API
 metadata:
-  name: getting-started-apimanagement-weather-api
+  name: walkthrough-weather-api
   namespace: apps
 spec: {}
 
@@ -10,26 +10,26 @@ spec: {}
 apiVersion: hub.traefik.io/v1alpha1
 kind: APIAccess
 metadata:
-  name: getting-started-apimanagement-weather-api
+  name: walkthrough-weather-api
   namespace: apps
 spec:
   apis:
-  - name: getting-started-apimanagement-weather-api
+  - name: walkthrough-weather-api
   everyone: true
 
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: getting-started-apimanagement-weather-api
+  name: walkthrough-weather-api
   namespace: apps
   annotations:
-    hub.traefik.io/api: getting-started-apimanagement-weather-api # <=== Link to the API using its name
+    hub.traefik.io/api: walkthrough-weather-api # <=== Link to the API using its name
 spec:
   entryPoints:
   - web
   routes:
-  - match: Host(`api.getting-started.apimanagement.docker.localhost`) && Path(`/weather`)
+  - match: Host(`api.walkthrough.docker.localhost`) && Path(`/weather`)
     kind: Rule
     services:
     - name: weather-app

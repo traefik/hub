@@ -2,7 +2,7 @@
 apiVersion: hub.traefik.io/v1alpha1
 kind: API
 metadata:
-  name: weather-api
+  name: access-control-apimanagement-complex-weather
   namespace: apps
   labels:
     subscription: standard
@@ -12,18 +12,18 @@ spec:
     operationSets:
       - name: get-forecast
         matchers:
-          - pathPrefix: "/weather"
+          - pathPrefix: "/complex/weather"
             methods: [ "GET" ]
       - name: patch-forecast
         matchers:
-          - pathPrefix: "/weather"
+          - pathPrefix: "/complex/weather"
             methods: [ "PATCH" ]
 
 ---
 apiVersion: hub.traefik.io/v1alpha1
 kind: APIAccess
 metadata:
-  name: weather-api-external
+  name: access-control-apimanagement-complex-weather-external
   namespace: apps
 spec:
   groups:
@@ -39,7 +39,7 @@ spec:
 apiVersion: hub.traefik.io/v1alpha1
 kind: APIAccess
 metadata:
-  name: weather-api-admin
+  name: access-control-apimanagement-complex-weather-admin
   namespace: apps
 spec:
   groups:
@@ -56,15 +56,15 @@ spec:
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: weather-api
+  name: access-control-apimanagement-complex-weather
   namespace: apps
   annotations:
-    hub.traefik.io/api: weather-api
+    hub.traefik.io/api: access-control-apimanagement-complex-weather
 spec:
   entryPoints:
     - web
   routes:
-  - match: Host(`api.docker.localhost`) && PathPrefix(`/weather`)
+  - match: Host(`api.access-control.apimanagement.docker.localhost`) && Path(`/complex/weather`)
     kind: Rule
     services:
     - name: weather-app
