@@ -90,6 +90,7 @@ This tutorial implements APIs using a JSON server in Go; the source code is [her
 Let's deploy a [weather app](../../src/manifests/weather-app.yaml) exposing an API.
 
 ```shell
+kubectl apply -f src/manifests/apps-namespace.yaml
 kubectl apply -f src/manifests/weather-app.yaml
 ```
 
@@ -298,7 +299,7 @@ We can now put this password in the API Key middleware:
 +apiVersion: v1
 +kind: Secret
 +metadata:
-+  name: apikey-auth
++  name: walkthrough-apikey-auth
 +  namespace: apps
 +stringData:
 +  secretKey: "{SHA}dhiZGvSW60OMQ+J6hPEyJ+jfUoU="
@@ -307,7 +308,7 @@ We can now put this password in the API Key middleware:
 +apiVersion: traefik.io/v1alpha1
 +kind: Middleware
 +metadata:
-+  name: apikey-auth
++  name: walkthrough-apikey-auth
 +  namespace: apps
 +spec:
 +  plugin:
@@ -316,7 +317,7 @@ We can now put this password in the API Key middleware:
 +        header: Authorization
 +        headerAuthScheme: Bearer
 +      secretValues:
-+        - urn:k8s:secret:apikey-auth:secretKey
++        - urn:k8s:secret:walkthrough-apikey-auth:secretKey
 +
 +---
  apiVersion: traefik.io/v1alpha1
@@ -340,7 +341,7 @@ We can now put this password in the API Key middleware:
 +    - name: weather-app
 +      port: 3000
 +    middlewares:
-+    - name: apikey-auth
++    - name: walkthrough-apikey-auth
 ```
 
 Let's apply it:
@@ -350,9 +351,9 @@ kubectl apply -f src/manifests/walkthrough/weather-app-apikey.yaml
 ```
 
 ```shell
-secret/apikey-auth created
-middleware.traefik.io/apikey-auth created
-ingressroute.traefik.io/walkthrough-weather-api-api-key created
+secret/walkthrough-apikey-auth created
+middleware.traefik.io/walkthrough-apikey-auth created
+ingressroute.traefik.io/walkthrough-api-key created
 ```
 
 And test it:

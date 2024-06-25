@@ -101,18 +101,19 @@ func (s *APIGatewayTestSuite) TestDashboardAccess() {
 func (s *APIGatewayTestSuite) TestGettingStarted() {
 	var err error
 
-	s.loadYaml("src/manifests/weather-app.yaml")
+	s.apply("src/manifests/apps-namespace.yaml")
+	s.apply("src/manifests/weather-app.yaml")
 	time.Sleep(1 * time.Second)
 	err = testhelpers.WaitFor(s.ctx, s.T(), s.k8s, 90*time.Second, "app=weather-app")
 	s.Require().NoError(err)
-	s.loadYaml("api-gateway/1-getting-started/manifests/weather-app-ingressroute.yaml")
+	s.apply("api-gateway/1-getting-started/manifests/weather-app-ingressroute.yaml")
 
 	req, err := http.NewRequest(http.MethodGet, "http://getting-started.apigateway.docker.localhost", nil)
 	s.Require().NoError(err)
 	err = try.RequestWithTransport(req, 30*time.Second, s.tr, try.StatusCodeIs(http.StatusOK))
 	s.Assert().NoError(err)
 
-	s.loadYaml("api-gateway/1-getting-started/manifests/weather-app-apikey.yaml")
+	s.apply("api-gateway/1-getting-started/manifests/weather-app-apikey.yaml")
 	req, err = http.NewRequest(http.MethodGet, "http://getting-started.apigateway.docker.localhost/api-key", nil)
 	s.Require().NoError(err)
 	err = try.RequestWithTransport(req, 10*time.Second, s.tr, try.StatusCodeIs(http.StatusUnauthorized))
@@ -134,24 +135,25 @@ func (s *APIGatewayTestSuite) TestSecureApplications() {
 	var err error
 	var req *http.Request
 
-	s.loadYaml("src/manifests/hydra.yaml")
+	s.apply("src/manifests/hydra.yaml")
 	err = testhelpers.WaitFor(s.ctx, s.T(), s.k8s, 90*time.Second, "app=hydra")
 	s.Require().NoError(err)
 	err = testhelpers.WaitFor(s.ctx, s.T(), s.k8s, 90*time.Second, "app=consent")
 	s.Require().NoError(err)
 
 	// Test M2M
-	s.loadYaml("src/manifests/whoami-app.yaml")
+	s.apply("src/manifests/apps-namespace.yaml")
+	s.apply("src/manifests/whoami-app.yaml")
 	time.Sleep(1 * time.Second)
 	err = testhelpers.WaitFor(s.ctx, s.T(), s.k8s, 90*time.Second, "app=whoami")
 	s.Require().NoError(err)
-	s.loadYaml("api-gateway/2-secure-applications/manifests/whoami-app-ingressroute.yaml")
+	s.apply("api-gateway/2-secure-applications/manifests/whoami-app-ingressroute.yaml")
 	req, err = http.NewRequest(http.MethodGet, "http://secure-applications.apigateway.docker.localhost/no-auth", nil)
 	s.Require().NoError(err)
 	err = try.RequestWithTransport(req, 10*time.Second, s.tr, try.StatusCodeIs(http.StatusOK))
 	s.Assert().NoError(err)
 
-	s.loadYaml("api-gateway/2-secure-applications/manifests/whoami-app-oauth2-client-creds.yaml")
+	s.apply("api-gateway/2-secure-applications/manifests/whoami-app-oauth2-client-creds.yaml")
 	output := testhelpers.LaunchKubectl(s.T(), "exec", "-i", "-n", "hydra", "deploy/hydra", "--",
 		"hydra", "create", "oauth2-client", "--name", "oauth-client", "--secret", "traefiklabs",
 		"--grant-type", "client_credentials", "--endpoint", "http://127.0.0.1:4445/",
@@ -190,7 +192,8 @@ func (s *APIGatewayTestSuite) TestSecureApplications() {
 	s.Assert().NoError(err)
 
 	// Test OIDC
-	s.loadYaml("api-gateway/2-secure-applications/manifests/whoami-app-ingressroute.yaml")
+	s.apply("src/manifests/apps-namespace.yaml")
+	s.apply("api-gateway/2-secure-applications/manifests/whoami-app-ingressroute.yaml")
 	req, err = http.NewRequest(http.MethodGet, "http://secure-applications.apigateway.docker.localhost/no-auth", nil)
 	s.Require().NoError(err)
 	err = try.RequestWithTransport(req, 10*time.Second, s.tr, try.StatusCodeIs(http.StatusOK))
@@ -306,7 +309,7 @@ func TestAPIGatewayTestSuite(t *testing.T) {
 	suite.Run(t, new(APIGatewayTestSuite))
 }
 
-func (s *APIGatewayTestSuite) loadYaml(path string) {
+func (s *APIGatewayTestSuite) apply(path string) {
 	results, err := testhelpers.ApplyFile(s.ctx, s.k8s, filepath.Join("..", "..", path))
 	s.Require().NoError(err)
 	testcontainers.Logger.Printf("📦️ %q loaded\n", results)

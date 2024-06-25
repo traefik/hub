@@ -96,6 +96,7 @@ func (s *APIManagementTestSuite) TestGettingStarted() {
 	var err error
 	adminToken := os.Getenv("ADMIN_TOKEN")
 
+	s.apply("src/manifests/apps-namespace.yaml")
 	s.apply("src/manifests/weather-app.yaml")
 	time.Sleep(1 * time.Second)
 	err = testhelpers.WaitFor(s.ctx, s.T(), s.k8s, 90*time.Second, "app=weather-app")
@@ -125,6 +126,7 @@ func (s *APIManagementTestSuite) TestAccessControl() {
 	externalToken, adminToken := os.Getenv("EXTERNAL_TOKEN"), os.Getenv("ADMIN_TOKEN")
 
 	// Simple Access Control
+	s.apply("src/manifests/apps-namespace.yaml")
 	s.apply("src/manifests/weather-app.yaml")
 	s.apply("src/manifests/admin-app.yaml")
 	time.Sleep(1 * time.Second)
@@ -179,6 +181,8 @@ func (s *APIManagementTestSuite) TestAPILifeCycleManagement() {
 	adminToken := os.Getenv("ADMIN_TOKEN")
 
 	// Publish First API Version
+	err = s.apply("src/manifests/apps-namespace.yaml")
+	s.Require().NoError(err)
 	err = s.apply("src/manifests/weather-app.yaml")
 	s.Require().NoError(err)
 	err = s.apply("api-management/3-api-lifecycle-management/manifests/api.yaml")

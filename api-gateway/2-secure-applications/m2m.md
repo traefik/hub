@@ -40,6 +40,7 @@ TraefikLabs has open-sourced a simple _whoami_ application displaying technical 
 First, let's deploy and expose it:
 
 ```shell
+kubectl apply -f src/manifests/apps-namespace.yaml
 kubectl apply -f src/manifests/whoami-app.yaml
 kubectl apply -f api-gateway/2-secure-applications/manifests/whoami-app-ingressroute.yaml
 sleep 5

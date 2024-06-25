@@ -96,15 +96,16 @@ func (s *WalkthroughTestSuite) TestDashboardAccess() {
 
 func (s *WalkthroughTestSuite) TestWalkthrough() {
 	// STEP 1
-	s.loadYaml("src/manifests/weather-app.yaml")
-	s.loadYaml("src/manifests/walkthrough/weather-app-no-auth.yaml")
+	s.apply("src/manifests/apps-namespace.yaml")
+	s.apply("src/manifests/weather-app.yaml")
+	s.apply("src/manifests/walkthrough/weather-app-no-auth.yaml")
 
 	req, err := http.NewRequest(http.MethodGet, "http://walkthrough.docker.localhost/no-auth", nil)
 	s.Require().NoError(err)
 	err = try.RequestWithTransport(req, 10*time.Second, s.tr, try.StatusCodeIs(http.StatusOK))
 	s.Assert().NoError(err)
 
-	s.loadYaml("src/manifests/walkthrough/weather-app-basic-auth.yaml")
+	s.apply("src/manifests/walkthrough/weather-app-basic-auth.yaml")
 
 	req, err = http.NewRequest(http.MethodGet, "http://walkthrough.docker.localhost/basic-auth", nil)
 	s.Require().NoError(err)
@@ -121,11 +122,9 @@ func (s *WalkthroughTestSuite) TestWalkthrough() {
 	testhelpers.LaunchHelmCommand(s.T(), "upgrade", "traefik", "-n", "traefik", "--wait",
 		"--reuse-values",
 		"--set", "hub.token=license",
-		"--set", "hub.platformUrl=https://platform-preview.hub.traefik.io/agent",
 		"--set", "image.registry=ghcr.io",
 		"--set", "image.repository=traefik/traefik-hub",
 		"--set", "image.tag=v3.0.0",
-		"--set", "image.pullPolicy=Always",
 		"traefik/traefik")
 
 	req, err = http.NewRequest(http.MethodGet, "http://walkthrough.docker.localhost/basic-auth", nil)
@@ -137,7 +136,7 @@ func (s *WalkthroughTestSuite) TestWalkthrough() {
 	err = try.RequestWithTransport(req, 5*time.Second, s.tr, try.StatusCodeIs(http.StatusOK))
 	s.Assert().NoError(err)
 
-	s.loadYaml("src/manifests/walkthrough/weather-app-apikey.yaml")
+	s.apply("src/manifests/walkthrough/weather-app-apikey.yaml")
 	req, err = http.NewRequest(http.MethodGet, "http://walkthrough.docker.localhost/api-key", nil)
 	s.Require().NoError(err)
 	err = try.RequestWithTransport(req, 5*time.Second, s.tr, try.StatusCodeIs(http.StatusUnauthorized))
@@ -163,14 +162,14 @@ func (s *WalkthroughTestSuite) TestWalkthrough() {
 	err = try.RequestWithTransport(req, 5*time.Second, s.tr, try.StatusCodeIs(http.StatusOK))
 	s.Assert().NoError(err)
 
-	s.loadYaml("src/manifests/walkthrough/api.yaml")
+	s.apply("src/manifests/walkthrough/api.yaml")
 
 	req, err = http.NewRequest(http.MethodGet, "http://api.walkthrough.docker.localhost/weather", nil)
 	s.Require().NoError(err)
 	err = try.RequestWithTransport(req, 5*time.Second, s.tr, try.StatusCodeIs(http.StatusUnauthorized))
 	s.Assert().NoError(err)
 
-	s.loadYaml("src/manifests/walkthrough/api-portal.yaml")
+	s.apply("src/manifests/walkthrough/api-portal.yaml")
 
 	req, err = http.NewRequest(http.MethodGet, "http://api.walkthrough.docker.localhost", nil)
 	s.Require().NoError(err)
@@ -189,7 +188,7 @@ func TestWalkthroughTestSuite(t *testing.T) {
 	suite.Run(t, new(WalkthroughTestSuite))
 }
 
-func (s *WalkthroughTestSuite) loadYaml(path string) {
+func (s *WalkthroughTestSuite) apply(path string) {
 	results, err := testhelpers.ApplyFile(s.ctx, s.k8s, filepath.Join("..", "..", path))
 	s.Require().NoError(err)
 	testcontainers.Logger.Printf("📦️ %q loaded\n", results)

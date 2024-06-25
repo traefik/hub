@@ -111,14 +111,12 @@ func InstallTraefikHubAPIGW(ctx context.Context, t *testing.T, k8s client.Client
 	CreateSecretForTraefikHub(ctx, t, k8s)
 	LaunchHelmCommand(t, "install", "traefik", "-n", traefikNamespace, "--wait",
 		"--set", "hub.token=license",
-		"--set", "hub.platformUrl=https://platform-preview.hub.traefik.io/agent",
 		"--set", "ingressClass.enabled=false",
 		"--set", "ingressRoute.dashboard.matchRule='Host(`dashboard.docker.localhost`)'",
 		"--set", "ingressRoute.dashboard.entryPoints={web}",
 		"--set", "image.registry=ghcr.io",
 		"--set", "image.repository=traefik/traefik-hub",
 		"--set", "image.tag=v3.0.0",
-		"--set", "image.pullPolicy=Always",
 		"--set", "ports.web.nodePort=30000",
 		"--set", "ports.websecure.nodePort=30001",
 		"traefik/traefik")
@@ -139,7 +137,6 @@ func InstallTraefikHubAPIM(ctx context.Context, t *testing.T, k8s client.Client)
 	CreateSecretForTraefikHub(ctx, t, k8s)
 	LaunchHelmCommand(t, "install", "traefik", "-n", traefikNamespace, "--wait",
 		"--set", "hub.token=license",
-		"--set", "hub.platformUrl=https://platform-preview.hub.traefik.io/agent",
 		"--set", "hub.apimanagement.enabled=true",
 		"--set", "ingressClass.enabled=false",
 		"--set", "ingressRoute.dashboard.matchRule='Host(`dashboard.docker.localhost`)'",
@@ -147,7 +144,6 @@ func InstallTraefikHubAPIM(ctx context.Context, t *testing.T, k8s client.Client)
 		"--set", "image.registry=ghcr.io",
 		"--set", "image.repository=traefik/traefik-hub",
 		"--set", "image.tag=v3.0.0",
-		"--set", "image.pullPolicy=Always",
 		"--set", "ports.web.nodePort=30000",
 		"--set", "ports.websecure.nodePort=30001",
 		"traefik/traefik")

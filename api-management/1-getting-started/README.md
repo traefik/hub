@@ -126,6 +126,7 @@ Now, we can access the local dashboard at http://dashboard.docker.localhost/.
 First, let's deploy a [weather app](https://github.com/traefik/hub/blob/main/src/manifests/weather-app.yaml) exposing an API:
 
 ```shell
+kubectl apply -f src/manifests/apps-namespace.yaml
 kubectl apply -f src/manifests/weather-app.yaml
 ```
 

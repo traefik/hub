@@ -7,6 +7,7 @@ In this tutorial, we will see how to publish a new version of an API.
 First, we'll deploy the API in _getting started_:
 
 ```shell
+kubectl apply -f src/manifests/apps-namespace.yaml
 kubectl apply -f src/manifests/weather-app.yaml
 kubectl apply -f api-management/3-api-lifecycle-management/manifests/api.yaml
 ```
@@ -219,7 +220,6 @@ kubectl apply -f api-management/3-api-lifecycle-management/manifests/api-v1.1.ya
 ```
 
 ```shell
-namespace/apps unchanged
 configmap/weather-app-forecast-data created
 deployment.apps/weather-app-forecast created
 service/weather-app-forecast created

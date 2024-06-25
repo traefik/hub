@@ -24,6 +24,7 @@ graph LR
 First, we will deploy the _weather_ app and the _admin_ app:
 
 ```shell
+kubectl apply -f src/manifests/apps-namespace.yaml
 kubectl apply -f src/manifests/weather-app.yaml
 kubectl apply -f src/manifests/admin-app.yaml
 ```

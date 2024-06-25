@@ -133,6 +133,7 @@ In this tutorial, APIs are implemented using a JSON server in Go; the source cod
 Let's deploy a [weather app](../../src/manifests/weather-app.yaml) exposing an API.
 
 ```shell
+kubectl apply -f src/manifests/apps-namespace.yaml
 kubectl apply -f src/manifests/weather-app.yaml
 ```
 
@@ -214,7 +215,7 @@ Put this hash in the API Key `Middleware`:
 +apiVersion: v1
 +kind: Secret
 +metadata:
-+  name: apikey-auth
++  name: getting-started-apigateway-apikey-auth
 +  namespace: apps
 +stringData:
 +  secretKey: "{SHA}dhiZGvSW60OMQ+J6hPEyJ+jfUoU="
@@ -223,7 +224,7 @@ Put this hash in the API Key `Middleware`:
 +apiVersion: traefik.io/v1alpha1
 +kind: Middleware
 +metadata:
-+  name: apikey-auth
++  name: getting-started-apigateway-apikey-auth
 +  namespace: apps
 +spec:
 +  plugin:
@@ -232,7 +233,7 @@ Put this hash in the API Key `Middleware`:
 +        header: Authorization
 +        headerAuthScheme: Bearer
 +      secretValues:
-+        - urn:k8s:secret:apikey-auth:secretKey
++        - urn:k8s:secret:getting-started-apigateway-apikey-auth:secretKey
 +
 +---
  apiVersion: traefik.io/v1alpha1
@@ -252,7 +253,7 @@ Put this hash in the API Key `Middleware`:
      - name: weather-app
        port: 3000
 +    middlewares:
-+    - name: apikey-auth
++    - name: getting-started-apigateway-apikey-auth
 ```
 
 
@@ -263,9 +264,9 @@ kubectl apply -f api-gateway/1-getting-started/manifests/weather-app-apikey.yaml
 ```
 
 ```shell
-secret/apikey-auth created
-middleware.traefik.io/apikey-auth created
-ingressroute.traefik.io/gw-1-weather-api-api-key created
+secret/getting-started-apikey-auth created
+middleware.traefik.io/getting-started-apikey-auth created
+ingressroute.traefik.io/getting-started-apigateway-api-key created
 ```
 
 And test it:
