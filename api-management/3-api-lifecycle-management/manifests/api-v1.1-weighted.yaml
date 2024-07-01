@@ -26,7 +26,7 @@ spec:
   entryPoints:
   - web
   routes:
-  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && Path(`/weather-v1-wrr`)
+  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && PathRegexp(`^/weather-v1-wrr(/([0-9]+|openapi.yaml))?$`)
     kind: Rule
     services:
     - name: api-lifecycle-apimanagement-weather-api-wrr

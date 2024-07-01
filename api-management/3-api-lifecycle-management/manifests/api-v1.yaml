@@ -6,6 +6,11 @@ metadata:
   namespace: apps
 spec:
   release: v1.0.0
+  openApiSpec:
+    path: /openapi.yaml
+    override:
+      servers:
+        - url: http://api.getting-started.apimanagement.docker.localhost
 
 ---
 apiVersion: hub.traefik.io/v1alpha1
@@ -40,7 +45,7 @@ spec:
   entryPoints:
   - web
   routes:
-  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && Path(`/weather-v1`)
+  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && PathRegexp(`^/weather-v1(/([0-9]+|openapi.yaml))?$`)
     kind: Rule
     services:
     - name: weather-app

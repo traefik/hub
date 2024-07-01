@@ -124,7 +124,7 @@ func (s *WalkthroughTestSuite) TestWalkthrough() {
 		"--set", "hub.token=license",
 		"--set", "image.registry=ghcr.io",
 		"--set", "image.repository=traefik/traefik-hub",
-		"--set", "image.tag=v3.0.0",
+		"--set", "image.tag=v3.1.1",
 		"traefik/traefik")
 
 	req, err = http.NewRequest(http.MethodGet, "http://walkthrough.docker.localhost/basic-auth", nil)

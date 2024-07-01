@@ -96,10 +96,12 @@ func (s *APIManagementTestSuite) TestGettingStarted() {
 	var err error
 	adminToken := os.Getenv("ADMIN_TOKEN")
 
-	s.apply("src/manifests/apps-namespace.yaml")
-	s.apply("src/manifests/weather-app.yaml")
+	err = s.apply("src/manifests/apps-namespace.yaml")
+	s.Require().NoError(err)
+	err = s.apply("src/manifests/weather-app.yaml")
+	s.Require().NoError(err)
 	time.Sleep(1 * time.Second)
-	err = testhelpers.WaitFor(s.ctx, s.T(), s.k8s, 90*time.Second, "app=weather-app")
+	err = testhelpers.WaitForPodReady(s.ctx, s.T(), s.k8s, 90*time.Second, "app=weather-app")
 	s.Require().NoError(err)
 
 	err = s.apply("api-management/1-getting-started/manifests/weather-app-ingressroute.yaml")
@@ -126,17 +128,22 @@ func (s *APIManagementTestSuite) TestAccessControl() {
 	externalToken, adminToken := os.Getenv("EXTERNAL_TOKEN"), os.Getenv("ADMIN_TOKEN")
 
 	// Simple Access Control
-	s.apply("src/manifests/apps-namespace.yaml")
-	s.apply("src/manifests/weather-app.yaml")
-	s.apply("src/manifests/admin-app.yaml")
-	time.Sleep(1 * time.Second)
-	err = testhelpers.WaitFor(s.ctx, s.T(), s.k8s, 90*time.Second, "app=weather-app")
+	err = s.apply("src/manifests/apps-namespace.yaml")
 	s.Require().NoError(err)
-	err = testhelpers.WaitFor(s.ctx, s.T(), s.k8s, 90*time.Second, "app=admin-app")
+	err = s.apply("src/manifests/weather-app.yaml")
+	s.Require().NoError(err)
+	err = s.apply("src/manifests/admin-app.yaml")
+	s.Require().NoError(err)
+	time.Sleep(1 * time.Second)
+	err = testhelpers.WaitForPodReady(s.ctx, s.T(), s.k8s, 90*time.Second, "app=weather-app")
+	s.Require().NoError(err)
+	err = testhelpers.WaitForPodReady(s.ctx, s.T(), s.k8s, 90*time.Second, "app=admin-app")
 	s.Require().NoError(err)
 
-	s.apply("api-management/2-access-control/manifests/simple-admin-api.yaml")
-	s.apply("api-management/2-access-control/manifests/simple-weather-api.yaml")
+	err = s.apply("api-management/2-access-control/manifests/simple-admin-api.yaml")
+	s.Require().NoError(err)
+	err = s.apply("api-management/2-access-control/manifests/simple-weather-api.yaml")
+	s.Require().NoError(err)
 
 	err = s.checkWithBearer(http.MethodGet, "http://api.access-control.apimanagement.docker.localhost/simple/admin", adminToken, 90*time.Second, http.StatusOK)
 	s.Assert().NoError(err)
@@ -151,8 +158,10 @@ func (s *APIManagementTestSuite) TestAccessControl() {
 	s.Assert().NoError(err)
 
 	// Complex Access Control
-	s.apply("api-management/2-access-control/manifests/complex-admin-api.yaml")
-	s.apply("api-management/2-access-control/manifests/complex-weather-api.yaml")
+	err = s.apply("api-management/2-access-control/manifests/complex-admin-api.yaml")
+	s.Require().NoError(err)
+	err = s.apply("api-management/2-access-control/manifests/complex-weather-api.yaml")
+	s.Require().NoError(err)
 
 	err = s.checkWithBearer(http.MethodGet, "http://api.access-control.apimanagement.docker.localhost/complex/admin", adminToken, 10*time.Second, http.StatusOK)
 	s.Assert().NoError(err)
@@ -189,7 +198,7 @@ func (s *APIManagementTestSuite) TestAPILifeCycleManagement() {
 	s.Require().NoError(err)
 
 	time.Sleep(1 * time.Second)
-	err = testhelpers.WaitFor(s.ctx, s.T(), s.k8s, 90*time.Second, "app=weather-app")
+	err = testhelpers.WaitForPodReady(s.ctx, s.T(), s.k8s, 90*time.Second, "app=weather-app")
 	s.Require().NoError(err)
 
 	err = s.check(http.MethodGet, "http://api.lifecycle.apimanagement.docker.localhost/weather", 5*time.Second, http.StatusUnauthorized)
@@ -213,7 +222,7 @@ func (s *APIManagementTestSuite) TestAPILifeCycleManagement() {
 	s.Assert().NoError(err)
 
 	time.Sleep(1 * time.Second)
-	err = testhelpers.WaitFor(s.ctx, s.T(), s.k8s, 90*time.Second, "app=weather-app-forecast")
+	err = testhelpers.WaitForPodReady(s.ctx, s.T(), s.k8s, 90*time.Second, "app=weather-app-forecast")
 	s.Require().NoError(err)
 
 	var req *http.Request

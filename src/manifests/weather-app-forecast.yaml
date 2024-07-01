@@ -33,20 +33,15 @@ spec:
       containers:
         - name: api
           image: ghcr.io/traefik-workshops/api-server:v0.2.0
-          args: ["-data", "/api/api.json", "-openapi", "/public/openapi.yaml", "-errorrate", "2"]
+          args: ["-data", "/api/api.json", "-errorrate", "2"]
           imagePullPolicy: Always
           volumeMounts:
           - name: api-data
             mountPath: /api
-          - name: openapi
-            mountPath: /public
       volumes:
         - name: api-data
           configMap:
             name: weather-app-forecast-data
-        - name: openapi
-          configMap:
-            name: weather-app-forecast-openapispec
 
 ---
 apiVersion: v1
@@ -63,116 +58,3 @@ spec:
       name: api
   selector:
     app: weather-app-forecast
-
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: weather-app-forecast-openapispec
-  namespace: apps
-data:
-  openapi.yaml: |
-    openapi: "3.0.0"
-    info:
-      version: 1.0.0
-      title: Forecast Weather
-      description: Forecast Weather API
-      contact:
-        name: TraefikLabs
-        url: 'https://traefik.io/'
-      license:
-        name: Apache 2.0
-        url: 'https://spdx.org/licenses/Apache-2.0.html'
-    tags:
-      - name: external
-        description: routes exposed publicly
-      - name: internal
-        description: routes reserved for internal usage
-    paths:
-      /forecast:
-        get:
-          summary: Retrieve weather
-          operationId: getForecast
-          tags:
-            - external
-          parameters:
-            - name: city
-              in: query
-              description: City
-              required: true
-              schema:
-                type: string
-          responses:
-            '200':
-              description: An array of forecasted weathers
-              content:
-                application/json:
-                  schema:
-                    $ref: "#/components/schemas/weathers"
-            '204':
-              $ref: '#/components/responses/nocontent'
-            '401':
-              $ref: '#/components/responses/unauthorized'
-            '500':
-              $ref: '#/components/responses/serverError'
-        patch:
-          summary: Update weather data
-          operationId: patchForecast
-          tags:
-            - external
-          parameters:
-            - name: city
-              in: query
-              description: City
-              required: true
-              schema:
-                type: string
-          responses:
-            '200':
-              description: An array of forecasted weathers
-              content:
-                application/json:
-                  schema:
-                    $ref: "#/components/schemas/weathers"
-            '204':
-              $ref: '#/components/responses/nocontent'
-            '401':
-              $ref: '#/components/responses/unauthorized'
-            '500':
-              $ref: '#/components/responses/serverError'
-
-    components:
-      responses:
-        nocontent:
-          description: "No content"
-        unauthorized:
-          description: "Access token is missing or invalid"
-        serverError:
-          description: "Internal server error"
-      schemas:
-        weather:
-          type: object
-          required:
-            - id
-            - name
-          properties:
-            id:
-              type: integer
-              format: int64
-            city:
-              type: string
-            weather:
-              type: string
-            dt:
-              type: string
-        weathers:
-          type: array
-          maxItems: 100
-          items:
-            $ref: "#/components/schemas/weather"
-      securitySchemes:
-        bearerAuth:
-          description: "Bearer Auth"
-          type: http
-          scheme: bearer
-          bearerFormat: JWT

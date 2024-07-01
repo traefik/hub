@@ -64,7 +64,7 @@ spec:
   entryPoints:
     - web
   routes:
-  - match: Host(`api.access-control.apimanagement.docker.localhost`) && Path(`/complex/weather`)
+  - match: Host(`api.access-control.apimanagement.docker.localhost`) && PathRegexp(`^/complex/weather(/([0-9]+|openapi.yaml))?$`)
     kind: Rule
     services:
     - name: weather-app

@@ -35,9 +35,11 @@ In this tutorial, we will use [Ory Hydra](https://www.ory.sh/hydra/), an OAuth 2
 We can deploy it:
 
 ```shell
+kubectl apply -f src/manifests/apps-namespace.yaml
 kubectl apply -f src/manifests/hydra.yaml
 kubectl wait -n hydra --for=condition=ready pod --selector=app=hydra --timeout=90s
 kubectl wait -n hydra --for=condition=ready pod --selector=app=consent --timeout=90s
+kubectl wait -n hydra --for=condition=complete  job/create-hydra-clients --timeout=90s
 ```
 
 TraefikLabs has open-sourced a simple whoami application displaying technical information about the request.
@@ -45,17 +47,16 @@ TraefikLabs has open-sourced a simple whoami application displaying technical in
 First, let's deploy and expose it:
 
 ```shell
-kubectl apply -f src/manifests/apps-namespace.yaml
 kubectl apply -f src/manifests/whoami-app.yaml
 kubectl apply -f api-gateway/2-secure-applications/manifests/whoami-app-ingressroute.yaml
 sleep 5
 ```
 
 ```shell
-namespace/apps created
-deployment.apps/whoami created
-service/whoami created
-ingressroute.traefik.io/secure-applications-apigateway-no-auth
+namespace/apps unchanged
+deployment.apps/whoami unchanged
+service/whoami unchanged
+ingressroute.traefik.io/secure-applications-apigateway-no-auth unchanged
 ```
 
 It should be accessible with curl on http://secure-applications.apigateway.docker.localhost/no-auth
@@ -86,12 +87,15 @@ X-Real-Ip: 10.42.0.1
 
 To secure it with OIDC, we'll need to configure Hydra.
 
-First, we will create the [JSON Web Key Sets](https://www.ory.sh/docs/hydra/jwks) that hydra uses to sign and verify id-token and access-token:
+First, we can create the [JSON Web Key Sets](https://www.ory.sh/docs/hydra/jwks) that hydra uses to sign and verify id-token and access-token.
+This step is automated for you in this tutorial but here is how it's created:
 
-```shell
-kubectl exec -it -n hydra deploy/hydra -- hydra create jwks hydra.openid.id-token --alg RS256 --endpoint http://127.0.0.1:4445/
-kubectl exec -it -n hydra deploy/hydra -- hydra create jwks hydra.jwt.access-token --alg RS256 --endpoint http://127.0.0.1:4445/
+```shell :../../src/manifests/hydra.yaml -s 398 -e 399 -i s1
+hydra create jwks hydra.openid.id-token --alg RS256 --endpoint http://hydra.hydra.svc:4445
+hydra create jwks hydra.jwt.access-token --alg RS256 --endpoint http://hydra.hydra.svc:4445
 ```
+
+If needed, it can be run manually with `kubectl exec -it -n hydra deploy/hydra -- hydra create ...`.
 
 And after, we can use the OIDC middleware. Let's see how it works compared to an unprotected IngressRoute:
 
@@ -109,8 +113,8 @@ And after, we can use the OIDC middleware. Let's see how it works compared to an
 +  plugin:
 +    oidc:
 +      issuer: http://hydra.hydra.svc:4444
-+      clientID: ${CLIENT_ID}
-+      clientSecret: ${CLIENT_SECRET}
++      clientId: "urn:k8s:secret:oidc-client:client_id"
++      clientSecret: "urn:k8s:secret:oidc-client:client_secret"
 +      loginUrl: /oidc/login
 +      logoutUrl: /oidc/logout
 +      redirectUrl: /oidc/callback
@@ -141,19 +145,26 @@ And after, we can use the OIDC middleware. Let's see how it works compared to an
 
 This middleware is configured to redirect `/login`, `/logout`, and `/callback` paths to the OIDC provider.
 
-So let's apply it. We'll create a user in Hydra and set it to the OIDC middleware:
+We'll use another user in Hydra for that purpose and set it to the OIDC middleware.
+It has been created thise way:
+
+```shell :../../src/manifests/hydra.yaml -s 376 -e 385 -i s1
+hydra create oauth2-client \
+  --endpoint http://hydra.hydra.svc:4445 \
+  --name oidc-client \
+  --secret traefiklabs \
+  --grant-type authorization_code,refresh_token \
+  --response-type code,id_token \
+  --scope openid,offline \
+  --redirect-uri http://secure-applications.apigateway.docker.localhost/oidc/callback \
+  --post-logout-callback http://secure-applications.apigateway.docker.localhost/oidc/callback \
+  --format json > /data/oidc-client.json
+```
+
+So let's apply it:
 
 ```shell
-client=$(kubectl exec -it -n hydra deploy/hydra -- \
-  hydra create oauth2-client --name oidc-client --secret traefiklabs \
-    --grant-type authorization_code,refresh_token --response-type code,id_token \
-    --scope openid,offline --redirect-uri http://secure-applications.apigateway.docker.localhost/oidc/callback \
-    --post-logout-callback http://secure-applications.apigateway.docker.localhost/oidc/callback \
-    --endpoint http://127.0.0.1:4445/ --format json)
-sleep 5
-export CLIENT_ID=$(echo $client | jq -r '.client_id')
-export CLIENT_SECRET=$(echo $client | jq -r '.client_secret')
-cat api-gateway/2-secure-applications/manifests/whoami-app-oidc.yaml | envsubst | kubectl apply -f -
+kubectl apply -f api-gateway/2-secure-applications/manifests/whoami-app-oidc.yaml
 ```
 
 Let's test it:
@@ -173,7 +184,7 @@ Now, let's say we want the user to log in on the whole domain. This YAML should 
 ```diff :../../hack/diff.sh -r -a "manifests/whoami-app-oidc.yaml manifests/whoami-app-oidc-nologinurl.yaml"
 --- manifests/whoami-app-oidc.yaml
 +++ manifests/whoami-app-oidc-nologinurl.yaml
-@@ -2,7 +2,7 @@
+@@ -2,17 +2,16 @@
  apiVersion: traefik.io/v1alpha1
  kind: Middleware
  metadata:
@@ -182,13 +193,15 @@ Now, let's say we want the user to log in on the whole domain. This YAML should 
    namespace: apps
  spec:
    plugin:
-@@ -10,9 +10,8 @@
+     oidc:
        issuer: http://hydra.hydra.svc:4444
-       clientID: ${CLIENT_ID}
-       clientSecret: ${CLIENT_SECRET}
+-      clientId: "urn:k8s:secret:oidc-client:client_id"
+-      clientSecret: "urn:k8s:secret:oidc-client:client_secret"
 -      loginUrl: /oidc/login
 -      logoutUrl: /oidc/logout
 -      redirectUrl: /oidc/callback
++      clientId: "urn:k8s:secret:oidc-client-nologin:client_id"
++      clientSecret: "urn:k8s:secret:oidc-client-nologin:client_secret"
 +      logoutUrl: /oidc-nologin/logout
 +      redirectUrl: /oidc-nologin/callback
        csrf: {}
@@ -216,19 +229,25 @@ Now, let's say we want the user to log in on the whole domain. This YAML should 
 +    - name: oidc-nologin
 ```
 
-Let's create a new ClientID / ClientSecret pair and test it:
+A new ClientID / ClientSecret pair has been created for that purpose:
+
+```shell :../../src/manifests/hydra.yaml -s 387 -e 396 -i s1
+hydra create oauth2-client \
+  --endpoint http://hydra.hydra.svc:4445 \
+  --name oidc-client-nologin \
+  --secret traefiklabs \
+  --grant-type authorization_code,refresh_token \
+  --response-type code,id_token \
+  --scope openid,offline \
+  --redirect-uri http://secure-applications.apigateway.docker.localhost/oidc-nologin/callback \
+  --post-logout-callback http://secure-applications.apigateway.docker.localhost/oidc/callback \
+  --format json > /data/oidc-client-nologin.json
+```
+
+Now, test it:
 
 ```shell
-client=$(kubectl exec -it -n hydra deploy/hydra -- \
-  hydra create oauth2-client --name oidc-client --secret traefiklabs \
-    --grant-type authorization_code,refresh_token --response-type code,id_token \
-    --scope openid,offline --redirect-uri http://secure-applications.apigateway.docker.localhost/oidc-nologin/callback \
-    --post-logout-callback http://secure-applications.apigateway.docker.localhost/oidc-nologin/callback \
-    --endpoint http://127.0.0.1:4445/ --format json)
-sleep 5
-export CLIENT_ID=$(echo $client | jq -r '.client_id')
-export CLIENT_SECRET=$(echo $client | jq -r '.client_secret')
-cat api-gateway/2-secure-applications/manifests/whoami-app-oidc-nologinurl.yaml | envsubst | kubectl apply -f -
+kubectl apply -f api-gateway/2-secure-applications/manifests/whoami-app-oidc-nologinurl.yaml
 ```
 
 We can now test it:

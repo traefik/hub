@@ -20,6 +20,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/k3s"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -116,7 +117,7 @@ func InstallTraefikHubAPIGW(ctx context.Context, t *testing.T, k8s client.Client
 		"--set", "ingressRoute.dashboard.entryPoints={web}",
 		"--set", "image.registry=ghcr.io",
 		"--set", "image.repository=traefik/traefik-hub",
-		"--set", "image.tag=v3.0.0",
+		"--set", "image.tag=v3.1.1",
 		"--set", "ports.web.nodePort=30000",
 		"--set", "ports.websecure.nodePort=30001",
 		"traefik/traefik")
@@ -143,7 +144,7 @@ func InstallTraefikHubAPIM(ctx context.Context, t *testing.T, k8s client.Client)
 		"--set", "ingressRoute.dashboard.entryPoints={web}",
 		"--set", "image.registry=ghcr.io",
 		"--set", "image.repository=traefik/traefik-hub",
-		"--set", "image.tag=v3.0.0",
+		"--set", "image.tag=v3.1.1",
 		"--set", "ports.web.nodePort=30000",
 		"--set", "ports.websecure.nodePort=30001",
 		"traefik/traefik")
@@ -168,13 +169,41 @@ func CreateSecretForTraefikHub(ctx context.Context, t *testing.T, k8s client.Cli
 	require.NoError(t, err)
 }
 
-func WaitFor(ctx context.Context, t *testing.T, k8s client.Client, interval time.Duration, labelSelector string) error {
-	return wait.PollUntilContextCancel(ctx, interval, true, func(ctx context.Context) (bool, error) {
+func WaitForPodReady(ctx context.Context, t *testing.T, k8s client.Client, interval time.Duration, labelSelector string) error {
+	ctx, cancelFunc := context.WithTimeout(ctx, interval)
+
+	return wait.PollUntilContextCancel(ctx, time.Second, true, func(ctx context.Context) (bool, error) {
 		state := getPodState(ctx, t, k8s, labelSelector)
 		if state.Terminated != nil {
+			cancelFunc()
 			return false, fmt.Errorf("pod with label %s terminated: %v", labelSelector, state.Terminated)
 		}
-		return state.Running != nil, nil
+
+		if state.Running != nil {
+			cancelFunc()
+			return true, nil
+		}
+
+		return false, nil
+	})
+}
+
+func WaitForJobCompleted(ctx context.Context, t *testing.T, k8s client.Client, interval time.Duration, labelSelector string) error {
+	ctx, cancelFunc := context.WithTimeout(ctx, interval)
+
+	return wait.PollUntilContextCancel(ctx, time.Second, true, func(ctx context.Context) (bool, error) {
+		state := getJobState(ctx, t, k8s, labelSelector)
+		if state.Failed > 0 {
+			cancelFunc()
+			return false, fmt.Errorf("job with label %s terminated: %v", labelSelector, state.Conditions[0].Message)
+		}
+
+		if state.Succeeded > 0 {
+			cancelFunc()
+			return true, nil
+		}
+
+		return false, nil
 	})
 }
 
@@ -208,6 +237,21 @@ func getPodState(ctx context.Context, t *testing.T, k8s client.Client, labelSele
 	}
 
 	return status.ContainerStatuses[0].State
+}
+
+func getJobState(ctx context.Context, t *testing.T, k8s client.Client, labelSelector string) batchv1.JobStatus {
+	jobList := &batchv1.JobList{}
+
+	selector, err := labels.Parse(labelSelector)
+	require.NoError(t, err)
+	err = k8s.List(ctx, jobList, &client.ListOptions{LabelSelector: selector})
+	require.NoError(t, err)
+
+	if len(jobList.Items) != 1 {
+		log.Fatalf("There should be only one job with label %s, found %d\n", labelSelector, len(jobList.Items))
+	}
+
+	return jobList.Items[0].Status
 }
 
 // Inspired by Gateway API implementation

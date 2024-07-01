@@ -37,6 +37,7 @@ const kubeConfigEnvVar = "KUBECONFIG"
 
 func (s *APIGatewayTestSuite) SetupSuite() {
 	s.ctx = context.Background()
+
 	err := checkRequiredEnvVariables()
 	s.Require().NoError(err)
 
@@ -75,7 +76,6 @@ func (s *APIGatewayTestSuite) SetupSuite() {
 			return dialer.DialContext(ctx, network, addr)
 		},
 	}
-	_, s.debug = os.LookupEnv("DEBUG")
 }
 
 func checkRequiredEnvVariables() error {
@@ -104,7 +104,7 @@ func (s *APIGatewayTestSuite) TestGettingStarted() {
 	s.apply("src/manifests/apps-namespace.yaml")
 	s.apply("src/manifests/weather-app.yaml")
 	time.Sleep(1 * time.Second)
-	err = testhelpers.WaitFor(s.ctx, s.T(), s.k8s, 90*time.Second, "app=weather-app")
+	err = testhelpers.WaitForPodReady(s.ctx, s.T(), s.k8s, 90*time.Second, "app=weather-app")
 	s.Require().NoError(err)
 	s.apply("api-gateway/1-getting-started/manifests/weather-app-ingressroute.yaml")
 
@@ -125,6 +125,9 @@ func (s *APIGatewayTestSuite) TestGettingStarted() {
 	s.Assert().NoError(err)
 }
 
+type k8sSecret struct {
+	Data oAuth2ClientConfig `json:"data"`
+}
 type oAuth2ClientConfig struct {
 	ClientID     string `json:"client_id"`
 	ClientSecret string `json:"client_secret"`
@@ -136,16 +139,18 @@ func (s *APIGatewayTestSuite) TestSecureApplications() {
 	var req *http.Request
 
 	s.apply("src/manifests/hydra.yaml")
-	err = testhelpers.WaitFor(s.ctx, s.T(), s.k8s, 90*time.Second, "app=hydra")
+	err = testhelpers.WaitForPodReady(s.ctx, s.T(), s.k8s, 90*time.Second, "app=hydra")
 	s.Require().NoError(err)
-	err = testhelpers.WaitFor(s.ctx, s.T(), s.k8s, 90*time.Second, "app=consent")
+	err = testhelpers.WaitForPodReady(s.ctx, s.T(), s.k8s, 90*time.Second, "app=consent")
+	s.Require().NoError(err)
+	err = testhelpers.WaitForJobCompleted(s.ctx, s.T(), s.k8s, 60*time.Second, "app=create-hydra-clients")
 	s.Require().NoError(err)
 
 	// Test M2M
 	s.apply("src/manifests/apps-namespace.yaml")
 	s.apply("src/manifests/whoami-app.yaml")
 	time.Sleep(1 * time.Second)
-	err = testhelpers.WaitFor(s.ctx, s.T(), s.k8s, 90*time.Second, "app=whoami")
+	err = testhelpers.WaitForPodReady(s.ctx, s.T(), s.k8s, 90*time.Second, "app=whoami")
 	s.Require().NoError(err)
 	s.apply("api-gateway/2-secure-applications/manifests/whoami-app-ingressroute.yaml")
 	req, err = http.NewRequest(http.MethodGet, "http://secure-applications.apigateway.docker.localhost/no-auth", nil)
@@ -154,37 +159,27 @@ func (s *APIGatewayTestSuite) TestSecureApplications() {
 	s.Assert().NoError(err)
 
 	s.apply("api-gateway/2-secure-applications/manifests/whoami-app-oauth2-client-creds.yaml")
-	output := testhelpers.LaunchKubectl(s.T(), "exec", "-i", "-n", "hydra", "deploy/hydra", "--",
-		"hydra", "create", "oauth2-client", "--name", "oauth-client", "--secret", "traefiklabs",
-		"--grant-type", "client_credentials", "--endpoint", "http://127.0.0.1:4445/",
-		"--audience", "https://traefik.io", "--format", "json",
-		"--token-endpoint-auth-method", "client_secret_post",
-	)
+	output := testhelpers.LaunchKubectl(s.T(), "get", "secrets", "-n", "apps", "oauth-client", "-o", "json")
 	s.Require().NotNil(output)
-	oauth2 := oAuth2ClientConfig{}
+	oauth2 := k8sSecret{}
 	err = json.NewDecoder(output).Decode(&oauth2)
+	s.Require().NoError(err)
+
+	clientID, err := base64.StdEncoding.DecodeString(oauth2.Data.ClientID)
+	s.Require().NoError(err)
+
+	clientSecret, err := base64.StdEncoding.DecodeString(oauth2.Data.ClientSecret)
 	s.Require().NoError(err)
 
 	req, err = http.NewRequest(http.MethodGet, "http://secure-applications.apigateway.docker.localhost/oauth2-client-credentials", nil)
 	s.Require().NoError(err)
-	auth := base64.StdEncoding.EncodeToString([]byte(oauth2.ClientID + ":" + oauth2.ClientSecret))
+	auth := base64.StdEncoding.EncodeToString([]byte(string(clientID) + ":" + string(clientSecret)))
 	req.Header.Add("Authorization", "Basic "+auth)
 	err = try.RequestWithTransport(req, 10*time.Second, s.tr, try.StatusCodeIs(http.StatusOK))
 	s.Assert().NoError(err)
 
 	// M2M with clientID / clientSecret in the mdw
-	output = testhelpers.LaunchKubectl(s.T(), "exec", "-i", "-n", "hydra", "deploy/hydra", "--",
-		"hydra", "create", "oauth2-client", "--name", "oauth-client", "--secret", "traefiklabs",
-		"--grant-type", "client_credentials", "--endpoint", "http://127.0.0.1:4445/",
-		"--audience", "https://traefik.io", "--format", "json",
-	)
-	s.Require().NotNil(output)
-	oauth2 = oAuth2ClientConfig{}
-	err = json.NewDecoder(output).Decode(&oauth2)
-	s.Require().NoError(err)
-	s.T().Setenv("CLIENT_ID", oauth2.ClientID)
-	s.T().Setenv("CLIENT_SECRET", oauth2.ClientSecret)
-	s.loadEnvSubstYaml("api-gateway/2-secure-applications/manifests/whoami-app-oauth2-client-creds-nologin.yaml")
+	s.apply("api-gateway/2-secure-applications/manifests/whoami-app-oauth2-client-creds-nologin.yaml")
 
 	req, err = http.NewRequest(http.MethodGet, "http://secure-applications.apigateway.docker.localhost/oauth2-client-credentials-nologin", nil)
 	s.Require().NoError(err)
@@ -199,31 +194,7 @@ func (s *APIGatewayTestSuite) TestSecureApplications() {
 	err = try.RequestWithTransport(req, 10*time.Second, s.tr, try.StatusCodeIs(http.StatusOK))
 	s.Assert().NoError(err)
 
-	output = testhelpers.LaunchKubectl(s.T(), "exec", "-i", "-n", "hydra", "deploy/hydra", "--",
-		"hydra", "create", "jwks", "hydra.openid.id-token",
-		"--alg", "RS256", "--endpoint", "http://127.0.0.1:4445/",
-	)
-	s.Require().NotNil(output)
-	output = testhelpers.LaunchKubectl(s.T(), "exec", "-i", "-n", "hydra", "deploy/hydra", "--",
-		"hydra", "create", "jwks", "hydra.jwt.access-token",
-		"--alg", "RS256", "--endpoint", "http://127.0.0.1:4445/",
-	)
-	s.Require().NotNil(output)
-	output = testhelpers.LaunchKubectl(s.T(), "exec", "-i", "-n", "hydra", "deploy/hydra", "--",
-		"hydra", "create", "oauth2-client", "--name", "oidc-client", "--secret", "traefiklabs",
-		"--grant-type", "authorization_code,refresh_token", "--response-type", "code,id_token",
-		"--scope", "openid,offline", "--redirect-uri", "http://secure-applications.apigateway.docker.localhost/oidc/callback",
-		"--post-logout-callback", "http://secure-applications.apigateway.docker.localhost/oidc/callback",
-		"--endpoint", "http://127.0.0.1:4445/", "--format", "json",
-	)
-	s.Require().NotNil(output)
-	oauth2 = oAuth2ClientConfig{}
-	err = json.NewDecoder(output).Decode(&oauth2)
-	s.Require().NoError(err)
-	s.T().Setenv("CLIENT_ID", oauth2.ClientID)
-	s.T().Setenv("CLIENT_SECRET", oauth2.ClientSecret)
-	time.Sleep(1 * time.Second)
-	s.loadEnvSubstYaml("api-gateway/2-secure-applications/manifests/whoami-app-oidc.yaml")
+	s.apply("api-gateway/2-secure-applications/manifests/whoami-app-oidc.yaml")
 
 	// FTM: No way to check when oidc has been loaded
 	time.Sleep(5 * time.Second)
@@ -260,22 +231,7 @@ func (s *APIGatewayTestSuite) TestSecureApplications() {
 	s.Assert().NoError(err)
 
 	// Test OIDC No Login
-	output = testhelpers.LaunchKubectl(s.T(), "exec", "-i", "-n", "hydra", "deploy/hydra", "--",
-		"hydra", "create", "oauth2-client", "--name", "oidc-client", "--secret", "traefiklabs",
-		"--grant-type", "authorization_code,refresh_token", "--response-type", "code,id_token",
-		"--scope", "openid,offline", "--redirect-uri", "http://secure-applications.apigateway.docker.localhost/oidc-nologin/callback",
-		"--post-logout-callback", "http://secure-applications.apigateway.docker.localhost/oidc-nologin/callback",
-		"--endpoint", "http://127.0.0.1:4445/", "--format", "json",
-	)
-	s.Require().NotNil(output)
-	oauth2 = oAuth2ClientConfig{}
-	err = json.NewDecoder(output).Decode(&oauth2)
-	s.Require().NoError(err)
-	s.T().Setenv("CLIENT_ID", oauth2.ClientID)
-	s.T().Setenv("CLIENT_SECRET", oauth2.ClientSecret)
-	time.Sleep(1 * time.Second)
-
-	s.loadEnvSubstYaml("api-gateway/2-secure-applications/manifests/whoami-app-oidc-nologinurl.yaml")
+	s.apply("api-gateway/2-secure-applications/manifests/whoami-app-oidc-nologinurl.yaml")
 
 	// FTM: No way to check when oidc has been loaded
 	time.Sleep(5 * time.Second)
@@ -311,12 +267,6 @@ func TestAPIGatewayTestSuite(t *testing.T) {
 
 func (s *APIGatewayTestSuite) apply(path string) {
 	results, err := testhelpers.ApplyFile(s.ctx, s.k8s, filepath.Join("..", "..", path))
-	s.Require().NoError(err)
-	testcontainers.Logger.Printf("📦️ %q loaded\n", results)
-}
-
-func (s *APIGatewayTestSuite) loadEnvSubstYaml(path string) {
-	results, err := testhelpers.ApplyEnvSubstFile(s.ctx, s.k8s, filepath.Join("..", "..", path), s.debug)
 	s.Require().NoError(err)
 	testcontainers.Logger.Printf("📦️ %q loaded\n", results)
 }

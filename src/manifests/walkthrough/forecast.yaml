@@ -4,12 +4,7 @@ kind: API
 metadata:
   name: walkthrough-weather-api-forecast
   namespace: apps
-spec:
-  openApiSpec:
-    path: /openapi.yaml
-    override:
-      servers:
-        - url: http://api.walkthrough.docker.localhost
+spec: {}
 
 ---
 apiVersion: hub.traefik.io/v1alpha1

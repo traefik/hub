@@ -30,9 +30,11 @@ In this tutorial, we will use [Ory Hydra](https://www.ory.sh/hydra/), an OAuth 2
 We can deploy it:
 
 ```shell
+kubectl apply -f src/manifests/apps-namespace.yaml
 kubectl apply -f src/manifests/hydra.yaml
 kubectl wait -n hydra --for=condition=ready pod --selector=app=hydra --timeout=90s
 kubectl wait -n hydra --for=condition=ready pod --selector=app=consent --timeout=90s
+kubectl wait -n hydra --for=condition=complete  job/create-hydra-clients --timeout=90s
 ```
 
 TraefikLabs has open-sourced a simple _whoami_ application displaying technical information about the request.
@@ -40,14 +42,12 @@ TraefikLabs has open-sourced a simple _whoami_ application displaying technical 
 First, let's deploy and expose it:
 
 ```shell
-kubectl apply -f src/manifests/apps-namespace.yaml
 kubectl apply -f src/manifests/whoami-app.yaml
 kubectl apply -f api-gateway/2-secure-applications/manifests/whoami-app-ingressroute.yaml
 sleep 5
 ```
 
 ```shell
-namespace/apps created
 deployment.apps/whoami created
 service/whoami created
 ingressroute.traefik.io/secure-applications-apigateway-no-auth created
@@ -128,21 +128,29 @@ kubectl apply -f api-gateway/2-secure-applications/manifests/whoami-app-oauth2-c
 ```
 
 ```shell
-middleware.traefik.io/oauth2-creds created
-ingressroute.traefik.io/gw-2-whoami-m2m-oauth2 created
+middleware.traefik.io/oauth2-client-creds created
+ingressroute.traefik.io/secure-applications-apigateway-oauth2-client-credentials created
 ```
 
-Once it's ready, we can create a Hydra OAuth2 client with _client_credentials_ grant type and test the authentication with it:
+Once it's ready, we can create a Hydra OAuth2 client with _client_credentials_ grant type. 
+This step is automated for you in this tutorial but here is how it's created:
+
+```shell :../../src/manifests/hydra.yaml -s 359 -e 366 -i s1
+hydra create oauth2-client \
+  --endpoint http://hydra.hydra.svc:4445 \
+  --name oauth-client \
+  --secret traefiklabs \
+  --grant-type client_credentials \
+  --audience https://traefik.io \
+  --token-endpoint-auth-method client_secret_post \
+  --format json > /data/oauth-client.json
+```
+
+If needed, it can be run manually with `kubectl exec -it -n hydra deploy/hydra -- hydra create ...`.
 
 ```shell
-client=$(kubectl exec -it -n hydra deploy/hydra -- \
-  hydra create oauth2-client --name oauth-client --secret traefiklabs \
-    --grant-type client_credentials --endpoint http://127.0.0.1:4445/ \
-    --audience https://traefik.io --format json \
-    --token-endpoint-auth-method client_secret_post)
-echo $client | jq -r '{ "client_id": .client_id, "client_secret": .client_secret }'
-client_id=$(echo $client | jq -r '.client_id')
-client_secret=$(echo $client | jq -r '.client_secret')
+client_id=$(kubectl get secrets -n apps oauth-client -o json | jq -r '.data.client_id' | base64 -d -w 0)
+client_secret=$(kubectl get secrets -n apps oauth-client -o json | jq -r '.data.client_secret' | base64 -d -w 0)
 auth=$(echo -n "$client_id:$client_secret" | base64 -w 0)
 curl -H "Authorization: Basic $auth" http://secure-applications.apigateway.docker.localhost/oauth2-client-credentials
 ```
@@ -150,10 +158,6 @@ curl -H "Authorization: Basic $auth" http://secure-applications.apigateway.docke
 It should output something like this:
 
 ```shell
-{
-  "client_id": "fee56775-bab3-4152-ad37-e2114ade6449",
-  "client_secret": "traefiklabs"
-}
 Hostname: whoami-6f57d5d6b5-bgmfl
 IP: 127.0.0.1
 IP: ::1
@@ -184,7 +188,7 @@ We can decode this JWT token easily on https://jwt.io
 
 ![Decode JWT Access Token](./images/oauth2-decode.png)
 
-There is an other mode allowed with this middleware, where we set _ClientId_ and _ClientSecret_ directly on Traefik Hub. Let's try it out.
+There is another mode allowed with this middleware, where we set _ClientId_ and _ClientSecret_ directly on Traefik Hub. Let's try it out.
 
 ```mermaid
 ---
@@ -203,7 +207,18 @@ sequenceDiagram
     apigw->>api: Send request with access token in HTTP Header
 ```
 
-We will remove the forward headers block and set the client's credentials directly in the middleware. We are using environment variables to substitute them according to your credentials to generate the applied configuration.
+We will remove the forward headers block and set the client's credentials directly in the middleware.
+Another client has been automatically created for that purpose. Let's see how:
+
+```shell :../../src/manifests/hydra.yaml -s 368 -e 374 -i s1
+hydra create oauth2-client \
+  --endpoint http://hydra.hydra.svc:4445 \
+  --name oauth-client-nologin \
+  --secret traefiklabs \
+  --grant-type client_credentials \
+  --audience https://traefik.io \
+  --format json > /data/oauth-client-nologin.json
+```
 
 ```diff :../../hack/diff.sh -r -a "manifests/whoami-app-oauth2.yaml manifests/whoami-app-oauth2-client-creds-nologin.yaml"
 --- manifests/whoami-app-oauth2.yaml
@@ -220,8 +235,8 @@ We will remove the forward headers block and set the client's credentials direct
 +    oAuthClientCredentials:
 +      url: http://hydra.hydra.svc:4444/oauth2/token
 +      audience: https://traefik.io
-+      clientId: ${CLIENT_ID}
-+      clientSecret: ${CLIENT_SECRET}
++      clientId: "urn:k8s:secret:oauth-client-nologin:client_id"
++      clientSecret: "urn:k8s:secret:oauth-client-nologin:client_secret"
 +
 +---
 +apiVersion: traefik.io/v1alpha1
@@ -242,17 +257,10 @@ We will remove the forward headers block and set the client's credentials direct
 +    - name: oauth2-client-creds-nologin
 ```
 
-Let's try it with a new user:
+Let's try it:
 
 ```shell
-client=$(kubectl exec -it -n hydra deploy/hydra -- \
-  hydra create oauth2-client --name oauth-client --secret traefiklabs \
-    --grant-type client_credentials --endpoint http://127.0.0.1:4445/ \
-    --audience https://traefik.io --format json)
-echo $client | jq -r '{ "client_id": .client_id, "client_secret": .client_secret }'
-export CLIENT_ID=$(echo $client | jq -r '.client_id')
-export CLIENT_SECRET=$(echo $client | jq -r '.client_secret')
-cat api-gateway/2-secure-applications/manifests/whoami-app-oauth2-client-creds-nologin.yaml | envsubst | kubectl apply -f -
+kubectl apply -f api-gateway/2-secure-applications/manifests/whoami-app-oauth2-client-creds-nologin.yaml
 sleep 2
 curl http://secure-applications.apigateway.docker.localhost/oauth2-client-credentials-nologin
 ```
@@ -260,10 +268,6 @@ curl http://secure-applications.apigateway.docker.localhost/oauth2-client-creden
 As we can see, there is no authentication required now *and* there is a JWT access token transmitted to the application:
 
 ```shell
-{
-  "client_id": "3d3604eb-cd92-4012-989a-01167277c4f1",
-  "client_secret": "traefiklabs"
-}
 Hostname: whoami-6f57d5d6b5-bgmfl
 IP: 127.0.0.1
 IP: ::1
@@ -282,5 +286,4 @@ X-Forwarded-Port: 80
 X-Forwarded-Proto: http
 X-Forwarded-Server: traefik-hub-6f5bbd6568-rp882
 X-Real-Ip: 10.42.0.1
-
 ```

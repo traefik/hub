@@ -8,8 +8,8 @@ spec:
   plugin:
     oidc:
       issuer: http://hydra.hydra.svc:4444
-      clientID: ${CLIENT_ID}
-      clientSecret: ${CLIENT_SECRET}
+      clientId: "urn:k8s:secret:oidc-client-nologin:client_id"
+      clientSecret: "urn:k8s:secret:oidc-client-nologin:client_secret"
       logoutUrl: /oidc-nologin/logout
       redirectUrl: /oidc-nologin/callback
       csrf: {}

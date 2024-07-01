@@ -8,7 +8,7 @@ spec:
   entryPoints:
     - web
   routes:
-  - match: HostRegexp(`getting-started.apimanagement.docker.localhost`)
+  - match: Host(`getting-started.apimanagement.docker.localhost`)
     kind: Rule
     services:
     - name: weather-app

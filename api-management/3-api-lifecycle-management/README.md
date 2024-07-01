@@ -13,9 +13,11 @@ kubectl apply -f api-management/3-api-lifecycle-management/manifests/api.yaml
 ```
 
 ```shell
-configmap/weather-data created
-deployment.apps/weather-app created
-service/weather-app created
+namespace/apps unchanged
+configmap/weather-data unchanged
+deployment.apps/weather-app unchanged
+service/weather-app unchanged
+configmap/weather-app-openapispec unchanged
 api.hub.traefik.io/api-lifecycle-apimanagement-weather-api created
 apiaccess.hub.traefik.io/api-lifecycle-apimanagement-weather-api created
 ingressroute.traefik.io/api-lifecycle-apimanagement-weather-api created
@@ -45,30 +47,34 @@ To use API Version features, we'll need to:
 ```diff :../../hack/diff.sh -r -a "manifests/api.yaml manifests/api-v1.yaml"
 --- manifests/api.yaml
 +++ manifests/api-v1.yaml
-@@ -1,35 +1,46 @@
+@@ -1,10 +1,11 @@
  ---
  apiVersion: hub.traefik.io/v1alpha1
+-kind: API
 +kind: APIVersion
-+metadata:
-+  name: api-lifecycle-apimanagement-weather-api-v1
-+  namespace: apps
-+spec:
-+  release: v1.0.0
-+
-+---
-+apiVersion: hub.traefik.io/v1alpha1
- kind: API
  metadata:
 -  name: api-lifecycle-apimanagement-weather-api
 +  name: api-lifecycle-apimanagement-weather-api-v1
    namespace: apps
--spec: {}
-+spec:
-+  versions:
-+    - name: api-lifecycle-apimanagement-weather-api-v1
+ spec:
++  release: v1.0.0
+   openApiSpec:
+     path: /openapi.yaml
+     override:
+@@ -13,28 +14,38 @@
  
  ---
  apiVersion: hub.traefik.io/v1alpha1
++kind: API
++metadata:
++  name: api-lifecycle-apimanagement-weather-api-v1
++  namespace: apps
++spec:
++  versions:
++    - name: api-lifecycle-apimanagement-weather-api-v1
++
++---
++apiVersion: hub.traefik.io/v1alpha1
  kind: APIAccess
  metadata:
 -  name: api-lifecycle-apimanagement-weather-api
@@ -94,8 +100,8 @@ To use API Version features, we'll need to:
    entryPoints:
    - web
    routes:
--  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && Path(`/weather`)
-+  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && Path(`/weather-v1`)
+-  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && PathRegexp(`^/weather(/([0-9]+|openapi.yaml))?$`)
++  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && PathRegexp(`^/weather-v1(/([0-9]+|openapi.yaml))?$`)
      kind: Rule
      services:
      - name: weather-app
@@ -137,7 +143,7 @@ So, for this second API Version, we'll need to:
 ```diff :../../hack/diff.sh -r -a "manifests/api-v1.yaml manifests/api-v1.1.yaml"
 --- manifests/api-v1.yaml
 +++ manifests/api-v1.1.yaml
-@@ -2,37 +2,38 @@
+@@ -2,10 +2,10 @@
  apiVersion: hub.traefik.io/v1alpha1
  kind: APIVersion
  metadata:
@@ -147,8 +153,10 @@ So, for this second API Version, we'll need to:
  spec:
 -  release: v1.0.0
 +  release: v1.1.0
- 
- ---
+   openApiSpec:
+     path: /openapi.yaml
+     override:
+@@ -16,28 +16,29 @@
  apiVersion: hub.traefik.io/v1alpha1
  kind: API
  metadata:
@@ -182,12 +190,12 @@ So, for this second API Version, we'll need to:
    namespace: apps
    annotations:
      hub.traefik.io/api-version: api-lifecycle-apimanagement-weather-api-v1
-@@ -40,8 +41,26 @@
+@@ -45,8 +46,26 @@
    entryPoints:
    - web
    routes:
--  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && Path(`/weather-v1`)
-+  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && Path(`/weather-multi-versions`)
+-  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && PathRegexp(`^/weather-v1(/([0-9]+|openapi.yaml))?$`)
++  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && PathRegexp(`^/weather-multi-versions(/([0-9]+|openapi.yaml))?$`)
      kind: Rule
      services:
      - name: weather-app
@@ -205,7 +213,7 @@ So, for this second API Version, we'll need to:
 +  entryPoints:
 +  - web
 +  routes:
-+  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && Path(`/weather-multi-versions`) && Header(`X-Version`, `preview`)
++  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && PathRegexp(`^/weather-multi-versions(/([0-9]+|openapi.yaml))?$`) && Header(`X-Version`, `preview`)
 +    kind: Rule
 +    services:
 +    - name: weather-app-forecast
@@ -220,10 +228,9 @@ kubectl apply -f api-management/3-api-lifecycle-management/manifests/api-v1.1.ya
 ```
 
 ```shell
-configmap/weather-app-forecast-data created
-deployment.apps/weather-app-forecast created
-service/weather-app-forecast created
-configmap/weather-app-forecast-openapispec created
+configmap/weather-app-forecast-data unchanged
+deployment.apps/weather-app-forecast unchanged
+service/weather-app-forecast unchanged
 apiversion.hub.traefik.io/api-lifecycle-apimanagement-weather-api-v1-1 created
 api.hub.traefik.io/api-lifecycle-apimanagement-weather-api-v1-1 created
 apiaccess.hub.traefik.io/api-lifecycle-apimanagement-weather-api-v1-1 created
@@ -259,7 +266,7 @@ Since the last step, the diff is looking like this:
 ```diff :../../hack/diff.sh -r -a "manifests/api-v1.1.yaml manifests/api-v1.1-weighted.yaml"
 --- manifests/api-v1.1.yaml
 +++ manifests/api-v1.1-weighted.yaml
-@@ -1,57 +1,24 @@
+@@ -1,62 +1,24 @@
  ---
 -apiVersion: hub.traefik.io/v1alpha1
 -kind: APIVersion
@@ -268,6 +275,11 @@ Since the last step, the diff is looking like this:
 -  namespace: apps
 -spec:
 -  release: v1.1.0
+-  openApiSpec:
+-    path: /openapi.yaml
+-    override:
+-      servers:
+-        - url: http://api.getting-started.apimanagement.docker.localhost
 -
 ----
 -apiVersion: hub.traefik.io/v1alpha1
@@ -305,7 +317,7 @@ Since the last step, the diff is looking like this:
 -  entryPoints:
 -  - web
 -  routes:
--  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && Path(`/weather-multi-versions`)
+-  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && PathRegexp(`^/weather-multi-versions(/([0-9]+|openapi.yaml))?$`)
 -    kind: Rule
 +  weighted:
      services:
@@ -327,12 +339,12 @@ Since the last step, the diff is looking like this:
    namespace: apps
    annotations:
      hub.traefik.io/api-version: api-lifecycle-apimanagement-weather-api-v1-1
-@@ -59,8 +26,9 @@
+@@ -64,8 +26,9 @@
    entryPoints:
    - web
    routes:
--  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && Path(`/weather-multi-versions`) && Header(`X-Version`, `preview`)
-+  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && Path(`/weather-v1-wrr`)
+-  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && PathRegexp(`^/weather-multi-versions(/([0-9]+|openapi.yaml))?$`) && Header(`X-Version`, `preview`)
++  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && PathRegexp(`^/weather-v1-wrr(/([0-9]+|openapi.yaml))?$`)
      kind: Rule
      services:
 -    - name: weather-app-forecast

@@ -25,17 +25,6 @@ jobs:
         with:
           go-version-file: tests/go.mod
           cache-dependency-path: tests/go.sum
-      - name: docker hub login
-        uses: docker/login-action@v3
-        with:
-          username: traefiker
-          password: ${{ secrets.TRAEFIKER_DOCKERHUB_TOKEN }}
-      - name: docker login on artifact registry
-        uses: docker/login-action@v3
-        with:
-          registry: europe-west9-docker.pkg.dev
-          username: _json_key
-          password: ${{ secrets.TRAEFIKER_GCP_SA_KEY }}
       - name: run tests
         working-directory: tests
         run: make test-walkthrough
@@ -49,17 +38,6 @@ jobs:
         with:
           go-version-file: tests/go.mod
           cache-dependency-path: tests/go.sum
-      - name: docker hub login
-        uses: docker/login-action@v3
-        with:
-          username: traefiker
-          password: ${{ secrets.TRAEFIKER_DOCKERHUB_TOKEN }}
-      - name: docker login on artifact registry
-        uses: docker/login-action@v3
-        with:
-          registry: europe-west9-docker.pkg.dev
-          username: _json_key
-          password: ${{ secrets.TRAEFIKER_GCP_SA_KEY }}
       - name: run tests
         working-directory: tests
         run: make test-apigw
@@ -73,17 +51,6 @@ jobs:
         with:
           go-version-file: tests/go.mod
           cache-dependency-path: tests/go.sum
-      - name: docker hub login
-        uses: docker/login-action@v3
-        with:
-          username: traefiker
-          password: ${{ secrets.TRAEFIKER_DOCKERHUB_TOKEN }}
-      - name: docker login on artifact registry
-        uses: docker/login-action@v3
-        with:
-          registry: europe-west9-docker.pkg.dev
-          username: _json_key
-          password: ${{ secrets.TRAEFIKER_GCP_SA_KEY }}
       - name: run tests
         working-directory: tests
         run: make test-apim

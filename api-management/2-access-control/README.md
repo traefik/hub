@@ -78,7 +78,7 @@ kubectl apply -f api-management/2-access-control/manifests/simple-admin-api.yaml
 
 ```shell
 api.hub.traefik.io/access-control-apimanagement-simple-admin created
-apiaccess.hub.traefik.io/access-control-apimanagement-admin-simple created
+apiaccess.hub.traefik.io/access-control-apimanagement-simple-admin created
 ingressroute.traefik.io/access-control-apimanagement-simple-admin created
 ```
 
@@ -122,7 +122,7 @@ spec:
   entryPoints:
     - web
   routes:
-  - match: Host(`api.access-control.apimanagement.docker.localhost`) && Path(`/simple/weather`)
+  - match: Host(`api.access-control.apimanagement.docker.localhost`) && PathRegexp(`^/simple/weather(/([0-9]+|openapi.yaml))?$`)
     kind: Rule
     services:
     - name: weather-app
@@ -265,8 +265,8 @@ One needs to define operationSets to configure operationFilters. Here, we'll dif
    entryPoints:
      - web
    routes:
--  - match: Host(`api.access-control.apimanagement.docker.localhost`) && Path(`/simple/weather`)
-+  - match: Host(`api.access-control.apimanagement.docker.localhost`) && Path(`/complex/weather`)
+-  - match: Host(`api.access-control.apimanagement.docker.localhost`) && PathRegexp(`^/simple/weather(/([0-9]+|openapi.yaml))?$`)
++  - match: Host(`api.access-control.apimanagement.docker.localhost`) && PathRegexp(`^/complex/weather(/([0-9]+|openapi.yaml))?$`)
      kind: Rule
      services:
      - name: weather-app
@@ -287,7 +287,7 @@ It can be tested with the API token of the admin:
 
 ```shell
 # This call is allowed.
-curl -i -H "Authorization: Bearer $ADMIN_TOKEN" "http://api.access-control.apimanagement.docker.localhost/complex/admin/"
+curl -i -H "Authorization: Bearer $ADMIN_TOKEN" "http://api.access-control.apimanagement.docker.localhost/complex/admin"
 # This call is now allowed
 curl -i -H "Authorization: Bearer $ADMIN_TOKEN" "http://api.access-control.apimanagement.docker.localhost/complex/weather"
 # And even PATCH is allowed
@@ -307,12 +307,12 @@ It can be explained quite easily if **PATCH** is still allowed. There is still a
 
 ```yaml
 kubectl get apiaccess -n apps
-NAME                          AGE
-mgmt-1-weather-api            28m
-mgmt-1-weather-api-forecast   15m
-access-control-apimanagement-simple-weather     6m38s
-access-control-apimanagement-weather-api-external   90s
-access-control-apimanagement-weather-api-admin      90s
+NAME                                                    AGE
+getting-started-apimanagement-weather-api               86m
+getting-started-apimanagement-weather-api-forecast      9m1s
+access-control-apimanagement-simple-weather             6m15s
+access-control-apimanagement-complex-weather-external   54s
+access-control-apimanagement-complex-weather-admin      54s
 ```
 
 It means that for the `external` user group, there are two `APIAccess` applying:

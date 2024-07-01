@@ -95,7 +95,7 @@ helm install traefik-hub -n traefik --wait \
   --set ingressRoute.dashboard.entryPoints={web} \
   --set image.registry=ghcr.io \
   --set image.repository=traefik/traefik-hub \
-  --set image.tag=v3.0.0 \
+  --set image.tag=v3.1.1 \
   --set ports.web.nodePort=30000 \
   --set ports.websecure.nodePort=30001 \
    traefik/traefik
@@ -116,7 +116,7 @@ helm upgrade traefik-hub -n traefik-hub --wait \
   --set ingressRoute.dashboard.entryPoints={web} \
   --set image.registry=ghcr.io \
   --set image.repository=traefik/traefik-hub \
-  --set image.tag=v3.0.0 \
+  --set image.tag=v3.1.1 \
   --set ports.web.nodePort=30000 \
   --set ports.websecure.nodePort=30001 \
    traefik/traefik
@@ -144,6 +144,7 @@ namespace/apps created
 configmap/weather-data created
 deployment.apps/weather-app created
 service/weather-app created
+configmap/weather-app-openapispec created
 ```
 
 It can be exposed with an `IngressRoute`:
@@ -159,7 +160,7 @@ spec:
   entryPoints:
     - web
   routes:
-  - match: HostRegexp(`getting-started.apigateway.docker.localhost`)
+  - match: Host(`getting-started.apigateway.docker.localhost`)
     kind: Rule
     services:
     - name: weather-app
@@ -171,7 +172,7 @@ kubectl apply -f api-gateway/1-getting-started/manifests/weather-app-ingressrout
 ```
 
 ```shell
-ingressroute.traefik.io/gw-1-weather-api created
+ingressroute.traefik.io/getting-started-apigateway created
 ```
 
 This API can be accessed using curl:
@@ -246,7 +247,7 @@ Put this hash in the API Key `Middleware`:
    entryPoints:
      - web
    routes:
--  - match: HostRegexp(`getting-started.apigateway.docker.localhost`)
+-  - match: Host(`getting-started.apigateway.docker.localhost`)
 +  - match: Host(`getting-started.apigateway.docker.localhost`) && Path(`/api-key`)
      kind: Rule
      services:
@@ -264,8 +265,8 @@ kubectl apply -f api-gateway/1-getting-started/manifests/weather-app-apikey.yaml
 ```
 
 ```shell
-secret/getting-started-apikey-auth created
-middleware.traefik.io/getting-started-apikey-auth created
+secret/getting-started-apigateway-apikey-auth created
+middleware.traefik.io/getting-started-apigateway-apikey-auth created
 ingressroute.traefik.io/getting-started-apigateway-api-key created
 ```
 
