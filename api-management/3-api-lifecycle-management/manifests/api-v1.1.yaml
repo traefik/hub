@@ -2,55 +2,51 @@
 apiVersion: hub.traefik.io/v1alpha1
 kind: APIVersion
 metadata:
-  name: weather-api-v1
-  namespace: apps
-spec:
-  release: v1.0.0
-
----
-apiVersion: hub.traefik.io/v1alpha1
-kind: APIVersion
-metadata:
-  name: weather-api-v1-1
+  name: api-lifecycle-apimanagement-weather-api-v1-1
   namespace: apps
 spec:
   release: v1.1.0
+  openApiSpec:
+    path: /openapi.yaml
+    override:
+      servers:
+        - url: http://api.getting-started.apimanagement.docker.localhost
 
 ---
 apiVersion: hub.traefik.io/v1alpha1
 kind: API
 metadata:
-  name: weather-api
+  name: api-lifecycle-apimanagement-weather-api-v1-1
   namespace: apps
 spec:
   versions:
-    - name: weather-api-v1
-    - name: weather-api-v1-1
+    - name: api-lifecycle-apimanagement-weather-api-v1
+    - name: api-lifecycle-apimanagement-weather-api-v1-1
 
 ---
 apiVersion: hub.traefik.io/v1alpha1
 kind: APIAccess
 metadata:
-  name: weather-api
+  name: api-lifecycle-apimanagement-weather-api-v1-1
   namespace: apps
 spec:
   apis:
-  - name: weather-api
+  - name: api-lifecycle-apimanagement-weather-api-v1-1
   everyone: true
 
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: weather-api
+  name: api-lifecycle-apimanagement-weather-api-v1-1
   namespace: apps
   annotations:
-    hub.traefik.io/api-version: weather-api-v1
+    hub.traefik.io/api-version: api-lifecycle-apimanagement-weather-api-v1
 spec:
   entryPoints:
   - web
   routes:
-  - match: Host(`api.docker.localhost`) && PathPrefix(`/weather`)
+  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && PathRegexp(`^/weather-multi-versions(/([0-9]+|openapi.yaml))?$`)
     kind: Rule
     services:
     - name: weather-app
@@ -60,15 +56,15 @@ spec:
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: weather-api-v1-1
+  name: api-lifecycle-apimanagement-weather-api-v1-1-preview
   namespace: apps
   annotations:
-    hub.traefik.io/api-version: weather-api-v1-1
+    hub.traefik.io/api-version: api-lifecycle-apimanagement-weather-api-v1-1
 spec:
   entryPoints:
   - web
   routes:
-  - match: Host(`api.docker.localhost`) && PathPrefix(`/weather`) && Header(`X-Version`, `preview`)
+  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && PathRegexp(`^/weather-multi-versions(/([0-9]+|openapi.yaml))?$`) && Header(`X-Version`, `preview`)
     kind: Rule
     services:
     - name: weather-app-forecast

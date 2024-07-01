@@ -89,7 +89,7 @@ helm install traefik-hub -n traefik --wait \
   --set ingressRoute.dashboard.entryPoints={web} \
   --set image.registry=ghcr.io \
   --set image.repository=traefik/traefik-hub \
-  --set image.tag=v3.0.0 \
+  --set image.tag=v3.1.1 \
   --set ports.web.nodePort=30000 \
   --set ports.websecure.nodePort=30001 \
    traefik/traefik
@@ -111,7 +111,7 @@ helm upgrade traefik-hub -n traefik --wait \
   --set ingressRoute.dashboard.entryPoints={web} \
   --set image.registry=ghcr.io \
   --set image.repository=traefik/traefik-hub \
-  --set image.tag=v3.0.0 \
+  --set image.tag=v3.1.1 \
   --set ports.web.nodePort=30000 \
   --set ports.websecure.nodePort=30001 \
    traefik/traefik
@@ -121,37 +121,39 @@ Now, we can access the local dashboard at http://dashboard.docker.localhost/.
 
 ## Step 2: Deploy an API as an Ingress
 
-:information_source: This tutorial implements API using a JSON server in Go; check out the source code [here](https://github.com/traefik/hub-preview/tree/main/src/api-server/).
+:information_source: This tutorial implements API using a JSON server in Go; check out the source code [here](https://github.com/traefik/hub/tree/main/src/api-server/).
 
-First, let's deploy a [weather app](https://github.com/traefik/hub-preview/blob/main/src/manifests/weather-app.yaml) exposing an API:
+First, let's deploy a [weather app](https://github.com/traefik/hub/blob/main/src/manifests/weather-app.yaml) exposing an API:
 
 ```shell
+kubectl apply -f src/manifests/apps-namespace.yaml
 kubectl apply -f src/manifests/weather-app.yaml
 ```
 
 It creates the weather app:
 
 ```shell
-namespace/apps created
-configmap/weather-data created
-deployment.apps/weather-app created
-service/weather-app created
+namespace/apps unchanged
+configmap/weather-data unchanged
+deployment.apps/weather-app unchanged
+service/weather-app unchanged
+configmap/weather-app-openapispec unchanged
 ```
 
 Then, expose the weather app using an `IngressRoute`:
 
-```yaml
+```yaml :manifests/weather-app-ingressroute.yaml
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: weather-api
+  name: getting-started-apimanagement
   namespace: apps
 spec:
   entryPoints:
     - web
   routes:
-  - match: Host(`api.docker.localhost`) && PathPrefix(`/weather`)
+  - match: Host(`getting-started.apimanagement.docker.localhost`)
     kind: Rule
     services:
     - name: weather-app
@@ -159,17 +161,17 @@ spec:
 ```
 
 ```shell
-kubectl apply -f src/manifests/weather-app-ingressroute.yaml
+kubectl apply -f api-management/1-getting-started/manifests/weather-app-ingressroute.yaml
 ```
 
 ```shell
-ingressroute.traefik.io/weather-api created
+ingressroute.traefik.io/getting-started-apimanagement created
 ```
 
 At this moment, this API is exposed. It's possible to reach it using `curl` command:
 
 ```shell
-curl http://api.docker.localhost/weather
+curl http://getting-started.apimanagement.docker.localhost
 ```
 
 ```json
@@ -186,43 +188,48 @@ curl http://api.docker.localhost/weather
 
 Let's manage the weather API with Traefik Hub using `API` and `APIAccess` resources:
 
-```yaml
+```yaml :manifests/api.yaml -s 1 -e 23
 ---
 apiVersion: hub.traefik.io/v1alpha1
 kind: API
 metadata:
-  name: weather-api
+  name: getting-started-apimanagement-weather-api
   namespace: apps
-spec: {}
+spec:
+  openApiSpec:
+    path: /openapi.yaml
+    override:
+      servers:
+        - url: http://api.getting-started.apimanagement.docker.localhost
 
 ---
 apiVersion: hub.traefik.io/v1alpha1
 kind: APIAccess
 metadata:
-  name: weather-api
+  name: getting-started-apimanagement-weather-api
   namespace: apps
 spec:
   apis:
-    - name: weather-api
+  - name: getting-started-apimanagement-weather-api
   everyone: true
 ```
 
 First, reference the `API` in the `IngressRoute` using the dedicated annotation:
 
-```yaml
+```yaml :manifests/api.yaml -s 25 -e 41
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: weather-api
+  name: getting-started-apimanagement-weather-api
   namespace: apps
   annotations:
-    hub.traefik.io/api: weather-api # <=== Link to the API using its name
+    hub.traefik.io/api: getting-started-apimanagement-weather-api # <=== Link to the API using its name
 spec:
   entryPoints:
-    - web
+  - web
   routes:
-  - match: Host(`api.docker.localhost`) && PathPrefix(`/weather`)
+  - match: Host(`api.getting-started.apimanagement.docker.localhost`) && PathRegexp(`^/weather(/([0-9]+|openapi.yaml))?$`)
     kind: Rule
     services:
     - name: weather-app
@@ -238,15 +245,15 @@ kubectl apply -f api-management/1-getting-started/manifests/api.yaml
 It creates `API`, `APIAccess`, and links `IngressRoute` to the weather API:
 
 ```shell
-api.hub.traefik.io/weather-api created
-apiaccess.hub.traefik.io/weather-api created
-ingressroute.traefik.io/weather-api configured
+api.hub.traefik.io/getting-started-apimanagement-weather-api created
+apiaccess.hub.traefik.io/getting-started-apimanagement-weather-api created
+ingressroute.traefik.io/getting-started-apimanagement-weather-api created
 ```
 
 Now, the API is secured. When someone tries to access the API, it returns the expected `401 Unauthorized` HTTP code:
 
 ```shell
-curl -i http://api.docker.localhost/weather
+curl -i http://api.getting-started.apimanagement.docker.localhost/weather
 ```
 
 ```shell
@@ -269,31 +276,31 @@ An API Portal use the same logic as an API for the routing, using `Ingress` and 
 
 :information_source: The portal enforces namespace boundaries and considers only `APIAccess` resources within the same namespace as the `APIPortal`.
 
-```yaml
+```yaml :manifests/api-portal.yaml
 ---
 apiVersion: hub.traefik.io/v1alpha1
 kind: APIPortal
 metadata:
-  name: apiportal
-  namespace: traefik
+  name: getting-started-apimanagement-apiportal
+  namespace: apps
 spec:
   title: API Portal
-  description: "Developer Portal"
+  description: "Apps Developer Portal"
   trustedUrls:
-    - api.docker.localhost
+    - http://api.getting-started.apimanagement.docker.localhost
 
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: apiportal
+  name: getting-started-apimanagement-apiportal
   namespace: traefik
   annotations:
     # This annotation link this Ingress to the API Portal using <name>@<namespace> format.
-    hub.traefik.io/api-portal: apiportal@apps
+    hub.traefik.io/api-portal: getting-started-apimanagement-apiportal@apps
 spec:
   rules:
-  - host: api.docker.localhost
+  - host: api.getting-started.apimanagement.docker.localhost
     http:
       paths:
         - path: /
@@ -308,16 +315,16 @@ spec:
 :information_source: This API Portal is routed with the internal _ClusterIP_ `Service` named _apiportal_ provided with the Helm Chart.
 
 ```shell
-kubectl apply -n traefik -f api-management/1-getting-started/manifests/api-portal.yaml
+kubectl apply -f api-management/1-getting-started/manifests/api-portal.yaml
 sleep 30
 ```
 
 ```shell
-apiportal.hub.traefik.io/apiportal created
-ingressroute.traefik.io/apiportal created
+apiportal.hub.traefik.io/getting-started-apimanagement-apiportal created
+ingress.networking.k8s.io/getting-started-apimanagement-apiportal created
 ```
 
-The API Portal is reachable on http://api.docker.localhost.
+The API Portal is reachable on http://api.getting-started.apimanagement.docker.localhost.
 
 Now, we should be able to log in with the admin user and create a token for the user:
 
@@ -332,7 +339,7 @@ export ADMIN_TOKEN=
 The weather API is reachable with this token set as header :tada: :
 
 ```shell
-curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.docker.localhost/weather
+curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.getting-started.apimanagement.docker.localhost/weather
 ```
 
 ```json
@@ -347,13 +354,12 @@ curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.docker.localhost/weather
 
 :information_source: If it fails with 401, wait a minute and try again. The token needs to be sync before it can be accepted by Traefik Hub.
 
-We can see the API available in the `apps` namespace in the portal. This first API does not come with an OpenAPI specification (OAS):
+We can see the API available in the `apps` namespace in the portal. We advise every API to come with an OpenAPI specification (OAS):
 
-![API Portal without OAS](./images/api-portal-without-oas.png)
+![API Portal with OAS](./images/api-portal-with-oas.png)
 
-Although not setting an OAS for an API is possible, it severely hurts getting started with API consumption.
-Let's see what features are unlocked if we set one.
-Let's deploy a [forecast app](https://github.com/traefik/hub-preview/blob/main/src/manifests/weather-app-forecast.yaml) with an OpenAPI specification:
+However, it's still possible not setting an OAS, but it severely hurts getting started with API consumption.
+Let's deploy a [forecast app](https://github.com/traefik/hub/blob/main/src/manifests/weather-app-forecast.yaml) without an OpenAPI specification:
 
 ```shell
 kubectl apply -f src/manifests/weather-app-forecast.yaml
@@ -361,33 +367,28 @@ kubectl apply -f src/manifests/weather-app-forecast.yaml
 
 This time, we will specify how to get this openapi spec in API _CRD_:
 
-```yaml
+```yaml :manifests/forecast.yaml -s 1 -e 7
 ---
 apiVersion: hub.traefik.io/v1alpha1
 kind: API
 metadata:
-  name: weather-api-forecast
+  name: getting-started-apimanagement-weather-api-forecast
   namespace: apps
-spec:
-  openApiSpec:
-    path: /openapi.yaml
-    override:
-      servers:
-        - url: http://api.docker.localhost
+spec: {}
 ```
 
-The other resources are built on the same model, as we can see in [the complete file](https://github.com/traefik/hub-preview/blob/main/api-management/1-getting-started/manifests/forecast.yaml). Let's apply it:
+The other resources are built on the same model, as we can see in [the complete file](https://github.com/traefik/hub/blob/main/api-management/1-getting-started/manifests/forecast.yaml). Let's apply it:
 
 ```shell
 kubectl apply -f api-management/1-getting-started/manifests/forecast.yaml
 ```
 
 ```shell
-api.hub.traefik.io/weather-api-forecast created
-apiaccess.hub.traefik.io/weather-api-forecast created
-ingressroute.traefik.io/weather-api-forecast created
+api.hub.traefik.io/getting-started-apimanagement-weather-api-forecast created
+apiaccess.hub.traefik.io/getting-started-apimanagement-weather-api-forecast created
+ingressroute.traefik.io/getting-started-apimanagement-weather-api-forecast created
 ```
 
 And that's it! This time, we have documentation built from the OpenAPI specification, and we can also interactively try the API with the Try Out functionality.
 
-![API Portal With OAS](./images/api-portal-with-oas.png)
+![API Portal without OAS](./images/api-portal-without-oas.png)

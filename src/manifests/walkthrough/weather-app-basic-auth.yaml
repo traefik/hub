@@ -22,13 +22,13 @@ spec:
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: weather-api
+  name: walkthrough-weather-api-basic-auth
   namespace: apps
 spec:
   entryPoints:
     - web
   routes:
-  - match: Host(`api.docker.localhost`) && PathPrefix(`/weather`)
+  - match: Host(`walkthrough.docker.localhost`) && Path(`/basic-auth`)
     kind: Rule
     services:
     - name: weather-app

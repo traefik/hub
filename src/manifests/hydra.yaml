@@ -1,0 +1,438 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hydra
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: hydra
+  namespace: hydra
+type: Opaque
+stringData:
+  DSN: memory
+  SECRETS_SYSTEM: youReallyNeedToChangeThis
+  SECRETS_COOKIE: youReallyNeedToChangeThis
+  OIDC_SUBJECT_IDENTIFIERS_PAIRWISE_SALT: youReallyNeedToChangeThis
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hydra
+  namespace: hydra
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hydra
+  template:
+    metadata:
+      labels:
+        app: hydra
+    spec:
+      automountServiceAccountToken: false
+      initContainers:
+        - name: migrate
+          image: docker.io/oryd/hydra:v2.2.0
+          args:
+            - migrate
+            - sql
+            - -e
+            - --yes
+          envFrom:
+            - secretRef:
+                name: hydra
+                optional: false
+          resources:
+            requests:
+              cpu: 20m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
+            seccompProfile:
+              type: RuntimeDefault
+            capabilities:
+              drop:
+                - ALL
+      containers:
+        - name: hydra
+          image: docker.io/oryd/hydra:v2.2.0
+          args:
+            - serve
+            - all
+            - --dev
+          envFrom:
+            - secretRef:
+                name: hydra
+                optional: false
+          env:
+            - name: URLS_SELF_ISSUER
+              value: http://hydra.hydra.svc:4444
+            - name: URLS_SELF_ADMIN
+              value: http://hydra.hydra.svc:4445
+            - name: URLS_SELF_PUBLIC
+              value: http://hydra.docker.localhost
+            - name: URLS_CONSENT
+              value: http://consent.docker.localhost/consent
+            - name: URLS_LOGIN
+              value: http://consent.docker.localhost/login
+            - name: URLS_LOGOUT
+              value: http://consent.docker.localhost/logout
+            - name: STRATEGIES_ACCESS_TOKEN
+              value: jwt
+            - name: WEBFINGER_OIDC_DISCOVERY_TOKEN_URL
+              value: http://hydra.hydra.svc:4444/oauth2/token
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+          ports:
+            - containerPort: 4444
+              name: public
+              protocol: TCP
+            - containerPort: 4445
+              name: admin
+              protocol: TCP
+            - containerPort: 5555
+              name: token
+              protocol: TCP
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
+            seccompProfile:
+              type: RuntimeDefault
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 250m
+              memory: 128Mi
+            limits:
+              cpu: 800m
+              memory: 392Mi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hydra
+  namespace: hydra
+spec:
+  type: ClusterIP
+  ports:
+    - port: 4444
+      targetPort: public
+      name: public
+    - port: 4445
+      targetPort: admin
+      name: admin
+    - port: 5555
+      targetPort: token
+      name: token
+  selector:
+    app: hydra
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: hydra
+  namespace: hydra
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`hydra.docker.localhost`)
+      kind: Rule
+      services:
+        - name: hydra
+          port: public
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consent
+  namespace: hydra
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: consent
+  template:
+    metadata:
+      labels:
+        app: consent
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: consent
+          image: docker.io/jlevesy/hail-hydra:v0.0.1
+          args:
+            - -a
+            - http://hydra.hydra.svc:4445
+            - -b
+            - :3000
+          env:
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+          ports:
+            - containerPort: 3000
+              name: consent
+              protocol: TCP
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
+            seccompProfile:
+              type: RuntimeDefault
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 50m
+              memory: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: consent
+  namespace: hydra
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3000
+      targetPort: consent
+      name: consent
+  selector:
+    app: consent
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: consent
+  namespace: hydra
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`consent.docker.localhost`)
+      kind: Rule
+      services:
+        - name: consent
+          port: consent
+
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: create-hydra-clients
+  namespace: hydra
+automountServiceAccountToken: false
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: create-hydra-clients
+  namespace: hydra
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - create
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: create-hydra-clients
+  namespace: hydra
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: create-hydra-clients
+subjects:
+  - kind: ServiceAccount
+    name: create-hydra-clients
+    namespace: hydra
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: create-hydra-clients
+  namespace: hydra
+  labels:
+    app: create-hydra-clients
+spec:
+  template:
+    metadata:
+      labels:
+        app: create-hydra-clients
+    spec:
+      restartPolicy: OnFailure
+      serviceAccountName: create-hydra-clients
+      automountServiceAccountToken: true
+      initContainers:
+        - name: wait-for-hydra
+          image: "busybox:1.36"
+          imagePullPolicy: IfNotPresent
+          command: ['sh', '-c', "until nc -w 1 hydra.hydra.svc 4445; do echo waiting for hydra to start; sleep 5; done"]
+          resources:
+            limits:
+              cpu: 30m
+              memory: 50Mi
+            requests:
+              cpu: 20m
+              memory: 10Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 65532
+            seccompProfile:
+              type: RuntimeDefault
+            capabilities:
+              drop:
+                - NET_RAW
+      containers:
+        - image: docker.io/oryd/hydra:v2.2.0
+          name: bootstrap
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault
+            capabilities:
+              drop:
+                - NET_RAW
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              hydra create oauth2-client \
+                --endpoint http://hydra.hydra.svc:4445 \
+                --name oauth-client \
+                --secret traefiklabs \
+                --grant-type client_credentials \
+                --audience https://traefik.io \
+                --token-endpoint-auth-method client_secret_post \
+                --format json > /data/oauth-client.json
+
+              hydra create oauth2-client \
+                --endpoint http://hydra.hydra.svc:4445 \
+                --name oauth-client-nologin \
+                --secret traefiklabs \
+                --grant-type client_credentials \
+                --audience https://traefik.io \
+                --format json > /data/oauth-client-nologin.json
+
+              hydra create oauth2-client \
+                --endpoint http://hydra.hydra.svc:4445 \
+                --name oidc-client \
+                --secret traefiklabs \
+                --grant-type authorization_code,refresh_token \
+                --response-type code,id_token \
+                --scope openid,offline \
+                --redirect-uri http://secure-applications.apigateway.docker.localhost/oidc/callback \
+                --post-logout-callback http://secure-applications.apigateway.docker.localhost/oidc/callback \
+                --format json > /data/oidc-client.json
+
+              hydra create oauth2-client \
+                --endpoint http://hydra.hydra.svc:4445 \
+                --name oidc-client-nologin \
+                --secret traefiklabs \
+                --grant-type authorization_code,refresh_token \
+                --response-type code,id_token \
+                --scope openid,offline \
+                --redirect-uri http://secure-applications.apigateway.docker.localhost/oidc-nologin/callback \
+                --post-logout-callback http://secure-applications.apigateway.docker.localhost/oidc/callback \
+                --format json > /data/oidc-client-nologin.json
+
+              hydra create jwks hydra.openid.id-token --alg RS256 --endpoint http://hydra.hydra.svc:4445
+              hydra create jwks hydra.jwt.access-token --alg RS256 --endpoint http://hydra.hydra.svc:4445
+          volumeMounts:
+            - mountPath: /data
+              name: data
+        - image: bitnami/kubectl:1.29-debian-12
+          name: create-secrets
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault
+            capabilities:
+              drop:
+                - NET_RAW
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              for client in oauth-client oauth-client-nologin oidc-client oidc-client-nologin; do
+                while true; do sleep 1; test -s /data/$client.json && break ; done
+                kubectl create secret -n apps generic $client \
+                  --from-literal=client_id="$(cat /data/$client.json | jq -r '.client_id')" \
+                  --from-literal=client_secret="$(cat /data/$client.json | jq -r '.client_secret')"
+              done
+          volumeMounts:
+            - mountPath: /data
+              name: data
+      volumes:
+        - name: data
+          emptyDir: {}

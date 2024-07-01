@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: apikey-auth
+  name: walkthrough-apikey-auth
   namespace: apps
 stringData:
   secretKey: "{SHA}dhiZGvSW60OMQ+J6hPEyJ+jfUoU="
@@ -11,7 +11,7 @@ stringData:
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
-  name: apikey-auth
+  name: walkthrough-apikey-auth
   namespace: apps
 spec:
   plugin:
@@ -20,22 +20,22 @@ spec:
         header: Authorization
         headerAuthScheme: Bearer
       secretValues:
-        - urn:k8s:secret:apikey-auth:secretKey
+        - urn:k8s:secret:walkthrough-apikey-auth:secretKey
 
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: weather-api
+  name: walkthrough-weather-api-api-key
   namespace: apps
 spec:
   entryPoints:
     - web
   routes:
-  - match: Host(`api.docker.localhost`) && PathPrefix(`/weather`)
+  - match: Host(`walkthrough.docker.localhost`) && Path(`/api-key`)
     kind: Rule
     services:
     - name: weather-app
       port: 3000
     middlewares:
-    - name: apikey-auth
+    - name: walkthrough-apikey-auth

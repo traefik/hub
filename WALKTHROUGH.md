@@ -90,6 +90,7 @@ This tutorial implements APIs using a JSON server in Go; the source code is [her
 Let's deploy a [weather app](../../src/manifests/weather-app.yaml) exposing an API.
 
 ```shell
+kubectl apply -f src/manifests/apps-namespace.yaml
 kubectl apply -f src/manifests/weather-app.yaml
 ```
 
@@ -104,36 +105,36 @@ service/weather-app created
 
 It can be exposed with an `IngressRoute`:
 
-```yaml
+```yaml :src/manifests/walkthrough/weather-app-no-auth.yaml
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: weather-api
+  name: walkthrough-weather-api-no-auth
   namespace: apps
 spec:
   entryPoints:
     - web
   routes:
-  - match: Host(`api.docker.localhost`) && PathPrefix(`/weather`)
-    kind: Rule
-    services:
-    - name: weather-app
-      port: 3000
+    - match: Host(`walkthrough.docker.localhost`) && Path(`/no-auth`)
+      kind: Rule
+      services:
+        - name: weather-app
+          port: 3000
 ```
 
 ```shell
-kubectl apply -f src/manifests/weather-app-ingressroute.yaml
+kubectl apply -f src/manifests/walkthrough/weather-app-no-auth.yaml
 ```
 
 ```shell
-ingressroute.traefik.io/weather-api created
+ingressroute.traefik.io/walkthrough-weather-api created
 ```
 
 This API can be accessed using curl:
 
 ```shell
-curl http://api.docker.localhost/weather
+curl http://walkthrough.docker.localhost/no-auth
 ```
 
 ```json
@@ -146,7 +147,7 @@ curl http://api.docker.localhost/weather
 }
 ```
 
-With Traefik Proxy, we can secure the access to this API using the Basic Authentication. To create an encoded user:password pair, the following command can be used: `htpasswd -nb user password | openssl base64`
+With Traefik Proxy, we can secure the access to this API using the Basic Authentication. To create an encoded _user_:_password_ pair, we can use `htpasswd` with `openssl` to encode it.
 
 So let's do it:
 
@@ -158,10 +159,10 @@ htpasswd -nb foo bar | openssl base64
 Zm9vOiRhcHIxJDJHR0RyLjJPJDdUVXJlOEt6anQ1WFFOUGRoby5CQjEKCg==
 ```
 
-```diff
---- src/manifests/weather-app-ingressroute.yaml
-+++ src/manifests/weather-app-basic-auth.yaml
-@@ -1,4 +1,24 @@
+```diff :hack/diff.sh -r -a "-Nau src/manifests/walkthrough/weather-app-no-auth.yaml src/manifests/walkthrough/weather-app-basic-auth.yaml"
+--- src/manifests/walkthrough/weather-app-no-auth.yaml
++++ src/manifests/walkthrough/weather-app-basic-auth.yaml
+@@ -1,15 +1,37 @@
  ---
 +apiVersion: v1
 +kind: Secret
@@ -186,10 +187,23 @@ Zm9vOiRhcHIxJDJHR0RyLjJPJDdUVXJlOEt6anQ1WFFOUGRoby5CQjEKCg==
  apiVersion: traefik.io/v1alpha1
  kind: IngressRoute
  metadata:
-@@ -13,3 +33,5 @@
-     services:
-     - name: weather-app
-       port: 3000
+-  name: walkthrough-weather-api-no-auth
++  name: walkthrough-weather-api-basic-auth
+   namespace: apps
+ spec:
+   entryPoints:
+     - web
+   routes:
+-    - match: Host(`walkthrough.docker.localhost`) && Path(`/no-auth`)
+-      kind: Rule
+-      services:
+-        - name: weather-app
+-          port: 3000
++  - match: Host(`walkthrough.docker.localhost`) && Path(`/basic-auth`)
++    kind: Rule
++    services:
++    - name: weather-app
++      port: 3000
 +    middlewares:
 +    - name: basic-auth
 ```
@@ -197,22 +211,22 @@ Zm9vOiRhcHIxJDJHR0RyLjJPJDdUVXJlOEt6anQ1WFFOUGRoby5CQjEKCg==
 Let's apply it:
 
 ```shell
-kubectl apply -f src/manifests/weather-app-basic-auth.yaml
+kubectl apply -f src/manifests/walkthrough/weather-app-basic-auth.yaml
 ```
 
 ```shell
 secret/basic-auth created
 middleware.traefik.io/basic-auth created
-ingressroute.traefik.io/weather-api configured
+ingressroute.traefik.io/walkthrough-weather-api-basic-auth created
 ```
 
 And now, we can confirm it's secured using BASIC Authentication :
 
 ```shell
 # This call is not authorized => 401
-curl -I http://api.docker.localhost/weather
+curl -I http://walkthrough.docker.localhost/basic-auth
 # This call is allowed => 200
-curl -I -u foo:bar http://api.docker.localhost/weather
+curl -I -u foo:bar http://walkthrough.docker.localhost/basic-auth
 ```
 
 [Basic Authentication](https://datatracker.ietf.org/doc/html/rfc7617) worked and was widely used in the early days of the web. However, it also has a security risk: credentials can be visible to any observer when using HTTP. It uses hard-coded credentials, potentially giving more authorization than required for a specific use case.
@@ -243,13 +257,13 @@ helm upgrade traefik -n traefik --wait \
   --set hub.token=license \
   --set image.registry=ghcr.io \
   --set image.repository=traefik/traefik-hub \
-  --set image.tag=v3.0.0 \
+  --set image.tag=v3.1.1 \
    traefik/traefik
 ```
 
 Traefik Hub is 100% compatible with Traefik Proxy v3.
 
-The dashboard is reachable (http://dashboard.docker.localhost/), which confirms that Traefik Hub API Gateway is successfully deployed.
+The dashboard is still reachable (http://dashboard.docker.localhost/). One can notice now the Traefik Hub API Gateway logo on the top left corner.
 
 ![Local Traefik Hub Dashboard](./src/images/hub-dashboard.png)
 
@@ -257,9 +271,9 @@ And also confirm _Basic Auth_ is still here:
 
 ```shell
 # This call is not authorized => 401
-curl -I http://api.docker.localhost/weather
+curl -I http://walkthrough.docker.localhost/basic-auth
 # This call is allowed => 200
-curl -I -u foo:bar http://api.docker.localhost/weather
+curl -I -u foo:bar http://walkthrough.docker.localhost/basic-auth
 ```
 
 Let's secure the weather API with an API Key.
@@ -277,16 +291,15 @@ htpasswd -nbs "" "Let's use API Key with Traefik Hub" | cut -c 2-
 
 We can now put this password in the API Key middleware:
 
-```diff
-diff -Nau src/manifests/weather-app-ingressroute.yaml src/manifests/weather-app-apikey.yaml
---- src/manifests/weather-app-ingressroute.yaml
-+++ src/manifests/weather-app-apikey.yaml
-@@ -1,4 +1,24 @@
+```diff :hack/diff.sh -r -a "-Nau src/manifests/walkthrough/weather-app-no-auth.yaml src/manifests/walkthrough/weather-app-apikey.yaml"
+--- src/manifests/walkthrough/weather-app-no-auth.yaml
++++ src/manifests/walkthrough/weather-app-apikey.yaml
+@@ -1,15 +1,41 @@
  ---
 +apiVersion: v1
 +kind: Secret
 +metadata:
-+  name: apikey-auth
++  name: walkthrough-apikey-auth
 +  namespace: apps
 +stringData:
 +  secretKey: "{SHA}dhiZGvSW60OMQ+J6hPEyJ+jfUoU="
@@ -295,47 +308,63 @@ diff -Nau src/manifests/weather-app-ingressroute.yaml src/manifests/weather-app-
 +apiVersion: traefik.io/v1alpha1
 +kind: Middleware
 +metadata:
-+  name: apikey-auth
++  name: walkthrough-apikey-auth
 +  namespace: apps
 +spec:
 +  plugin:
-+    apikey:
++    apiKey:
++      keySource:
++        header: Authorization
++        headerAuthScheme: Bearer
 +      secretValues:
-+        - urn:k8s:secret:apikey-auth:secretKey
++        - urn:k8s:secret:walkthrough-apikey-auth:secretKey
 +
 +---
  apiVersion: traefik.io/v1alpha1
  kind: IngressRoute
  metadata:
-@@ -13,3 +33,5 @@
-     services:
-     - name: weather-app
-       port: 3000
+-  name: walkthrough-weather-api-no-auth
++  name: walkthrough-weather-api-api-key
+   namespace: apps
+ spec:
+   entryPoints:
+     - web
+   routes:
+-    - match: Host(`walkthrough.docker.localhost`) && Path(`/no-auth`)
+-      kind: Rule
+-      services:
+-        - name: weather-app
+-          port: 3000
++  - match: Host(`walkthrough.docker.localhost`) && Path(`/api-key`)
++    kind: Rule
++    services:
++    - name: weather-app
++      port: 3000
 +    middlewares:
-+    - name: apikey-auth
++    - name: walkthrough-apikey-auth
 ```
 
 Let's apply it:
 
 ```shell
-kubectl apply -f src/manifests/weather-app-apikey.yaml
+kubectl apply -f src/manifests/walkthrough/weather-app-apikey.yaml
 ```
 
 ```shell
-secret/apikey-auth created
-middleware.traefik.io/apikey-auth created
-ingressroute.traefik.io/weather-api configured
+secret/walkthrough-apikey-auth created
+middleware.traefik.io/walkthrough-apikey-auth created
+ingressroute.traefik.io/walkthrough-weather-api-api-key created
 ```
 
 And test it:
 
 ```shell
 # This call is not authorized => 401
-curl -I http://api.docker.localhost/weather
+curl -I http://walkthrough.docker.localhost/api-key
 # Let's set the token
 export API_KEY=$(echo -n "Let's use API Key with Traefik Hub" | base64)
 # This call with the token is allowed => 200
-curl -I -H "Authorization: Bearer $API_KEY" http://api.docker.localhost/weather
+curl -I -H "Authorization: Bearer $API_KEY" http://walkthrough.docker.localhost/api-key
 ```
 
 The API is now secured.
@@ -357,7 +386,7 @@ helm upgrade traefik -n traefik --wait \
 
 Traefik Hub API Management is 100% compatible with Traefik Proxy v3 and Traefik Hub API Gateway.
 
-The dashboard is reachable (http://dashboard.docker.localhost/), which confirms that Traefik Hub API Gateway is successfuly deployed.
+The dashboard is still reachable on http://dashboard.docker.localhost/
 
 ![Local Traefik Hub Dashboard](./src/images/hub-dashboard.png)
 
@@ -365,52 +394,55 @@ And also confirm that the API is still secured using an API Key:
 
 ```shell
 # This call is not authorized => 401
-curl -I http://api.docker.localhost/weather
-# Let's set the token
-export API_KEY=$(echo -n "Let's use API Key with Traefik Hub" | base64)
+curl -I http://walkthrough.docker.localhost/api-key
 # This call with the token is allowed => 200
-curl -I -H "Authorization: Bearer $API_KEY" http://api.docker.localhost/weather
+curl -I -H "Authorization: Bearer $API_KEY" http://walkthrough.docker.localhost/api-key
 ```
 
 Now, let's try to manage it with Traefik Hub using `API` and `APIAccess` resources:
 
-```yaml
+```yaml :src/manifests/walkthrough/api.yaml -s 1 -e 23
 ---
 apiVersion: hub.traefik.io/v1alpha1
 kind: API
 metadata:
-  name: weather-api
+  name: walkthrough-weather-api
   namespace: apps
-spec: {}
+spec:
+  openApiSpec:
+    path: /openapi.yaml
+    override:
+      servers:
+        - url: http://api.getting-started.apimanagement.docker.localhost
 
 ---
 apiVersion: hub.traefik.io/v1alpha1
 kind: APIAccess
 metadata:
-  name: weather-api
+  name: walkthrough-weather-api
   namespace: apps
 spec:
   apis:
-    - name: weather-api
+  - name: walkthrough-weather-api
   everyone: true
 ```
 
 We'll need to reference this API in the `IngressRoute` with an annotation:
 
-```yaml
+```yaml :src/manifests/walkthrough/api.yaml -s 25 -e 41
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: weather-api
+  name: walkthrough-weather-api
   namespace: apps
   annotations:
-    hub.traefik.io/api: weather-api # <=== Link to the API using its name
+    hub.traefik.io/api: walkthrough-weather-api # <=== Link to the API using its name
 spec:
   entryPoints:
-    - web
+  - web
   routes:
-  - match: Host(`api.docker.localhost`) && PathPrefix(`/weather`)
+  - match: Host(`api.walkthrough.docker.localhost`) && PathRegexp(`^/weather(/([0-9]+|openapi.yaml))?$`)
     kind: Rule
     services:
     - name: weather-app
@@ -422,21 +454,21 @@ spec:
 Let's apply it:
 
 ```shell
-kubectl apply -f api-management/1-getting-started/manifests/api.yaml
+kubectl apply -f src/manifests/walkthrough/api.yaml
 ```
 
 It will create `API`, `APIAccess` and link `IngressRoute` to this API.
 
 ```shell
-api.hub.traefik.io/weather-api created
-apiaccess.hub.traefik.io/weather-api created
-ingressroute.traefik.io/weather-api configured
+api.hub.traefik.io/walkthrough-weather-api created
+apiaccess.hub.traefik.io/walkthrough-weather-api created
+ingressroute.traefik.io/walkthrough-weather-api created
 ```
 
 Now, we can confirm this API is not publicly exposed:
 
 ```shell
-curl -i http://api.docker.localhost/weather
+curl -i http://api.walkthrough.docker.localhost/weather
 ```
 
 It returns the expected 401 Unauthorized HTTP code:
@@ -457,31 +489,31 @@ Users are created in the [Traefik Hub Online Dashboard](https://hub.traefik.io/u
 
 The user created previously will connect to an API Portal to generate an API key, so let's deploy the API Portal!
 
-```yaml
+```yaml :src/manifests/walkthrough/api-portal.yaml
 ---
 apiVersion: hub.traefik.io/v1alpha1
 kind: APIPortal
 metadata:
-  name: apiportal
-  namespace: traefik
+  name: walkthrough-apiportal
+  namespace: apps
 spec:
   title: API Portal
-  description: "Developer Portal"
+  description: "Apps Developer Portal"
   trustedUrls:
-    - api.docker.localhost
+    - http://api.walkthrough.docker.localhost
 
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: apiportal
+  name: walkthrough-apiportal
   namespace: traefik
   annotations:
     # This annotation link this Ingress to the API Portal using <name>@<namespace> format.
-    hub.traefik.io/api-portal: apiportal@apps
+    hub.traefik.io/api-portal: walkthrough-apiportal@apps
 spec:
   rules:
-  - host: api.docker.localhost
+  - host: api.walkthrough.docker.localhost
     http:
       paths:
         - path: /
@@ -496,16 +528,16 @@ spec:
 :information_source: This API Portal is routed with the internal _ClusterIP_ `Service` named apiportal.
 
 ```shell
-kubectl apply -f api-management/1-getting-started/manifests/api-portal.yaml
-sleep 30
+kubectl apply -f src/manifests/walkthrough/api-portal.yaml
+sleep 60
 ```
 
 ```shell
-apiportal.hub.traefik.io/apiportal created
-ingressroute.traefik.io/apiportal created
+apiportal.hub.traefik.io/walkthrough-apiportal created
+ingress.networking.k8s.io/walkthrough-apiportal created
 ```
 
-The API Portal should be reachable on http://api.docker.localhost
+The API Portal should be reachable on http://api.walkthrough.docker.localhost
 
 We log in with the admin user.
 
@@ -522,7 +554,7 @@ export ADMIN_TOKEN="XXX"
 Request the API with this token: :tada:
 
 ```shell
-curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.docker.localhost/weather
+curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.walkthrough.docker.localhost/weather
 ```
 
 ```json
@@ -537,46 +569,41 @@ curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.docker.localhost/weather
 
 :information_source: If it fails with 401, just wait one minute and try again. The token needs to be sync before it can be accepted by Traefik Hub.
 
-We can see the API available in the `apps` namespace in the portal. This first API does not come with an OpenAPI specification (OAS):
+We can see the API available in the `apps` namespace in the portal. We advise every API to come with an OpenAPI specification (OAS):
 
-![API Portal without OAS](./api-management/1-getting-started/images/api-portal-without-oas.png)
+![API Portal with OAS](./api-management/1-getting-started/images/api-portal-with-oas.png)
 
-Although not setting an OAS for an API is possible, it severely hurts getting started with API consumption. Let's see what features are unlocked if we set one. Let's deploy a [forecast app](https://github.com/traefik/hub-preview/blob/main/src/manifests/weather-app-forecast.yaml) with an OpenAPI specification:
+However, it's still possible not setting an OAS, but it severely hurts getting started with API consumption.
 
 ```shell
-kubectl apply -f src/manifests/weather-app-forecast.yaml
+kubectl apply -f src/manifests/walkthrough/api.yaml
 ```
 
-This time, we will specify how to get the OAS in the API _CRD_:
+This time, we won't specify any OAS in the API _CRD_:
 
-```yaml
+```yaml :src/manifests/walkthrough/forecast.yaml -s 1 -e 7
 ---
 apiVersion: hub.traefik.io/v1alpha1
 kind: API
 metadata:
-  name: weather-api-forecast
+  name: walkthrough-weather-api-forecast
   namespace: apps
-spec:
-  openApiSpec:
-    path: /openapi.yaml
-    override:
-      servers:
-        - url: http://api.docker.localhost
+spec: {}
 ```
 
-The other resources are built on the same model, as we can see in [the complete file](https://github.com/traefik/hub-preview/blob/main/api-management/1-getting-started/manifests/forecast.yaml). Let's apply it:
+The other resources are built on the same model, as we can see in [the complete file](https://github.com/traefik/hub/blob/main/api-management/1-getting-started/manifests/forecast.yaml). Let's apply it:
 
 ```shell
-kubectl apply -f api-management/1-getting-started/manifests/forecast.yaml
+kubectl apply -f src/manifests/walkthrough/forecast.yaml
 ```
 
 ```shell
-api.hub.traefik.io/weather-api-forecast created
-apiaccess.hub.traefik.io/weather-api-forecast created
-ingressroute.traefik.io/weather-api-forecast created
+api.hub.traefik.io/walkthrough-weather-api-forecast created
+apiaccess.hub.traefik.io/walkthrough-weather-api-forecast created
+ingressroute.traefik.io/walkthrough-weather-api-forecast created
 ```
 
 And that's it! This time, we have documentation built from the OpenAPI specification, and we can also interactively try the API with the Try Out functionality.
 
-![API Portal With OAS](./api-management/1-getting-started/images/api-portal-with-oas.png)
+![API Portal without OAS](./api-management/1-getting-started/images/api-portal-without-oas.png)
 

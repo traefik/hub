@@ -2,7 +2,7 @@
 apiVersion: hub.traefik.io/v1alpha1
 kind: API
 metadata:
-  name: getting-started-apimanagement-weather-api
+  name: api-lifecycle-apimanagement-weather-api
   namespace: apps
 spec:
   openApiSpec:
@@ -15,26 +15,26 @@ spec:
 apiVersion: hub.traefik.io/v1alpha1
 kind: APIAccess
 metadata:
-  name: getting-started-apimanagement-weather-api
+  name: api-lifecycle-apimanagement-weather-api
   namespace: apps
 spec:
   apis:
-  - name: getting-started-apimanagement-weather-api
+  - name: api-lifecycle-apimanagement-weather-api
   everyone: true
 
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: getting-started-apimanagement-weather-api
+  name: api-lifecycle-apimanagement-weather-api
   namespace: apps
   annotations:
-    hub.traefik.io/api: getting-started-apimanagement-weather-api # <=== Link to the API using its name
+    hub.traefik.io/api: api-lifecycle-apimanagement-weather-api # <=== Link to the API using its name
 spec:
   entryPoints:
   - web
   routes:
-  - match: Host(`api.getting-started.apimanagement.docker.localhost`) && PathRegexp(`^/weather(/([0-9]+|openapi.yaml))?$`)
+  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && PathRegexp(`^/weather(/([0-9]+|openapi.yaml))?$`)
     kind: Rule
     services:
     - name: weather-app

@@ -1,0 +1,41 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: getting-started-apigateway-apikey-auth
+  namespace: apps
+stringData:
+  secretKey: "{SHA}dhiZGvSW60OMQ+J6hPEyJ+jfUoU="
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: getting-started-apigateway-apikey-auth
+  namespace: apps
+spec:
+  plugin:
+    apiKey:
+      keySource:
+        header: Authorization
+        headerAuthScheme: Bearer
+      secretValues:
+        - urn:k8s:secret:getting-started-apigateway-apikey-auth:secretKey
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: getting-started-apigateway-api-key
+  namespace: apps
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`getting-started.apigateway.docker.localhost`) && Path(`/api-key`)
+    kind: Rule
+    services:
+    - name: weather-app
+      port: 3000
+    middlewares:
+    - name: getting-started-apigateway-apikey-auth
