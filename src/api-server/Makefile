@@ -16,7 +16,7 @@ build: dist
 test:
 	go test -v -cover ./...
 
-check:
+lint:
 	golangci-lint run
 
 build-linux-arm64: export GOOS := linux
@@ -31,4 +31,4 @@ build-linux-amd64:
 
 ## Build Multi archs Docker image
 multi-arch-image-%: build-linux-amd64 build-linux-arm64
-	docker buildx build $(DOCKER_BUILDX_ARGS) -t mmatur/traefik-hub:$* --platform=$(DOCKER_BUILD_PLATFORMS) .
+	docker buildx build $(DOCKER_BUILDX_ARGS) -t ghcr.io/traefik/api-server:$* --platform=$(DOCKER_BUILD_PLATFORMS) .

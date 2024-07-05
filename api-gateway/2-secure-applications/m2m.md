@@ -132,7 +132,7 @@ middleware.traefik.io/oauth2-client-creds created
 ingressroute.traefik.io/secure-applications-apigateway-oauth2-client-credentials created
 ```
 
-Once it's ready, we can create a Hydra OAuth2 client with _client_credentials_ grant type. 
+Once it's ready, we can create a Hydra OAuth2 client with _client_credentials_ grant type.
 This step is automated for you in this tutorial but here is how it's created:
 
 ```shell :../../src/manifests/hydra.yaml -s 359 -e 366 -i s1
@@ -265,7 +265,7 @@ sleep 2
 curl http://secure-applications.apigateway.docker.localhost/oauth2-client-credentials-nologin
 ```
 
-As we can see, there is no authentication required now *and* there is a JWT access token transmitted to the application:
+As we can see, there is no authentication required now _and_ there is a JWT access token transmitted to the application:
 
 ```shell
 Hostname: whoami-6f57d5d6b5-bgmfl

@@ -1,0 +1,16 @@
+{
+  "weather": {
+    "0": {
+      "city": "GopherCity",
+      "weather": "Moderate rain"
+    },
+    "1": {
+      "city": "City of Gophers",
+      "weather": "Sunny"
+    },
+    "2": {
+      "city": "GopherRocks",
+      "weather": "Cloudy"
+    }
+  }
+}

@@ -95,7 +95,7 @@ helm install traefik-hub -n traefik --wait \
   --set ingressRoute.dashboard.entryPoints={web} \
   --set image.registry=ghcr.io \
   --set image.repository=traefik/traefik-hub \
-  --set image.tag=v3.1.1 \
+  --set image.tag=v3.2.0 \
   --set ports.web.nodePort=30000 \
   --set ports.websecure.nodePort=30001 \
    traefik/traefik
@@ -116,7 +116,7 @@ helm upgrade traefik-hub -n traefik-hub --wait \
   --set ingressRoute.dashboard.entryPoints={web} \
   --set image.registry=ghcr.io \
   --set image.repository=traefik/traefik-hub \
-  --set image.tag=v3.1.1 \
+  --set image.tag=v3.2.0 \
   --set ports.web.nodePort=30000 \
   --set ports.websecure.nodePort=30001 \
    traefik/traefik
@@ -257,7 +257,6 @@ Put this hash in the API Key `Middleware`:
 +    - name: getting-started-apigateway-apikey-auth
 ```
 
-
 Let's apply it:
 
 ```shell
@@ -374,6 +373,7 @@ sudo systemctl status traefik-hub.service
 
 [...] systemd[1]: Started traefik-hub.service - Traefik Hub.
 ```
+
 ### Step 2: Expose an API
 
 :information_source: On Linux, we can use all the providers supported by Traefik Proxy and Traefik Hub API Gateway.

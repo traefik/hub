@@ -229,9 +229,13 @@ curl -I http://walkthrough.docker.localhost/basic-auth
 curl -I -u foo:bar http://walkthrough.docker.localhost/basic-auth
 ```
 
-[Basic Authentication](https://datatracker.ietf.org/doc/html/rfc7617) worked and was widely used in the early days of the web. However, it also has a security risk: credentials can be visible to any observer when using HTTP. It uses hard-coded credentials, potentially giving more authorization than required for a specific use case.
+[Basic Authentication](https://datatracker.ietf.org/doc/html/rfc7617) worked and was widely used in the early days of the web. However, it also has a security risk:
+credentials can be visible to any observer when using HTTP. It uses hard-coded credentials, potentially giving more authorization
+than required for a specific use case.
 
-Nowadays, those issues are addressed when using [JSON Web Tokens (JWT)](https://datatracker.ietf.org/doc/html/rfc7519). A JWT can be cryptographically verified, detach authentication from user credentials, and has an issue and expiration date. JWT can be used with Traefik Hub API Gateway, so let's upgrade our setup to Traefik Hub
+Nowadays, those issues are addressed when using [JSON Web Tokens (JWT)](https://datatracker.ietf.org/doc/html/rfc7519). A JWT can be cryptographically verified,
+detach authentication from user credentials, and has an issue and expiration date. JWT can be used with Traefik Hub API
+Gateway, so let's upgrade our setup to Traefik Hub
 
 ## Step 2: Upgrade Traefik Proxy to Traefik Hub API Gateway
 
@@ -257,7 +261,7 @@ helm upgrade traefik -n traefik --wait \
   --set hub.token=license \
   --set image.registry=ghcr.io \
   --set image.repository=traefik/traefik-hub \
-  --set image.tag=v3.1.1 \
+  --set image.tag=v3.2.0 \
    traefik/traefik
 ```
 
@@ -567,7 +571,7 @@ curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.walkthrough.docker.local
 }
 ```
 
-:information_source: If it fails with 401, just wait one minute and try again. The token needs to be sync before it can be accepted by Traefik Hub.
+:information_source: If it fails with 401, wait one minute and try again. The token needs to be sync before it can be accepted by Traefik Hub.
 
 We can see the API available in the `apps` namespace in the portal. We advise every API to come with an OpenAPI specification (OAS):
 
@@ -606,4 +610,3 @@ ingressroute.traefik.io/walkthrough-weather-api-forecast created
 And that's it! This time, we have documentation built from the OpenAPI specification, and we can also interactively try the API with the Try Out functionality.
 
 ![API Portal without OAS](./api-management/1-getting-started/images/api-portal-without-oas.png)
-
