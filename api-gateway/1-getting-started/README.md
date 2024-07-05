@@ -88,9 +88,10 @@ Install Traefik Hub API Gateway using Helm:
 # Add the Helm repository
 helm repo add --force-update traefik https://traefik.github.io/charts
 # Install the Helm chart
-helm install traefik-hub -n traefik --wait \
+helm install traefik-hub -n traefik --version v28.3.0 --wait \
   --set hub.token=license \
   --set ingressClass.enabled=false \
+  --set ingressRoute.dashboard.enabled=true \
   --set ingressRoute.dashboard.matchRule='Host(`dashboard.docker.localhost`)' \
   --set ingressRoute.dashboard.entryPoints={web} \
   --set image.registry=ghcr.io \
@@ -109,9 +110,10 @@ kubectl apply --server-side --force-conflicts -k https://github.com/traefik/trae
 # Update the Helm repository
 helm repo update
 # Upgrade the Helm chart
-helm upgrade traefik-hub -n traefik-hub --wait \
+helm upgrade traefik-hub -n traefik-hub --version v28.3.0 --wait \
   --set hub.token=license \
   --set ingressClass.enabled=false \
+  --set ingressRoute.dashboard.enabled=true \
   --set ingressRoute.dashboard.matchRule='Host(`dashboard.docker.localhost`)' \
   --set ingressRoute.dashboard.entryPoints={web} \
   --set image.registry=ghcr.io \

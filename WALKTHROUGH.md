@@ -70,8 +70,9 @@ helm repo add --force-update traefik https://traefik.github.io/charts
 # Create a namespace
 kubectl create namespace traefik
 # Install the Helm chart
-helm install traefik -n traefik --wait \
+helm install traefik -n traefik --version v28.3.0 --wait \
   --set ingressClass.enabled=false \
+  --set ingressRoute.dashboard.enabled=true \
   --set ingressRoute.dashboard.matchRule='Host(`dashboard.docker.localhost`)' \
   --set ingressRoute.dashboard.entryPoints={web} \
   --set ports.web.nodePort=30000 \
@@ -256,7 +257,7 @@ kubectl create secret generic license --namespace traefik --from-literal=token=$
 Then, upgrade Traefik Proxy to Traefik Hub using the same Helm chart:
 
 ```shell
-helm upgrade traefik -n traefik --wait \
+helm upgrade traefik -n traefik --version v28.3.0 --wait \
   --reuse-values \
   --set hub.token=license \
   --set image.registry=ghcr.io \
@@ -382,7 +383,7 @@ We'll need Traefik Hub with API Management!
 First, we enable API Management on Traefik Traefik Hub using the same Helm chart:
 
 ```shell
-helm upgrade traefik -n traefik --wait \
+helm upgrade traefik -n traefik --version v28.3.0 --wait \
   --reuse-values \
   --set hub.apimanagement.enabled=true \
    traefik/traefik
