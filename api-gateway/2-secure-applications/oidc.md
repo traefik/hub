@@ -1,6 +1,8 @@
 ## Human authentication with OpenID Connect Authentication
 
-OpenID Connect Authentication is built on top of the OAuth2 Authorization Code Flow (defined in [OAuth 2.0 RFC 6749, section 4.1](https://tools.ietf.org/html/rfc6749#section-4.1)) and allows an application to be secured by delegating authentication to an external provider (Google Accounts, LinkedIn, GitHub, etc.) and obtaining the end user's session claims and scopes for authorization purposes.
+OpenID Connect Authentication is built on top of the OAuth2 Authorization Code Flow (defined in [OAuth 2.0 RFC 6749, section 4.1](https://tools.ietf.org/html/rfc6749#section-4.1))
+and allows an application to be secured by delegating authentication to an external provider (Google Accounts, LinkedIn, GitHub, etc.)
+and obtaining the end user's session claims and scopes for authorization purposes.
 
 :information_source: To follow this tutorial, you'll need to install Traefik Hub following [getting started](../1-getting-started/README.md) instructions.
 

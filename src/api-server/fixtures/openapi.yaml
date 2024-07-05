@@ -1,0 +1,250 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Weather
+  description: Weather API
+  contact:
+    name: TraefikLabs
+    url: 'https://traefik.io/'
+  license:
+    name: Apache 2.0
+    url: 'https://spdx.org/licenses/Apache-2.0.html'
+tags:
+  - name: external
+    description: routes exposed publicly
+  - name: internal
+    description: routes reserved for internal usage
+paths:
+  /weather:
+    get:
+      summary: Retrieve all registered weather of all cities
+      operationId: getAll
+      tags:
+        - external
+      responses:
+        '200':
+          description: An array of weather data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/weather"
+        '404':
+          $ref: '#/components/responses/notFound'
+        '500':
+          $ref: '#/components/responses/serverError'
+    post:
+      summary: Create a weather record
+      operationId: post
+      tags:
+        - external
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/weatherWithoutId'
+      responses:
+        '201':
+          description: The created weather with its id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/weather"
+        '500':
+          $ref: '#/components/responses/serverError'
+  /weather/{id}:
+    get:
+      summary: Retrieve weather of a city
+      operationId: get
+      tags:
+        - external
+      parameters:
+        - name: id
+          in: path
+          description: Record ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A weather
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/weather"
+        '404':
+          $ref: '#/components/responses/notFound'
+        '500':
+          $ref: '#/components/responses/serverError'
+    delete:
+      summary: Delete weather of a city
+      operationId: delete
+      tags:
+        - external
+      parameters:
+        - name: id
+          in: path
+          description: Record ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          $ref: '#/components/responses/noContent'
+    put:
+      summary: Update weather of a city
+      operationId: put
+      tags:
+        - external
+      parameters:
+        - name: id
+          in: path
+          description: Record ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/weatherWithoutId'
+      responses:
+        '200':
+          $ref: '#/components/responses/noContent'
+    patch:
+      summary: Patch weather data
+      operationId: patch
+      tags:
+        - external
+      parameters:
+        - name: id
+          in: path
+          description: Record ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/patchRequest'
+      responses:
+        '200':
+          description: An array of forecasted weather data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/weather"
+        '204':
+          $ref: '#/components/responses/noContent'
+        '401':
+          $ref: '#/components/responses/unauthorized'
+        '500':
+          $ref: '#/components/responses/serverError'
+
+components:
+  responses:
+    created:
+      description: "Created"
+    noContent:
+      description: "No content"
+    notFound:
+      description: "Not found"
+    unauthorized:
+      description: "Access token is missing or invalid"
+    serverError:
+      description: "Internal server error"
+  schemas:
+    weather:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+        city:
+          type: string
+        weather:
+          type: string
+    weatherWithoutId:
+      type: object
+      required:
+        - name
+      properties:
+        city:
+          type: string
+        weather:
+          type: string
+    weathers:
+      type: array
+      maxItems: 100
+      items:
+        $ref: "#/components/schemas/weather"
+    patchRequest:
+      type: array
+      items:
+        oneOf:
+          - $ref: '#/components/schemas/JSONPatchRequestAddReplaceTest'
+          - $ref: '#/components/schemas/JSONPatchRequestRemove'
+          - $ref: '#/components/schemas/JSONPatchRequestMoveCopy'
+    JSONPatchRequestAddReplaceTest:
+      type: object
+      additionalProperties: false
+      required:
+        - value
+        - op
+        - path
+      properties:
+        path:
+          description: A JSON Pointer path.
+          type: string
+        value:
+          description: The value to add, replace or test.
+        op:
+          description: The operation to perform.
+          type: string
+          enum:
+            - add
+            - replace
+            - test
+    JSONPatchRequestRemove:
+      type: object
+      additionalProperties: false
+      required:
+        - op
+        - path
+      properties:
+        path:
+          description: A JSON Pointer path.
+          type: string
+        op:
+          description: The operation to perform.
+          type: string
+          enum:
+            - remove
+    JSONPatchRequestMoveCopy:
+      type: object
+      additionalProperties: false
+      required:
+        - from
+        - op
+        - path
+      properties:
+        path:
+          description: A JSON Pointer path.
+          type: string
+        op:
+          description: The operation to perform.
+          type: string
+          enum:
+            - move
+            - copy
+        from:
+          description: A JSON Pointer path.
+          type: string
+  securitySchemes:
+    bearerAuth:
+      description: "Bearer Auth"
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

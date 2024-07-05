@@ -33,9 +33,9 @@ This repository contains source code showing how to use:
 
 ## :alembic: APIs used in this repository
 
-All APIs are implemented using a simple JSON server in Go; the source code is [here](./src/api-server).
+All APIs are implemented using a tiny JSON server in Go; the source code is [here](./src/api-server).
 
-This JSON server is used to deploy simple JSON APIs using a configmap.
+This JSON server is used to deploy JSON APIs using a configmap.
 
 The Kubernetes manifests (YAML) to deploy those apps are [here](./src/manifests).
 
