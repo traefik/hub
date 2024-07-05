@@ -81,10 +81,11 @@ Now, install Traefik Hub with Helm:
 # Add the Helm repository
 helm repo add --force-update traefik https://traefik.github.io/charts
 # Install the Helm chart
-helm install traefik-hub -n traefik --wait \
+helm install traefik-hub -n traefik --version v28.3.0 --wait \
   --set hub.token=license \
   --set hub.apimanagement.enabled=true \
   --set ingressClass.enabled=false \
+  --set ingressRoute.dashboard.enabled=true \
   --set ingressRoute.dashboard.matchRule='Host(`dashboard.docker.localhost`)' \
   --set ingressRoute.dashboard.entryPoints={web} \
   --set image.registry=ghcr.io \
@@ -103,10 +104,11 @@ kubectl apply --server-side --force-conflicts -k https://github.com/traefik/trae
 # Update the Helm repository
 helm repo add --force-update traefik https://traefik.github.io/charts
 # Upgrade the Helm chart
-helm upgrade traefik-hub -n traefik --wait \
+helm upgrade traefik-hub -n traefik --version v28.3.0 --wait \
   --set hub.token=license \
   --set hub.apimanagement.enabled=true \
   --set ingressClass.enabled=false \
+  --set ingressRoute.dashboard.enabled=true \
   --set ingressRoute.dashboard.matchRule='Host(`dashboard.docker.localhost`)' \
   --set ingressRoute.dashboard.entryPoints={web} \
   --set image.registry=ghcr.io \
