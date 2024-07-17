@@ -14,7 +14,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/fluxcd/pkg/envsubst"
+	"github.com/docker/docker/api/types/container"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -48,8 +48,10 @@ func CreateKubernetesCluster(ctx context.Context, t *testing.T) (*k3s.K3sContain
 			ContainerRequest: testcontainers.ContainerRequest{
 				Image:        rancherImage,
 				ExposedPorts: []string{"80/tcp", "443/tcp", "6443/tcp", "8443/tcp"},
-				NetworkMode:  "host",
-				Privileged:   true,
+				HostConfigModifier: func(hc *container.HostConfig) {
+					hc.NetworkMode = "host"
+				},
+				Privileged: true,
 			},
 		}),
 	)
@@ -119,7 +121,7 @@ func InstallTraefikHubAPIGW(ctx context.Context, t *testing.T, k8s client.Client
 		"--set", "ingressRoute.dashboard.entryPoints={web}",
 		"--set", "image.registry=ghcr.io",
 		"--set", "image.repository=traefik/traefik-hub",
-		"--set", "image.tag=v3.2.0",
+		"--set", "image.tag=v3.3.0",
 		"--set", "ports.web.nodePort=30000",
 		"--set", "ports.websecure.nodePort=30001",
 		"traefik/traefik")
@@ -147,7 +149,7 @@ func InstallTraefikHubAPIM(ctx context.Context, t *testing.T, k8s client.Client)
 		"--set", "ingressRoute.dashboard.entryPoints={web}",
 		"--set", "image.registry=ghcr.io",
 		"--set", "image.repository=traefik/traefik-hub",
-		"--set", "image.tag=v3.2.0",
+		"--set", "image.tag=v3.3.0",
 		"--set", "ports.web.nodePort=30000",
 		"--set", "ports.websecure.nodePort=30001",
 		"traefik/traefik")
@@ -259,30 +261,14 @@ func getJobState(ctx context.Context, t *testing.T, k8s client.Client, labelSele
 
 // Inspired by Gateway API implementation
 // See https://github.com/kubernetes-sigs/gateway-api/blob/main/conformance/utils/kubernetes/apply.go
-// ApplyFile apply a yaml on k8s client
+
+// ApplyFile applies a yaml on k8s client
 func ApplyFile(ctx context.Context, k8s client.Client, filepath string) (result []string, err error) {
 	data, err := os.ReadFile(filepath)
 	if err != nil {
 		return nil, err
 	}
 	decoder := yaml.NewYAMLOrJSONDecoder(bytes.NewBuffer(data), 4096)
-	return applyYAMLOrJSONDecoder(ctx, k8s, decoder)
-}
-
-// ApplyFile execute ensubst and apply a yaml on k8s client
-func ApplyEnvSubstFile(ctx context.Context, k8s client.Client, filepath string, debug bool) (result []string, err error) {
-	data, err := os.ReadFile(filepath)
-	if err != nil {
-		return nil, err
-	}
-	output, err := envsubst.EvalEnv(string(data), false)
-	if err != nil {
-		return nil, err
-	}
-	if debug {
-		testcontainers.Logger.Printf("Yaml after envsubst: %s\n", output)
-	}
-	decoder := yaml.NewYAMLOrJSONDecoder(bytes.NewBufferString(output), 4096)
 	return applyYAMLOrJSONDecoder(ctx, k8s, decoder)
 }
 
