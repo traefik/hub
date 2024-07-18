@@ -7,16 +7,16 @@ metadata:
 data:
   api.json: |
     {
-      "forecast": [
-        { "id": 1, "city": "GopherCity", "weather": "Cloudy", "dt": "3128231402" },
-        { "id": 2, "city": "City of Gopher", "weather": "Rainy", "dt": "3128231402" },
-        { "id": 3, "code": "GopherCentral", "weather": "Shiny", "dt": "3128231402" }
-      ],
-      "forecast-fr": [
-        { "id": 1, "city": "GopherCity", "weather": "Nuageux", "dt": "3128231402" },
-        { "id": 2, "city": "City of Gopher", "weather": "Pluvieux", "dt": "3128231402" },
-        { "id": 3, "code": "GopherCentral", "weather": "Ensoleillé", "dt": "3128231402" }
-      ]
+      "forecast": {
+        "1": {"city": "GopherCity", "weather": "Cloudy", "dt": "3128231402"},
+        "2": {"city": "City of Gopher", "weather": "Rainy", "dt": "3128231402"},
+        "3": {"code": "GopherCentral", "weather": "Shiny", "dt": "3128231402"}
+      },
+      "forecast-fr": {
+        "1": {"city": "GopherCity", "weather": "Nuageux", "dt": "3128231402"},
+        "2": {"city": "City of Gopher", "weather": "Pluvieux", "dt": "3128231402"},
+        "3": {"code": "GopherCentral", "weather": "Ensoleillé", "dt": "3128231402"}
+      }
     }
 ---
 apiVersion: apps/v1
@@ -36,9 +36,9 @@ spec:
     spec:
       containers:
         - name: api
-          image: ghcr.io/traefik-workshops/api-server:v0.2.0
+          image: ghcr.io/traefik/api-server:v1.0.0
           args: ["-data", "/api/api.json", "-openapi", "/public/openapi.yaml", "-errorrate", "2"]
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           volumeMounts:
           - name: api-data
             mountPath: /api

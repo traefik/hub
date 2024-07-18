@@ -117,11 +117,13 @@ spec:
   entryPoints:
     - web
   routes:
-    - match: Host(`walkthrough.docker.localhost`) && Path(`/no-auth`)
+    - match: Host(`walkthrough.docker.localhost`) && PathPrefix(`/no-auth`)
       kind: Rule
       services:
         - name: weather-app
           port: 3000
+      middlewares:
+        - name: stripprefix-weather
 ```
 
 ```shell
@@ -135,17 +137,15 @@ ingressroute.traefik.io/walkthrough-weather-api created
 This API can be accessed using curl:
 
 ```shell
-curl http://walkthrough.docker.localhost/no-auth
+curl http://walkthrough.docker.localhost/no-auth/weather
 ```
 
 ```json
-{
-  "public": [
-    { "id": 1, "city": "GopherCity", "weather": "Moderate rain" },
-    { "id": 2, "city": "City of Gophers", "weather": "Sunny" },
-    { "id": 3, "city": "GopherRocks", "weather": "Cloudy" }
-  ]
-}
+[
+  {"city":"GopherTown","id":"0","weather":"Cloudy"},
+  {"city":"City of Gophers","id":"1","weather":"Sunny"},
+  {"city":"GopherRocks","id":"2","weather":"Cloudy"}
+]
 ```
 
 With Traefik Proxy, we can secure the access to this API using the Basic Authentication. To create an encoded _user_:_password_ pair, we can use `htpasswd` with `openssl` to encode it.
@@ -163,7 +163,7 @@ Zm9vOiRhcHIxJDJHR0RyLjJPJDdUVXJlOEt6anQ1WFFOUGRoby5CQjEKCg==
 ```diff :hack/diff.sh -r -a "-Nau src/manifests/walkthrough/weather-app-no-auth.yaml src/manifests/walkthrough/weather-app-basic-auth.yaml"
 --- src/manifests/walkthrough/weather-app-no-auth.yaml
 +++ src/manifests/walkthrough/weather-app-basic-auth.yaml
-@@ -1,15 +1,37 @@
+@@ -1,17 +1,38 @@
  ---
 +apiVersion: v1
 +kind: Secret
@@ -195,18 +195,21 @@ Zm9vOiRhcHIxJDJHR0RyLjJPJDdUVXJlOEt6anQ1WFFOUGRoby5CQjEKCg==
    entryPoints:
      - web
    routes:
--    - match: Host(`walkthrough.docker.localhost`) && Path(`/no-auth`)
+-    - match: Host(`walkthrough.docker.localhost`) && PathPrefix(`/no-auth`)
 -      kind: Rule
 -      services:
 -        - name: weather-app
 -          port: 3000
-+  - match: Host(`walkthrough.docker.localhost`) && Path(`/basic-auth`)
+-      middlewares:
+-        - name: stripprefix-weather
++  - match: Host(`walkthrough.docker.localhost`) && PathPrefix(`/basic-auth`)
 +    kind: Rule
 +    services:
 +    - name: weather-app
 +      port: 3000
 +    middlewares:
-+    - name: basic-auth
++      - name: stripprefix-weather
++      - name: basic-auth
 ```
 
 Let's apply it:
@@ -225,9 +228,9 @@ And now, we can confirm it's secured using BASIC Authentication :
 
 ```shell
 # This call is not authorized => 401
-curl -I http://walkthrough.docker.localhost/basic-auth
+curl -i http://walkthrough.docker.localhost/basic-auth/weather
 # This call is allowed => 200
-curl -I -u foo:bar http://walkthrough.docker.localhost/basic-auth
+curl -i -u foo:bar http://walkthrough.docker.localhost/basic-auth/weather
 ```
 
 [Basic Authentication](https://datatracker.ietf.org/doc/html/rfc7617) worked and was widely used in the early days of the web. However, it also has a security risk:
@@ -276,9 +279,9 @@ And also confirm _Basic Auth_ is still here:
 
 ```shell
 # This call is not authorized => 401
-curl -I http://walkthrough.docker.localhost/basic-auth
+curl -i http://walkthrough.docker.localhost/basic-auth/weather
 # This call is allowed => 200
-curl -I -u foo:bar http://walkthrough.docker.localhost/basic-auth
+curl -i -u foo:bar http://walkthrough.docker.localhost/basic-auth/weather
 ```
 
 Let's secure the weather API with an API Key.
@@ -299,7 +302,7 @@ We can now put this password in the API Key middleware:
 ```diff :hack/diff.sh -r -a "-Nau src/manifests/walkthrough/weather-app-no-auth.yaml src/manifests/walkthrough/weather-app-apikey.yaml"
 --- src/manifests/walkthrough/weather-app-no-auth.yaml
 +++ src/manifests/walkthrough/weather-app-apikey.yaml
-@@ -1,15 +1,41 @@
+@@ -1,17 +1,42 @@
  ---
 +apiVersion: v1
 +kind: Secret
@@ -335,18 +338,21 @@ We can now put this password in the API Key middleware:
    entryPoints:
      - web
    routes:
--    - match: Host(`walkthrough.docker.localhost`) && Path(`/no-auth`)
+-    - match: Host(`walkthrough.docker.localhost`) && PathPrefix(`/no-auth`)
 -      kind: Rule
 -      services:
 -        - name: weather-app
 -          port: 3000
-+  - match: Host(`walkthrough.docker.localhost`) && Path(`/api-key`)
+-      middlewares:
+-        - name: stripprefix-weather
++  - match: Host(`walkthrough.docker.localhost`) && PathPrefix(`/api-key`)
 +    kind: Rule
 +    services:
 +    - name: weather-app
 +      port: 3000
 +    middlewares:
-+    - name: walkthrough-apikey-auth
++      - name: stripprefix-weather
++      - name: walkthrough-apikey-auth
 ```
 
 Let's apply it:
@@ -365,11 +371,11 @@ And test it:
 
 ```shell
 # This call is not authorized => 401
-curl -I http://walkthrough.docker.localhost/api-key
+curl -i http://walkthrough.docker.localhost/api-key/weather
 # Let's set the token
 export API_KEY=$(echo -n "Let's use API Key with Traefik Hub" | base64)
 # This call with the token is allowed => 200
-curl -I -H "Authorization: Bearer $API_KEY" http://walkthrough.docker.localhost/api-key
+curl -i -H "Authorization: Bearer $API_KEY" http://walkthrough.docker.localhost/api-key/weather
 ```
 
 The API is now secured.
@@ -399,9 +405,9 @@ And also confirm that the API is still secured using an API Key:
 
 ```shell
 # This call is not authorized => 401
-curl -I http://walkthrough.docker.localhost/api-key
+curl -i http://walkthrough.docker.localhost/api-key/weather
 # This call with the token is allowed => 200
-curl -I -H "Authorization: Bearer $API_KEY" http://walkthrough.docker.localhost/api-key
+curl -i -H "Authorization: Bearer $API_KEY" http://walkthrough.docker.localhost/api-key/weather
 ```
 
 Now, let's try to manage it with Traefik Hub using `API` and `APIAccess` resources:
@@ -418,7 +424,7 @@ spec:
     path: /openapi.yaml
     override:
       servers:
-        - url: http://api.getting-started.apimanagement.docker.localhost
+        - url: http://api.walkthrough.docker.localhost
 
 ---
 apiVersion: hub.traefik.io/v1alpha1
@@ -447,7 +453,7 @@ spec:
   entryPoints:
   - web
   routes:
-  - match: Host(`api.walkthrough.docker.localhost`) && PathRegexp(`^/weather(/([0-9]+|openapi.yaml))?$`)
+  - match: Host(`api.walkthrough.docker.localhost`) && PathPrefix(`/weather`)
     kind: Rule
     services:
     - name: weather-app
@@ -563,13 +569,11 @@ curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.walkthrough.docker.local
 ```
 
 ```json
-{
-  "public": [
-    { "id": 1, "city": "GopherCity", "weather": "Moderate rain" },
-    { "id": 2, "city": "City of Gophers", "weather": "Sunny" },
-    { "id": 3, "city": "GopherRocks", "weather": "Cloudy" }
-  ]
-}
+[
+  {"city":"GopherTown","id":"0","weather":"Cloudy"},
+  {"city":"City of Gophers","id":"1","weather":"Sunny"},
+  {"city":"GopherRocks","id":"2","weather":"Cloudy"}
+]
 ```
 
 :information_source: If it fails with 401, wait one minute and try again. The token needs to be sync before it can be accepted by Traefik Hub.
@@ -579,10 +583,6 @@ We can see the API available in the `apps` namespace in the portal. We advise ev
 ![API Portal with OAS](./api-management/1-getting-started/images/api-portal-with-oas.png)
 
 However, it's still possible not setting an OAS, but it severely hurts getting started with API consumption.
-
-```shell
-kubectl apply -f src/manifests/walkthrough/api.yaml
-```
 
 This time, we won't specify any OAS in the API _CRD_:
 

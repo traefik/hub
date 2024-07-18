@@ -13,3 +13,5 @@ spec:
     services:
     - name: weather-app
       port: 3000
+    middlewares:
+      - name: stripprefix-weather

@@ -30,9 +30,10 @@ spec:
   entryPoints:
     - web
   routes:
-  - match: Host(`api.access-control.apimanagement.docker.localhost`) && Path(`/simple/admin`)
+  - match: Host(`api.access-control.apimanagement.docker.localhost`) && PathPrefix(`/simple/admin`)
     kind: Rule
     services:
     - name: admin-app
       port: 3000
-
+    middlewares:
+      - name: stripprefix-admin

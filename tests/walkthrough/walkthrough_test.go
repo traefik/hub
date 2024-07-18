@@ -100,14 +100,14 @@ func (s *WalkthroughTestSuite) TestWalkthrough() {
 	s.apply("src/manifests/weather-app.yaml")
 	s.apply("src/manifests/walkthrough/weather-app-no-auth.yaml")
 
-	req, err := http.NewRequest(http.MethodGet, "http://walkthrough.docker.localhost/no-auth", nil)
+	req, err := http.NewRequest(http.MethodGet, "http://walkthrough.docker.localhost/no-auth/weather", nil)
 	s.Require().NoError(err)
 	err = try.RequestWithTransport(req, 10*time.Second, s.tr, try.StatusCodeIs(http.StatusOK))
 	s.Assert().NoError(err)
 
 	s.apply("src/manifests/walkthrough/weather-app-basic-auth.yaml")
 
-	req, err = http.NewRequest(http.MethodGet, "http://walkthrough.docker.localhost/basic-auth", nil)
+	req, err = http.NewRequest(http.MethodGet, "http://walkthrough.docker.localhost/basic-auth/weather", nil)
 	s.Require().NoError(err)
 
 	err = try.RequestWithTransport(req, 5*time.Second, s.tr, try.StatusCodeIs(http.StatusUnauthorized))
@@ -127,7 +127,7 @@ func (s *WalkthroughTestSuite) TestWalkthrough() {
 		"--set", "image.tag=v3.3.0",
 		"traefik/traefik")
 
-	req, err = http.NewRequest(http.MethodGet, "http://walkthrough.docker.localhost/basic-auth", nil)
+	req, err = http.NewRequest(http.MethodGet, "http://walkthrough.docker.localhost/basic-auth/weather", nil)
 	s.Require().NoError(err)
 
 	err = try.RequestWithTransport(req, 5*time.Second, s.tr, try.StatusCodeIs(http.StatusUnauthorized))
@@ -137,7 +137,7 @@ func (s *WalkthroughTestSuite) TestWalkthrough() {
 	s.Assert().NoError(err)
 
 	s.apply("src/manifests/walkthrough/weather-app-apikey.yaml")
-	req, err = http.NewRequest(http.MethodGet, "http://walkthrough.docker.localhost/api-key", nil)
+	req, err = http.NewRequest(http.MethodGet, "http://walkthrough.docker.localhost/api-key/weather", nil)
 	s.Require().NoError(err)
 	err = try.RequestWithTransport(req, 5*time.Second, s.tr, try.StatusCodeIs(http.StatusUnauthorized))
 	s.Assert().NoError(err)
@@ -153,7 +153,7 @@ func (s *WalkthroughTestSuite) TestWalkthrough() {
 		"--set", "hub.apimanagement.enabled=true",
 		"traefik/traefik")
 
-	req, err = http.NewRequest(http.MethodGet, "http://walkthrough.docker.localhost/api-key", nil)
+	req, err = http.NewRequest(http.MethodGet, "http://walkthrough.docker.localhost/api-key/weather", nil)
 	s.Require().NoError(err)
 
 	err = try.RequestWithTransport(req, 5*time.Second, s.tr, try.StatusCodeIs(http.StatusUnauthorized))

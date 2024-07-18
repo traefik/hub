@@ -32,10 +32,11 @@ spec:
   entryPoints:
     - web
   routes:
-  - match: Host(`getting-started.apigateway.docker.localhost`) && Path(`/api-key`)
+  - match: Host(`getting-started.apigateway.docker.localhost`) && PathPrefix(`/api-key`)
     kind: Rule
     services:
     - name: weather-app
       port: 3000
     middlewares:
+    - name: stripprefix-weather
     - name: getting-started-apigateway-apikey-auth

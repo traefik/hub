@@ -1,0 +1,33 @@
+---
+apiVersion: hub.traefik.io/v1alpha1
+kind: APIPortal
+metadata:
+  name: api-lifecycle-apimanagement-apiportal
+  namespace: apps
+spec:
+  title: API Portal
+  description: "Apps Developer Portal"
+  trustedUrls:
+    - http://api.lifecycle.apimanagement.docker.localhost
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api-lifecycle-apimanagement-apiportal
+  namespace: traefik
+  annotations:
+    # This annotation link this Ingress to the API Portal using <name>@<namespace> format.
+    hub.traefik.io/api-portal: api-lifecycle-apimanagement-apiportal@apps
+spec:
+  rules:
+  - host: api.lifecycle.apimanagement.docker.localhost
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: apiportal
+              port:
+                number: 9903

@@ -12,11 +12,11 @@ spec:
     operationSets:
       - name: get-forecast
         matchers:
-          - pathPrefix: "/complex/weather"
+          - pathPrefix: "/weather"
             methods: [ "GET" ]
       - name: patch-forecast
         matchers:
-          - pathPrefix: "/complex/weather"
+          - pathPrefix: "/weather/0"
             methods: [ "PATCH" ]
 
 ---
@@ -69,4 +69,5 @@ spec:
     services:
     - name: weather-app
       port: 3000
-
+    middlewares:
+      - name: stripprefix-weather

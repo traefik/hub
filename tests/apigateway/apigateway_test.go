@@ -108,13 +108,13 @@ func (s *APIGatewayTestSuite) TestGettingStarted() {
 	s.Require().NoError(err)
 	s.apply("api-gateway/1-getting-started/manifests/weather-app-ingressroute.yaml")
 
-	req, err := http.NewRequest(http.MethodGet, "http://getting-started.apigateway.docker.localhost", nil)
+	req, err := http.NewRequest(http.MethodGet, "http://getting-started.apigateway.docker.localhost/weather", nil)
 	s.Require().NoError(err)
 	err = try.RequestWithTransport(req, 30*time.Second, s.tr, try.StatusCodeIs(http.StatusOK))
 	s.Assert().NoError(err)
 
 	s.apply("api-gateway/1-getting-started/manifests/weather-app-apikey.yaml")
-	req, err = http.NewRequest(http.MethodGet, "http://getting-started.apigateway.docker.localhost/api-key", nil)
+	req, err = http.NewRequest(http.MethodGet, "http://getting-started.apigateway.docker.localhost/api-key/weather", nil)
 	s.Require().NoError(err)
 	err = try.RequestWithTransport(req, 10*time.Second, s.tr, try.StatusCodeIs(http.StatusUnauthorized))
 	s.Assert().NoError(err)
