@@ -251,7 +251,7 @@ export TRAEFIK_HUB_TOKEN=
 ```
 
 ```shell
-kubectl create secret generic license --namespace traefik --from-literal=token=$TRAEFIK_HUB_TOKEN
+kubectl create secret generic traefik-hub-license --namespace traefik --from-literal=token=$TRAEFIK_HUB_TOKEN
 ```
 
 Then, upgrade Traefik Proxy to Traefik Hub using the same Helm chart:
@@ -259,7 +259,7 @@ Then, upgrade Traefik Proxy to Traefik Hub using the same Helm chart:
 ```shell
 helm upgrade traefik -n traefik --wait \
   --reuse-values \
-  --set hub.token=license \
+  --set hub.token=traefik-hub-license \
   --set image.registry=ghcr.io \
   --set image.repository=traefik/traefik-hub \
   --set image.tag=v3.3.0 \
