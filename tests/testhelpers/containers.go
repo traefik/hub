@@ -114,7 +114,7 @@ func InstallTraefikHubAPIGW(ctx context.Context, t *testing.T, k8s client.Client
 
 	CreateSecretForTraefikHub(ctx, t, k8s)
 	LaunchHelmCommand(t, "install", "traefik", "-n", traefikNamespace, "--wait",
-		"--set", "hub.token=license",
+		"--set", "hub.token=traefik-hub-license",
 		"--set", "ingressClass.enabled=false",
 		"--set", "ingressRoute.dashboard.enabled=true",
 		"--set", "ingressRoute.dashboard.matchRule='Host(`dashboard.docker.localhost`)'",
@@ -141,7 +141,7 @@ func InstallTraefikHubAPIM(ctx context.Context, t *testing.T, k8s client.Client)
 
 	CreateSecretForTraefikHub(ctx, t, k8s)
 	LaunchHelmCommand(t, "install", "traefik", "-n", traefikNamespace, "--wait",
-		"--set", "hub.token=license",
+		"--set", "hub.token=traefik-hub-license",
 		"--set", "hub.apimanagement.enabled=true",
 		"--set", "ingressClass.enabled=false",
 		"--set", "ingressRoute.dashboard.enabled=true",
@@ -167,7 +167,7 @@ func CreateSecretForTraefikHub(ctx context.Context, t *testing.T, k8s client.Cli
 
 	licenseData := map[string][]byte{"token": []byte(token)}
 	license := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{Name: "license", Namespace: "traefik"},
+		ObjectMeta: metav1.ObjectMeta{Name: "traefik-hub-license", Namespace: "traefik"},
 		Data:       licenseData,
 	}
 	err := k8s.Create(ctx, license)

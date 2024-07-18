@@ -72,7 +72,7 @@ export TRAEFIK_HUB_TOKEN=
 
 ```shell
 kubectl create namespace traefik
-kubectl create secret generic license --namespace traefik --from-literal=token=$TRAEFIK_HUB_TOKEN
+kubectl create secret generic traefik-hub-license --namespace traefik --from-literal=token=$TRAEFIK_HUB_TOKEN
 ```
 
 Now, install Traefik Hub with Helm:
@@ -81,8 +81,8 @@ Now, install Traefik Hub with Helm:
 # Add the Helm repository
 helm repo add --force-update traefik https://traefik.github.io/charts
 # Install the Helm chart
-helm install traefik-hub -n traefik --wait \
-  --set hub.token=license \
+helm install traefik -n traefik --wait \
+  --set hub.token=traefik-hub-license \
   --set hub.apimanagement.enabled=true \
   --set ingressClass.enabled=false \
   --set ingressRoute.dashboard.enabled=true \
@@ -105,7 +105,7 @@ kubectl apply --server-side --force-conflicts -k https://github.com/traefik/trae
 helm repo add --force-update traefik https://traefik.github.io/charts
 # Upgrade the Helm chart
 helm upgrade traefik-hub -n traefik --wait \
-  --set hub.token=license \
+  --set hub.token=traefik-hub-license \
   --set hub.apimanagement.enabled=true \
   --set ingressClass.enabled=false \
   --set ingressRoute.dashboard.enabled=true \
