@@ -104,7 +104,7 @@ kubectl apply --server-side --force-conflicts -k https://github.com/traefik/trae
 # Update the Helm repository
 helm repo add --force-update traefik https://traefik.github.io/charts
 # Upgrade the Helm chart
-helm upgrade traefik-hub -n traefik --wait \
+helm upgrade traefik -n traefik --wait \
   --set hub.token=traefik-hub-license \
   --set hub.apimanagement.enabled=true \
   --set ingressClass.enabled=false \
