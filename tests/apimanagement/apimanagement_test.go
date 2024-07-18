@@ -1,8 +1,10 @@
 package apimanagement
 
 import (
+	"bytes"
 	"context"
 	"errors"
+	"io"
 	"net"
 	"net/http"
 	"os"
@@ -106,7 +108,7 @@ func (s *APIManagementTestSuite) TestGettingStarted() {
 
 	err = s.apply("api-management/1-getting-started/manifests/weather-app-ingressroute.yaml")
 	s.Assert().NoError(err)
-	err = s.check(http.MethodGet, "http://getting-started.apimanagement.docker.localhost", 10*time.Second, http.StatusOK)
+	err = s.check(http.MethodGet, "http://getting-started.apimanagement.docker.localhost/weather", 10*time.Second, http.StatusOK)
 	s.Assert().NoError(err)
 
 	err = s.apply("api-management/1-getting-started/manifests/api.yaml")
@@ -119,7 +121,7 @@ func (s *APIManagementTestSuite) TestGettingStarted() {
 	err = s.check(http.MethodGet, "http://api.getting-started.apimanagement.docker.localhost", 90*time.Second, http.StatusOK)
 	s.Assert().NoError(err)
 
-	err = s.checkWithBearer(http.MethodGet, "http://api.getting-started.apimanagement.docker.localhost/weather", adminToken, 90*time.Second, http.StatusOK)
+	err = s.checkWithBearer(http.MethodGet, "http://api.getting-started.apimanagement.docker.localhost/weather", http.NoBody, adminToken, 90*time.Second, http.StatusOK)
 	s.Assert().NoError(err)
 }
 
@@ -145,16 +147,16 @@ func (s *APIManagementTestSuite) TestAccessControl() {
 	err = s.apply("api-management/2-access-control/manifests/simple-weather-api.yaml")
 	s.Require().NoError(err)
 
-	err = s.checkWithBearer(http.MethodGet, "http://api.access-control.apimanagement.docker.localhost/simple/admin", adminToken, 90*time.Second, http.StatusOK)
+	err = s.checkWithBearer(http.MethodGet, "http://api.access-control.apimanagement.docker.localhost/simple/admin", http.NoBody, adminToken, 90*time.Second, http.StatusOK)
 	s.Assert().NoError(err)
 
-	err = s.checkWithBearer(http.MethodGet, "http://api.access-control.apimanagement.docker.localhost/simple/weather", adminToken, 5*time.Second, http.StatusForbidden)
+	err = s.checkWithBearer(http.MethodGet, "http://api.access-control.apimanagement.docker.localhost/simple/weather", http.NoBody, adminToken, 5*time.Second, http.StatusForbidden)
 	s.Assert().NoError(err)
 
-	err = s.checkWithBearer(http.MethodGet, "http://api.access-control.apimanagement.docker.localhost/simple/weather", externalToken, 5*time.Second, http.StatusOK)
+	err = s.checkWithBearer(http.MethodGet, "http://api.access-control.apimanagement.docker.localhost/simple/weather", http.NoBody, externalToken, 5*time.Second, http.StatusOK)
 	s.Assert().NoError(err)
 
-	err = s.checkWithBearer(http.MethodGet, "http://api.access-control.apimanagement.docker.localhost/simple/admin", externalToken, 5*time.Second, http.StatusForbidden)
+	err = s.checkWithBearer(http.MethodGet, "http://api.access-control.apimanagement.docker.localhost/simple/admin", http.NoBody, externalToken, 5*time.Second, http.StatusForbidden)
 	s.Assert().NoError(err)
 
 	// Complex Access Control
@@ -163,25 +165,25 @@ func (s *APIManagementTestSuite) TestAccessControl() {
 	err = s.apply("api-management/2-access-control/manifests/complex-weather-api.yaml")
 	s.Require().NoError(err)
 
-	err = s.checkWithBearer(http.MethodGet, "http://api.access-control.apimanagement.docker.localhost/complex/admin", adminToken, 10*time.Second, http.StatusOK)
+	err = s.checkWithBearer(http.MethodGet, "http://api.access-control.apimanagement.docker.localhost/complex/admin", http.NoBody, adminToken, 10*time.Second, http.StatusOK)
 	s.Assert().NoError(err)
 
-	err = s.checkWithBearer(http.MethodGet, "http://api.access-control.apimanagement.docker.localhost/complex/weather", adminToken, 5*time.Second, http.StatusOK)
+	err = s.checkWithBearer(http.MethodGet, "http://api.access-control.apimanagement.docker.localhost/complex/weather", http.NoBody, adminToken, 5*time.Second, http.StatusOK)
 	s.Assert().NoError(err)
 
-	err = s.checkWithBearer(http.MethodPatch, "http://api.access-control.apimanagement.docker.localhost/complex/weather", adminToken, 5*time.Second, http.StatusOK)
+	err = s.checkWithBearer(http.MethodPatch, "http://api.access-control.apimanagement.docker.localhost/complex/weather/0", bytes.NewReader([]byte(`[{"op": "replace", "path": "/city", "value": "GopherTown"}]`)), adminToken, 5*time.Second, http.StatusNoContent)
 	s.Assert().NoError(err)
 
-	err = s.checkWithBearer(http.MethodGet, "http://api.access-control.apimanagement.docker.localhost/complex/weather", externalToken, 5*time.Second, http.StatusOK)
+	err = s.checkWithBearer(http.MethodGet, "http://api.access-control.apimanagement.docker.localhost/complex/weather", http.NoBody, externalToken, 5*time.Second, http.StatusOK)
 	s.Assert().NoError(err)
 
-	err = s.checkWithBearer(http.MethodPatch, "http://api.access-control.apimanagement.docker.localhost/complex/weather", externalToken, 5*time.Second, http.StatusOK)
+	err = s.checkWithBearer(http.MethodPatch, "http://api.access-control.apimanagement.docker.localhost/complex/weather/0", bytes.NewReader([]byte(`[{"op": "replace", "path": "/weather", "value": "Cloudy"}]`)), externalToken, 5*time.Second, http.StatusNoContent)
 	s.Assert().NoError(err)
 
 	err = testhelpers.Delete(s.ctx, s.k8s, "APIAccess", "access-control-apimanagement-simple-weather", "apps", "hub.traefik.io", "v1alpha1")
 	s.Require().NoError(err)
 
-	err = s.checkWithBearer(http.MethodPatch, "http://api.access-control.apimanagement.docker.localhost/complex/weather", externalToken, 10*time.Second, http.StatusForbidden)
+	err = s.checkWithBearer(http.MethodPatch, "http://api.access-control.apimanagement.docker.localhost/complex/weather/0", bytes.NewReader([]byte(`[{"op": "replace", "path": "/weather", "value": "Cloudy"}]`)), externalToken, 10*time.Second, http.StatusForbidden)
 	s.Assert().NoError(err)
 }
 
@@ -203,16 +205,16 @@ func (s *APIManagementTestSuite) TestAPILifeCycleManagement() {
 
 	err = s.check(http.MethodGet, "http://api.lifecycle.apimanagement.docker.localhost/weather", 5*time.Second, http.StatusUnauthorized)
 	s.Assert().NoError(err)
-	err = s.checkWithBearer(http.MethodGet, "http://api.lifecycle.apimanagement.docker.localhost/weather", adminToken, 90*time.Second, http.StatusOK)
+	err = s.checkWithBearer(http.MethodGet, "http://api.lifecycle.apimanagement.docker.localhost/weather", http.NoBody, adminToken, 90*time.Second, http.StatusOK)
 	s.Assert().NoError(err)
 
 	err = s.apply("api-management/3-api-lifecycle-management/manifests/api-v1.yaml")
 	s.Require().NoError(err)
 	time.Sleep(1 * time.Second)
 
-	err = s.check(http.MethodGet, "http://api.lifecycle.apimanagement.docker.localhost/weather-v1", 5*time.Second, http.StatusUnauthorized)
+	err = s.check(http.MethodGet, "http://api.lifecycle.apimanagement.docker.localhost/weather-v1/weather", 5*time.Second, http.StatusUnauthorized)
 	s.Assert().NoError(err)
-	err = s.checkWithBearer(http.MethodGet, "http://api.lifecycle.apimanagement.docker.localhost/weather-v1", adminToken, 90*time.Second, http.StatusOK)
+	err = s.checkWithBearer(http.MethodGet, "http://api.lifecycle.apimanagement.docker.localhost/weather-v1/weather", http.NoBody, adminToken, 90*time.Second, http.StatusOK)
 	s.Assert().NoError(err)
 
 	// Publish Second API Version
@@ -226,23 +228,23 @@ func (s *APIManagementTestSuite) TestAPILifeCycleManagement() {
 	s.Require().NoError(err)
 
 	var req *http.Request
-	req, err = http.NewRequest(http.MethodGet, "http://api.lifecycle.apimanagement.docker.localhost/weather-multi-versions", nil)
+	req, err = http.NewRequest(http.MethodGet, "http://api.lifecycle.apimanagement.docker.localhost/weather-multi-versions/weather", nil)
 	s.Require().NoError(err)
 	req.Header.Add("X-Version", "preview")
 	err = try.RequestWithTransport(req, 10*time.Second, s.tr, try.StatusCodeIs(http.StatusUnauthorized))
 	s.Assert().NoError(err)
 
-	req, err = http.NewRequest(http.MethodGet, "http://api.lifecycle.apimanagement.docker.localhost/weather-multi-versions", nil)
+	req, err = http.NewRequest(http.MethodGet, "http://api.lifecycle.apimanagement.docker.localhost/weather-multi-versions/weather", nil)
 	s.Require().NoError(err)
 	req.Header.Add("Authorization", "Bearer "+adminToken)
-	err = try.RequestWithTransport(req, 10*time.Second, s.tr, try.BodyContains("weather"))
+	err = try.RequestWithTransport(req, 10*time.Second, s.tr, try.BodyContains("GopherCity"))
 	s.Assert().NoError(err)
 
-	req, err = http.NewRequest(http.MethodGet, "http://api.lifecycle.apimanagement.docker.localhost/weather-multi-versions", nil)
+	req, err = http.NewRequest(http.MethodGet, "http://api.lifecycle.apimanagement.docker.localhost/weather-multi-versions/weather", nil)
 	s.Require().NoError(err)
 	req.Header.Add("X-Version", "preview")
 	req.Header.Add("Authorization", "Bearer "+adminToken)
-	err = try.RequestWithTransport(req, 10*time.Second, s.tr, try.BodyContains("forecast"))
+	err = try.RequestWithTransport(req, 10*time.Second, s.tr, try.BodyContains("GopherRocks"))
 	s.Assert().NoError(err)
 
 	// Try the new version with a part of the traffic
@@ -250,9 +252,12 @@ func (s *APIManagementTestSuite) TestAPILifeCycleManagement() {
 	s.Require().NoError(err)
 
 	// both should work
-	err = try.RequestWithTransport(req, 10*time.Second, s.tr, try.BodyContains("forecast"))
+	req, err = http.NewRequest(http.MethodGet, "http://api.lifecycle.apimanagement.docker.localhost/weather-v1-wrr/weather", nil)
+	s.Require().NoError(err)
+	req.Header.Add("Authorization", "Bearer "+adminToken)
+	err = try.RequestWithTransport(req, 10*time.Second, s.tr, try.BodyContains("GopherRocks"))
 	s.Assert().NoError(err)
-	err = try.RequestWithTransport(req, 10*time.Second, s.tr, try.BodyContains("weather"))
+	err = try.RequestWithTransport(req, 10*time.Second, s.tr, try.BodyContains("GopherCity"))
 	s.Assert().NoError(err)
 
 }
@@ -278,8 +283,8 @@ func (s *APIManagementTestSuite) check(method string, url string, timeout time.D
 	return try.RequestWithTransport(req, timeout, s.tr, try.StatusCodeIs(status))
 }
 
-func (s *APIManagementTestSuite) checkWithBearer(method, url, bearer string, timeout time.Duration, status int) error {
-	req, err := http.NewRequest(method, url, nil)
+func (s *APIManagementTestSuite) checkWithBearer(method, url string, body io.Reader, bearer string, timeout time.Duration, status int) error {
+	req, err := http.NewRequest(method, url, body)
 	if err != nil {
 		return err
 	}

@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/network"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -49,9 +50,9 @@ func CreateKubernetesCluster(ctx context.Context, t *testing.T) (*k3s.K3sContain
 				Image:        rancherImage,
 				ExposedPorts: []string{"80/tcp", "443/tcp", "6443/tcp", "8443/tcp"},
 				HostConfigModifier: func(hc *container.HostConfig) {
-					hc.NetworkMode = "host"
+					hc.NetworkMode = network.NetworkBridge
+					hc.Privileged = true
 				},
-				Privileged: true,
 			},
 		}),
 	)

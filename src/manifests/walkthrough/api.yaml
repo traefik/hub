@@ -9,7 +9,7 @@ spec:
     path: /openapi.yaml
     override:
       servers:
-        - url: http://api.getting-started.apimanagement.docker.localhost
+        - url: http://api.walkthrough.docker.localhost
 
 ---
 apiVersion: hub.traefik.io/v1alpha1
@@ -34,8 +34,10 @@ spec:
   entryPoints:
   - web
   routes:
-  - match: Host(`api.walkthrough.docker.localhost`) && PathRegexp(`^/weather(/([0-9]+|openapi.yaml))?$`)
+  - match: Host(`api.walkthrough.docker.localhost`) && PathPrefix(`/weather`)
     kind: Rule
     services:
     - name: weather-app
       port: 3000
+    middlewares:
+      - name: stripprefix-weather

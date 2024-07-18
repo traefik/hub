@@ -110,7 +110,7 @@ kubectl apply --server-side --force-conflicts -k https://github.com/traefik/trae
 # Update the Helm repository
 helm repo update
 # Upgrade the Helm chart
-helm upgrade traefik-hub -n traefik-hub --wait \
+helm upgrade traefik -n traefik --wait \
   --set hub.token=traefik-hub-license \
   --set ingressClass.enabled=false \
   --set ingressRoute.dashboard.enabled=true \
@@ -144,6 +144,7 @@ It should create the public app
 ```shell
 namespace/apps created
 configmap/weather-data created
+middleware.traefik.io/stripprefix-weather created
 deployment.apps/weather-app created
 service/weather-app created
 configmap/weather-app-openapispec created
@@ -162,11 +163,13 @@ spec:
   entryPoints:
     - web
   routes:
-  - match: Host(`getting-started.apigateway.docker.localhost`)
+  - match: Host(`getting-started.apigateway.docker.localhost`) && PathPrefix(`/weather`)
     kind: Rule
     services:
     - name: weather-app
       port: 3000
+    middlewares:
+      - name: stripprefix-weather
 ```
 
 ```shell
@@ -180,17 +183,15 @@ ingressroute.traefik.io/getting-started-apigateway created
 This API can be accessed using curl:
 
 ```shell
-curl http://getting-started.apigateway.docker.localhost/
+curl http://getting-started.apigateway.docker.localhost/weather
 ```
 
 ```json
-{
-  "public": [
-    { "id": 1, "city": "GopherCity", "weather": "Moderate rain" },
-    { "id": 2, "city": "City of Gophers", "weather": "Sunny" },
-    { "id": 3, "city": "GopherRocks", "weather": "Cloudy" }
-  ]
-}
+[
+  {"city":"GopherCity","id":"0","weather":"Moderate rain"},
+  {"city":"City of Gophers","id":"1","weather":"Sunny"},
+  {"city":"GopherRocks","id":"2","weather":"Cloudy"}
+]
 ```
 
 ### Step 3: Secure authentication on this API with Traefik Hub
@@ -213,7 +214,7 @@ Put this hash in the API Key `Middleware`:
 ```diff :../../hack/diff.sh -r -a "manifests/weather-app-ingressroute.yaml manifests/weather-app-apikey.yaml"
 --- manifests/weather-app-ingressroute.yaml
 +++ manifests/weather-app-apikey.yaml
-@@ -1,15 +1,41 @@
+@@ -1,17 +1,42 @@
  ---
 +apiVersion: v1
 +kind: Secret
@@ -249,13 +250,15 @@ Put this hash in the API Key `Middleware`:
    entryPoints:
      - web
    routes:
--  - match: Host(`getting-started.apigateway.docker.localhost`)
-+  - match: Host(`getting-started.apigateway.docker.localhost`) && Path(`/api-key`)
+-  - match: Host(`getting-started.apigateway.docker.localhost`) && PathPrefix(`/weather`)
++  - match: Host(`getting-started.apigateway.docker.localhost`) && PathPrefix(`/api-key`)
      kind: Rule
      services:
      - name: weather-app
        port: 3000
-+    middlewares:
+     middlewares:
+-      - name: stripprefix-weather
++    - name: stripprefix-weather
 +    - name: getting-started-apigateway-apikey-auth
 ```
 
@@ -275,11 +278,11 @@ And test it:
 
 ```shell
 # This call is not authorized => 401
-curl -I http://getting-started.apigateway.docker.localhost/api-key
+curl -i http://getting-started.apigateway.docker.localhost/api-key/weather
 # Let's set the API key
 export API_KEY=$(echo -n "Let's use API Key with Traefik Hub" | base64)
 # This call with the token is allowed => 200
-curl -I -H "Authorization: Bearer $API_KEY" http://getting-started.apigateway.docker.localhost/api-key
+curl -i -H "Authorization: Bearer $API_KEY" http://getting-started.apigateway.docker.localhost/api-key/weather
 ```
 
 The API is now secured.

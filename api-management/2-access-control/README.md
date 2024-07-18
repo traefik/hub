@@ -64,12 +64,13 @@ spec:
   entryPoints:
     - web
   routes:
-  - match: Host(`api.access-control.apimanagement.docker.localhost`) && Path(`/simple/admin`)
+  - match: Host(`api.access-control.apimanagement.docker.localhost`) && PathPrefix(`/simple/admin`)
     kind: Rule
     services:
     - name: admin-app
       port: 3000
-
+    middlewares:
+      - name: stripprefix-admin
 ```
 
 ```shell
@@ -127,6 +128,8 @@ spec:
     services:
     - name: weather-app
       port: 3000
+    middlewares:
+      - name: stripprefix-weather
 ```
 
 ```shell
@@ -194,7 +197,7 @@ One needs to define operationSets to configure operationFilters. Here, we'll dif
 ```diff :../../hack/diff.sh -r -a "manifests/simple-weather-api.yaml manifests/complex-weather-api.yaml"
 --- manifests/simple-weather-api.yaml
 +++ manifests/complex-weather-api.yaml
-@@ -2,41 +2,71 @@
+@@ -2,40 +2,69 @@
  apiVersion: hub.traefik.io/v1alpha1
  kind: API
  metadata:
@@ -209,11 +212,11 @@ One needs to define operationSets to configure operationFilters. Here, we'll dif
 +    operationSets:
 +      - name: get-forecast
 +        matchers:
-+          - pathPrefix: "/complex/weather"
++          - pathPrefix: "/weather"
 +            methods: [ "GET" ]
 +      - name: patch-forecast
 +        matchers:
-+          - pathPrefix: "/complex/weather"
++          - pathPrefix: "/weather/0"
 +            methods: [ "PATCH" ]
  
  ---
@@ -270,8 +273,6 @@ One needs to define operationSets to configure operationFilters. Here, we'll dif
      kind: Rule
      services:
      - name: weather-app
-       port: 3000
-+
 ```
 
 ### Deploy and test it
@@ -291,7 +292,7 @@ curl -i -H "Authorization: Bearer $ADMIN_TOKEN" "http://api.access-control.apima
 # This call is now allowed
 curl -i -H "Authorization: Bearer $ADMIN_TOKEN" "http://api.access-control.apimanagement.docker.localhost/complex/weather"
 # And even PATCH is allowed
-curl -i -XPATCH -H "Authorization: Bearer $ADMIN_TOKEN" "http://api.access-control.apimanagement.docker.localhost/complex/weather"
+curl -i -XPATCH -H "Authorization: Bearer $ADMIN_TOKEN" "http://api.access-control.apimanagement.docker.localhost/complex/weather/0" -d '[{"op": "replace", "path": "/city", "value": "GopherTown"}]'
 ```
 
 And test it with the external user's token:
@@ -300,7 +301,7 @@ And test it with the external user's token:
 # This one is allowed
 curl -i -H "Authorization: Bearer $EXTERNAL_TOKEN" "http://api.access-control.apimanagement.docker.localhost/complex/weather"
 # And PATCH should be not allowed
-curl -i -XPATCH -H "Authorization: Bearer $EXTERNAL_TOKEN" "http://api.access-control.apimanagement.docker.localhost/complex/weather"
+curl -i -XPATCH -H "Authorization: Bearer $EXTERNAL_TOKEN" "http://api.access-control.apimanagement.docker.localhost/complex/weather/0" -d '[{"op": "replace", "path": "/weather", "value": "Cloudy"}]'
 ```
 
 It can be explained quite easily if **PATCH** is still allowed. There is still an `APIAccess` created with the simple tutorial:
@@ -359,5 +360,5 @@ The first one allows all kinds of HTTP requests. If we delete it, the _external_
 ```shell
 kubectl delete apiaccess -n apps access-control-apimanagement-simple-weather
 # This time, PATCH is not allowed
-curl -i -XPATCH -H "Authorization: Bearer $EXTERNAL_TOKEN" "http://api.access-control.apimanagement.docker.localhost/complex/weather"
+curl -i -XPATCH -H "Authorization: Bearer $EXTERNAL_TOKEN" "http://api.access-control.apimanagement.docker.localhost/complex/weather/0" -d '[{"op": "replace", "path": "/weather", "value": "Cloudy"}]'
 ```

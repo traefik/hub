@@ -26,9 +26,11 @@ spec:
   entryPoints:
   - web
   routes:
-  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && PathRegexp(`^/weather-v1-wrr(/([0-9]+|openapi.yaml))?$`)
+  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && PathPrefix(`/weather-v1-wrr`)
     kind: Rule
     services:
     - name: api-lifecycle-apimanagement-weather-api-wrr
       port: 3000
       kind: TraefikService
+    middlewares:
+      - name: stripprefix-weather

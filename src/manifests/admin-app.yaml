@@ -13,11 +13,27 @@ metadata:
 data:
   api.json: |
     {
-      "settings": [
-        { "id": 1, "lang": "en" },
-        { "id": 2, "lang": "fr" },
-      ]
+      "admin": {
+        "settings": {
+          "1": {
+            "lang": "en"},
+          "2": {
+            "lang": "fr"}
+        }
+      }
     }
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: stripprefix-admin
+  namespace: admin
+spec:
+  stripPrefix:
+    prefixes:
+      - /simple
+      - /complex
 
 ---
 apiVersion: apps/v1
@@ -37,9 +53,9 @@ spec:
     spec:
       containers:
         - name: api
-          image: ghcr.io/traefik-workshops/api-server:v0.2.0
+          image: ghcr.io/traefik/api-server:v1.0.0
           args: ["-data", "/api/api.json", "-errorrate", "2"]
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           volumeMounts:
           - name: api-data
             mountPath: /api

@@ -32,10 +32,11 @@ spec:
   entryPoints:
     - web
   routes:
-  - match: Host(`walkthrough.docker.localhost`) && Path(`/api-key`)
+  - match: Host(`walkthrough.docker.localhost`) && PathPrefix(`/api-key`)
     kind: Rule
     services:
     - name: weather-app
       port: 3000
     middlewares:
-    - name: walkthrough-apikey-auth
+      - name: stripprefix-weather
+      - name: walkthrough-apikey-auth

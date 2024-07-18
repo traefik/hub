@@ -8,8 +8,10 @@ spec:
   entryPoints:
     - web
   routes:
-    - match: Host(`walkthrough.docker.localhost`) && Path(`/no-auth`)
+    - match: Host(`walkthrough.docker.localhost`) && PathPrefix(`/no-auth`)
       kind: Rule
       services:
         - name: weather-app
           port: 3000
+      middlewares:
+        - name: stripprefix-weather

@@ -7,12 +7,32 @@ metadata:
 data:
   api.json: |
     {
-      "weather": [
-        { "id": 0, "city": "GopherCity", "weather": "Moderate rain" },
-        { "id": 1, "city": "City of Gophers", "weather": "Sunny" },
-        { "id": 2, "city": "GopherRocks", "weather": "Cloudy" }
-      ]
+      "weather": {
+        "0": {"city": "GopherCity", "weather": "Moderate rain"},
+        "1": {"city": "City of Gophers", "weather": "Sunny"},
+        "2": {"city": "GopherRocks", "weather": "Cloudy"}
+        }
     }
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: stripprefix-weather
+  namespace: apps
+spec:
+  stripPrefix:
+    prefixes:
+      - /api-key
+      - /simple
+      - /complex
+      - /weather-v1-wrr
+      - /weather-v1
+      - /weather-multi-versions
+      - /no-auth
+      - /basic-auth
+      - /api-key
+      - /forecast
 
 ---
 apiVersion: apps/v1
@@ -32,9 +52,9 @@ spec:
     spec:
       containers:
         - name: api
-          image: ghcr.io/traefik-workshops/api-server:v0.2.0
+          image: ghcr.io/traefik/api-server:v1.0.0
           args: ["-data", "/api/api.json", "-openapi", "/public/openapi.yaml", "-errorrate", "2"]
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           volumeMounts:
           - name: api-data
             mountPath: /api
@@ -91,53 +111,44 @@ data:
     paths:
       /weather:
         get:
-          summary: Retrieve all registered weather
-          operationId: listWeather
+          summary: Retrieve all registered weather of all cities
+          operationId: getAll
           tags:
             - external
           responses:
             '200':
-              description: An array of weathers
+              description: An array of weather data
               content:
                 application/json:
                   schema:
                     $ref: "#/components/schemas/weather"
-            '204':
-              $ref: '#/components/responses/nocontent'
-            '401':
-              $ref: '#/components/responses/unauthorized'
+            '404':
+              $ref: '#/components/responses/notFound'
+            '500':
+              $ref: '#/components/responses/serverError'
+        post:
+          summary: Create a weather record
+          operationId: post
+          tags:
+            - external
+          requestBody:
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/weatherWithoutId'
+          responses:
+            '201':
+              description: The created weather with its id
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/weather"
             '500':
               $ref: '#/components/responses/serverError'
       /weather/{id}:
         get:
           summary: Retrieve weather of a city
-          operationId: getWeather
-          tags:
-            - external
-          parameters:
-          - name: id
-            in: path
-            description: Record ID
-            required: true
-            schema:
-              type: integer
-              format: int64
-          responses:
-            '200':
-              description: A weather
-              content:
-                application/json:
-                  schema:
-                    $ref: "#/components/schemas/weather"
-            '204':
-              $ref: '#/components/responses/nocontent'
-            '401':
-              $ref: '#/components/responses/unauthorized'
-            '500':
-              $ref: '#/components/responses/serverError'
-        patch:
-          summary: Update weather data
-          operationId: patchForecast
+          operationId: get
           tags:
             - external
           parameters:
@@ -146,32 +157,92 @@ data:
               description: Record ID
               required: true
               schema:
-                type: integer
-                format: int64
-            - name: city
-              in: query
-              description: City
+                type: string
+          responses:
+            '200':
+              description: A weather
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/weather"
+            '404':
+              $ref: '#/components/responses/notFound'
+            '500':
+              $ref: '#/components/responses/serverError'
+        delete:
+          summary: Delete weather of a city
+          operationId: delete
+          tags:
+            - external
+          parameters:
+            - name: id
+              in: path
+              description: Record ID
               required: true
               schema:
                 type: string
           responses:
+            '204':
+              $ref: '#/components/responses/noContent'
+        put:
+          summary: Update weather of a city
+          operationId: put
+          tags:
+            - external
+          parameters:
+            - name: id
+              in: path
+              description: Record ID
+              required: true
+              schema:
+                type: string
+          requestBody:
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/weatherWithoutId'
+          responses:
             '200':
-              description: An array of forecasted weathers
+              $ref: '#/components/responses/noContent'
+        patch:
+          summary: Patch weather data
+          operationId: patch
+          tags:
+            - external
+          parameters:
+            - name: id
+              in: path
+              description: Record ID
+              required: true
+              schema:
+                type: string
+          requestBody:
+            content:
+              application/json-patch+json:
+                schema:
+                  $ref: '#/components/schemas/patchRequest'
+          responses:
+            '200':
+              description: An array of forecasted weather data
               content:
                 application/json:
                   schema:
                     $ref: "#/components/schemas/weather"
             '204':
-              $ref: '#/components/responses/nocontent'
+              $ref: '#/components/responses/noContent'
             '401':
               $ref: '#/components/responses/unauthorized'
             '500':
               $ref: '#/components/responses/serverError'
-
+    
     components:
       responses:
-        nocontent:
+        created:
+          description: "Created"
+        noContent:
           description: "No content"
+        notFound:
+          description: "Not found"
         unauthorized:
           description: "Access token is missing or invalid"
         serverError:
@@ -184,8 +255,16 @@ data:
             - name
           properties:
             id:
-              type: integer
-              format: int64
+              type: string
+            city:
+              type: string
+            weather:
+              type: string
+        weatherWithoutId:
+          type: object
+          required:
+            - name
+          properties:
             city:
               type: string
             weather:
@@ -195,6 +274,68 @@ data:
           maxItems: 100
           items:
             $ref: "#/components/schemas/weather"
+        patchRequest:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/JSONPatchRequestAddReplaceTest'
+              - $ref: '#/components/schemas/JSONPatchRequestRemove'
+              - $ref: '#/components/schemas/JSONPatchRequestMoveCopy'
+        JSONPatchRequestAddReplaceTest:
+          type: object
+          additionalProperties: false
+          required:
+            - value
+            - op
+            - path
+          properties:
+            path:
+              description: A JSON Pointer path.
+              type: string
+            value:
+              description: The value to add, replace or test.
+            op:
+              description: The operation to perform.
+              type: string
+              enum:
+                - add
+                - replace
+                - test
+        JSONPatchRequestRemove:
+          type: object
+          additionalProperties: false
+          required:
+            - op
+            - path
+          properties:
+            path:
+              description: A JSON Pointer path.
+              type: string
+            op:
+              description: The operation to perform.
+              type: string
+              enum:
+                - remove
+        JSONPatchRequestMoveCopy:
+          type: object
+          additionalProperties: false
+          required:
+            - from
+            - op
+            - path
+          properties:
+            path:
+              description: A JSON Pointer path.
+              type: string
+            op:
+              description: The operation to perform.
+              type: string
+              enum:
+                - move
+                - copy
+            from:
+              description: A JSON Pointer path.
+              type: string
       securitySchemes:
         bearerAuth:
           description: "Bearer Auth"

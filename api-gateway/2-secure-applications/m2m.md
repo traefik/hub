@@ -261,7 +261,7 @@ Let's try it:
 
 ```shell
 kubectl apply -f api-gateway/2-secure-applications/manifests/whoami-app-oauth2-client-creds-nologin.yaml
-sleep 2
+sleep 3
 curl http://secure-applications.apigateway.docker.localhost/oauth2-client-credentials-nologin
 ```
 

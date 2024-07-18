@@ -29,8 +29,10 @@ spec:
   entryPoints:
   - web
   routes:
-  - match: Host(`api.walkthrough.docker.localhost`) && Path(`/forecast`)
+  - match: Host(`api.walkthrough.docker.localhost`) && PathPrefix(`/forecast`)
     kind: Rule
     services:
     - name: weather-app-forecast
       port: 3000
+    middlewares:
+      - name: stripprefix-weather

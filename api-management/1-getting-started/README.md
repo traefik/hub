@@ -104,7 +104,7 @@ kubectl apply --server-side --force-conflicts -k https://github.com/traefik/trae
 # Update the Helm repository
 helm repo add --force-update traefik https://traefik.github.io/charts
 # Upgrade the Helm chart
-helm upgrade traefik-hub -n traefik --wait \
+helm upgrade traefik -n traefik --wait \
   --set hub.token=traefik-hub-license \
   --set hub.apimanagement.enabled=true \
   --set ingressClass.enabled=false \
@@ -137,6 +137,7 @@ It creates the weather app:
 ```shell
 namespace/apps unchanged
 configmap/weather-data unchanged
+middleware.traefik.io/stripprefix-weather unchanged
 deployment.apps/weather-app unchanged
 service/weather-app unchanged
 configmap/weather-app-openapispec unchanged
@@ -160,6 +161,8 @@ spec:
     services:
     - name: weather-app
       port: 3000
+    middlewares:
+      - name: stripprefix-weather
 ```
 
 ```shell
@@ -173,17 +176,15 @@ ingressroute.traefik.io/getting-started-apimanagement created
 At this moment, this API is exposed. It's possible to reach it using `curl` command:
 
 ```shell
-curl http://getting-started.apimanagement.docker.localhost
+curl http://getting-started.apimanagement.docker.localhost/weather
 ```
 
 ```json
-{
-  "public": [
-    { "id": 1, "city": "GopherCity", "weather": "Moderate rain" },
-    { "id": 2, "city": "City of Gophers", "weather": "Sunny" },
-    { "id": 3, "city": "GopherRocks", "weather": "Cloudy" }
-  ]
-}
+[
+  {"city":"City of Gophers","id":"1","weather":"Sunny"},
+  {"city":"GopherRocks","id":"2","weather":"Cloudy"},
+  {"city":"GopherCity","id":"0","weather":"Moderate rain"}
+]
 ```
 
 ## Step 3: Manage the API using Traefik Hub API Management
@@ -231,7 +232,7 @@ spec:
   entryPoints:
   - web
   routes:
-  - match: Host(`api.getting-started.apimanagement.docker.localhost`) && PathRegexp(`^/weather(/([0-9]+|openapi.yaml))?$`)
+  - match: Host(`api.getting-started.apimanagement.docker.localhost`) && PathPrefix(`/weather`)
     kind: Rule
     services:
     - name: weather-app
@@ -345,13 +346,11 @@ curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.getting-started.apimanag
 ```
 
 ```json
-{
-  "public": [
-    { "id": 1, "city": "GopherCity", "weather": "Moderate rain" },
-    { "id": 2, "city": "City of Gophers", "weather": "Sunny" },
-    { "id": 3, "city": "GopherRocks", "weather": "Cloudy" }
-  ]
-}
+[
+  {"city":"City of Gophers","id":"1","weather":"Sunny"},
+  {"city":"GopherRocks","id":"2","weather":"Cloudy"},
+  {"city":"GopherCity","id":"0","weather":"Moderate rain"}
+]
 ```
 
 :information_source: If it fails with 401, wait a minute and try again. The token needs to be sync before it can be accepted by Traefik Hub.

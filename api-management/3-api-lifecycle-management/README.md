@@ -15,6 +15,7 @@ kubectl apply -f api-management/3-api-lifecycle-management/manifests/api.yaml
 ```shell
 namespace/apps unchanged
 configmap/weather-data unchanged
+middleware.traefik.io/stripprefix-weather unchanged
 deployment.apps/weather-app unchanged
 service/weather-app unchanged
 configmap/weather-app-openapispec unchanged
@@ -47,7 +48,7 @@ To use API Version features, we'll need to:
 ```diff :../../hack/diff.sh -r -a "manifests/api.yaml manifests/api-v1.yaml"
 --- manifests/api.yaml
 +++ manifests/api-v1.yaml
-@@ -1,10 +1,11 @@
+@@ -1,41 +1,54 @@
  ---
  apiVersion: hub.traefik.io/v1alpha1
 -kind: API
@@ -61,10 +62,12 @@ To use API Version features, we'll need to:
    openApiSpec:
      path: /openapi.yaml
      override:
-@@ -13,28 +14,38 @@
- 
- ---
- apiVersion: hub.traefik.io/v1alpha1
+       servers:
+-        - url: http://api.lifecycle.apimanagement.docker.localhost
++        - url: http://api.lifecycle.apimanagement.docker.localhost/weather-v1
++
++---
++apiVersion: hub.traefik.io/v1alpha1
 +kind: API
 +metadata:
 +  name: api-lifecycle-apimanagement-weather-api-v1
@@ -72,9 +75,9 @@ To use API Version features, we'll need to:
 +spec:
 +  versions:
 +    - name: api-lifecycle-apimanagement-weather-api-v1
-+
-+---
-+apiVersion: hub.traefik.io/v1alpha1
+ 
+ ---
+ apiVersion: hub.traefik.io/v1alpha1
  kind: APIAccess
  metadata:
 -  name: api-lifecycle-apimanagement-weather-api
@@ -100,11 +103,14 @@ To use API Version features, we'll need to:
    entryPoints:
    - web
    routes:
--  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && PathRegexp(`^/weather(/([0-9]+|openapi.yaml))?$`)
-+  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && PathRegexp(`^/weather-v1(/([0-9]+|openapi.yaml))?$`)
+-  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && PathPrefix(`/weather`)
++  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && PathPrefix(`/weather-v1`)
      kind: Rule
      services:
      - name: weather-app
+       port: 3000
++    middlewares:
++      - name: stripprefix-weather
 ```
 
 We can apply it:
@@ -124,9 +130,9 @@ And confirm it's still working:
 
 ```shell
 # This call is not allowed
-curl -i http://api.lifecycle.apimanagement.docker.localhost/weather-v1
+curl -i http://api.lifecycle.apimanagement.docker.localhost/weather-v1/weather
 # This call is allowed
-curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.lifecycle.apimanagement.docker.localhost/weather-v1
+curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.lifecycle.apimanagement.docker.localhost/weather-v1/weather
 ```
 
 ## Publish a second API Version
@@ -143,7 +149,7 @@ So, for this second API Version, we'll need to:
 ```diff :../../hack/diff.sh -r -a "manifests/api-v1.yaml manifests/api-v1.1.yaml"
 --- manifests/api-v1.yaml
 +++ manifests/api-v1.1.yaml
-@@ -2,10 +2,10 @@
+@@ -2,42 +2,43 @@
  apiVersion: hub.traefik.io/v1alpha1
  kind: APIVersion
  metadata:
@@ -156,7 +162,11 @@ So, for this second API Version, we'll need to:
    openApiSpec:
      path: /openapi.yaml
      override:
-@@ -16,28 +16,29 @@
+       servers:
+-        - url: http://api.lifecycle.apimanagement.docker.localhost/weather-v1
++        - url: http://api.lifecycle.apimanagement.docker.localhost/weather-multi-versions
+ 
+ ---
  apiVersion: hub.traefik.io/v1alpha1
  kind: API
  metadata:
@@ -190,16 +200,18 @@ So, for this second API Version, we'll need to:
    namespace: apps
    annotations:
      hub.traefik.io/api-version: api-lifecycle-apimanagement-weather-api-v1
-@@ -45,8 +46,26 @@
+@@ -45,10 +46,30 @@
    entryPoints:
    - web
    routes:
--  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && PathRegexp(`^/weather-v1(/([0-9]+|openapi.yaml))?$`)
-+  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && PathRegexp(`^/weather-multi-versions(/([0-9]+|openapi.yaml))?$`)
+-  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && PathPrefix(`/weather-v1`)
++  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && PathPrefix(`/weather-multi-versions`)
      kind: Rule
      services:
      - name: weather-app
        port: 3000
+     middlewares:
+       - name: stripprefix-weather
 +
 +---
 +apiVersion: traefik.io/v1alpha1
@@ -213,11 +225,13 @@ So, for this second API Version, we'll need to:
 +  entryPoints:
 +  - web
 +  routes:
-+  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && PathRegexp(`^/weather-multi-versions(/([0-9]+|openapi.yaml))?$`) && Header(`X-Version`, `preview`)
++  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && PathPrefix(`/weather-multi-versions`) && Header(`X-Version`, `preview`)
 +    kind: Rule
 +    services:
 +    - name: weather-app-forecast
 +      port: 3000
++    middlewares:
++      - name: stripprefix-weather
 ```
 
 So let's do it:
@@ -242,11 +256,11 @@ Now, we can test if it works:
 
 ```shell
 # Even with preview X-Version header, it should return 401 without token
-curl -i  -H "X-Version: preview" http://api.lifecycle.apimanagement.docker.localhost/weather-multi-versions
+curl -i  -H "X-Version: preview" http://api.lifecycle.apimanagement.docker.localhost/weather-multi-versions/weather
 # Regular access => returns weather data
-curl  -H "Authorization: Bearer $ADMIN_TOKEN" http://api.lifecycle.apimanagement.docker.localhost/weather-multi-versions
+curl  -H "Authorization: Bearer $ADMIN_TOKEN" http://api.lifecycle.apimanagement.docker.localhost/weather-multi-versions/weather
 # Preview access, with special header => returns forecast data
-curl -H "X-Version: preview"  -H "Authorization: Bearer $ADMIN_TOKEN" http://api.lifecycle.apimanagement.docker.localhost/weather-multi-versions
+curl -H "X-Version: preview"  -H "Authorization: Bearer $ADMIN_TOKEN" http://api.lifecycle.apimanagement.docker.localhost/weather-multi-versions/weather
 ```
 
 To go further, one can use this pattern with other Traefik Middlewares to route versions based on many parameters: path, query, content type, clientIP, basicAuth, forwardAuth, and many others!
@@ -266,7 +280,7 @@ Since the last step, the diff is looking like this:
 ```diff :../../hack/diff.sh -r -a "manifests/api-v1.1.yaml manifests/api-v1.1-weighted.yaml"
 --- manifests/api-v1.1.yaml
 +++ manifests/api-v1.1-weighted.yaml
-@@ -1,62 +1,24 @@
+@@ -1,64 +1,24 @@
  ---
 -apiVersion: hub.traefik.io/v1alpha1
 -kind: APIVersion
@@ -279,7 +293,7 @@ Since the last step, the diff is looking like this:
 -    path: /openapi.yaml
 -    override:
 -      servers:
--        - url: http://api.getting-started.apimanagement.docker.localhost
+-        - url: http://api.lifecycle.apimanagement.docker.localhost/weather-multi-versions
 -
 ----
 -apiVersion: hub.traefik.io/v1alpha1
@@ -317,12 +331,14 @@ Since the last step, the diff is looking like this:
 -  entryPoints:
 -  - web
 -  routes:
--  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && PathRegexp(`^/weather-multi-versions(/([0-9]+|openapi.yaml))?$`)
+-  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && PathPrefix(`/weather-multi-versions`)
 -    kind: Rule
 +  weighted:
      services:
 -    - name: weather-app
 -      port: 3000
+-    middlewares:
+-      - name: stripprefix-weather
 +      - name: weather-app
 +        port: 3000
 +        weight: 1
@@ -339,18 +355,20 @@ Since the last step, the diff is looking like this:
    namespace: apps
    annotations:
      hub.traefik.io/api-version: api-lifecycle-apimanagement-weather-api-v1-1
-@@ -64,8 +26,9 @@
+@@ -66,10 +26,11 @@
    entryPoints:
    - web
    routes:
--  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && PathRegexp(`^/weather-multi-versions(/([0-9]+|openapi.yaml))?$`) && Header(`X-Version`, `preview`)
-+  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && PathRegexp(`^/weather-v1-wrr(/([0-9]+|openapi.yaml))?$`)
+-  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && PathPrefix(`/weather-multi-versions`) && Header(`X-Version`, `preview`)
++  - match: Host(`api.lifecycle.apimanagement.docker.localhost`) && PathPrefix(`/weather-v1-wrr`)
      kind: Rule
      services:
 -    - name: weather-app-forecast
 +    - name: api-lifecycle-apimanagement-weather-api-wrr
        port: 3000
 +      kind: TraefikService
+     middlewares:
+       - name: stripprefix-weather
 ```
 
 Let's apply it:
@@ -367,10 +385,10 @@ ingressroute.traefik.io/weather-api created
 A simple test should confirm that it works:
 
 ```shell
-curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.lifecycle.apimanagement.docker.localhost/weather-v1-wrr
-curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.lifecycle.apimanagement.docker.localhost/weather-v1-wrr
-curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.lifecycle.apimanagement.docker.localhost/weather-v1-wrr
-curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.lifecycle.apimanagement.docker.localhost/weather-v1-wrr
+curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.lifecycle.apimanagement.docker.localhost/weather-v1-wrr/weather
+curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.lifecycle.apimanagement.docker.localhost/weather-v1-wrr/weather
+curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.lifecycle.apimanagement.docker.localhost/weather-v1-wrr/weather
+curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.lifecycle.apimanagement.docker.localhost/weather-v1-wrr/weather
 ```
 
 To go further, it's also possible to mirror production traffic to a new version and/or to use a sticky session.
