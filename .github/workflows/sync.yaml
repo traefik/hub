@@ -1,0 +1,39 @@
+name: 🏗️ sync
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  sync-hub:
+    runs-on: buildjet-2vcpu-ubuntu-2204
+    steps:
+      - name: checkout hub-doc repo
+        uses: actions/checkout@v4
+        with:
+          repository: traefik/hub-doc
+          ref: main
+          token: ${{ secrets.TRAEFIKER_GITHUB_TOKEN }}
+          path: ${{ github.workspace }}/hub-doc
+      - name: copy files
+        run: |
+          cd ${{ github.workspace }}/hub-doc
+          make sync
+      - name: create PR
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.TRAEFIKER_GITHUB_TOKEN }}
+          path: hub-doc
+          commit-message: "chore: update tutorials"
+          committer: "Traefiker <traefiker@github.com>"
+          author: "${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>"
+          signoff: false
+          branch: update-files-${{ github.ref_name }}
+          delete-branch: true
+          title: 'chore: update tutorials'
+          labels: kind/enhancement,status/2-needs-review
+          body: |
+            ### Motivation
+            
+            Update tutorials with latest verified code.
