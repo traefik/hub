@@ -3,9 +3,13 @@ on:
   workflow_dispatch:
   pull_request:
     branches:
-      - main
+      - master
     paths:
-      - '**.yaml'
+      - '.github/workflows/test.yaml'
+      - 'src/manifests/**.yaml'
+      - 'api-management/**.yaml'
+      - 'api-gateway/**.yaml'
+      - 'tests/**.go'
 
 env:
   API_TOKEN: ${{ secrets.API_TOKEN }}
@@ -54,4 +58,16 @@ jobs:
       - name: run tests
         working-directory: tests
         run: make test-apim
-
+  testhelpers:
+    runs-on: buildjet-2vcpu-ubuntu-2204
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: tests/go.mod
+          cache-dependency-path: tests/go.sum
+      - name: run tests
+        working-directory: tests
+        run: make test-testhelpers
