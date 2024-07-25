@@ -29,6 +29,11 @@ jobs:
         with:
           go-version-file: tests/go.mod
           cache-dependency-path: tests/go.sum
+      - name: docker hub login
+        uses: docker/login-action@v3
+        with:
+          username: traefiker
+          password: ${{ secrets.TRAEFIKER_DOCKERHUB_TOKEN }}
       - name: run tests
         working-directory: tests
         run: make test-walkthrough
@@ -42,6 +47,11 @@ jobs:
         with:
           go-version-file: tests/go.mod
           cache-dependency-path: tests/go.sum
+      - name: docker hub login
+        uses: docker/login-action@v3
+        with:
+          username: traefiker
+          password: ${{ secrets.TRAEFIKER_DOCKERHUB_TOKEN }}
       - name: run tests
         working-directory: tests
         run: make test-apigw
@@ -55,6 +65,11 @@ jobs:
         with:
           go-version-file: tests/go.mod
           cache-dependency-path: tests/go.sum
+      - name: docker hub login
+        uses: docker/login-action@v3
+        with:
+          username: traefiker
+          password: ${{ secrets.TRAEFIKER_DOCKERHUB_TOKEN }}
       - name: run tests
         working-directory: tests
         run: make test-apim
@@ -68,6 +83,11 @@ jobs:
         with:
           go-version-file: tests/go.mod
           cache-dependency-path: tests/go.sum
+      - name: docker hub login
+        uses: docker/login-action@v3
+        with:
+          username: traefiker
+          password: ${{ secrets.TRAEFIKER_DOCKERHUB_TOKEN }}
       - name: run tests
         working-directory: tests
         run: make test-testhelpers
