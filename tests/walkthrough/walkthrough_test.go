@@ -120,11 +120,12 @@ func (s *WalkthroughTestSuite) TestWalkthrough() {
 	// STEP 2
 	testhelpers.CreateSecretForTraefikHub(s.ctx, s.T(), s.k8s)
 	testhelpers.LaunchHelmCommand(s.T(), "upgrade", "traefik", "-n", "traefik", "--wait",
+		"--version", "v29.0.1",
 		"--reuse-values",
 		"--set", "hub.token=traefik-hub-license",
 		"--set", "image.registry=ghcr.io",
 		"--set", "image.repository=traefik/traefik-hub",
-		"--set", "image.tag=v3.3.0",
+		"--set", "image.tag=v3.3.1",
 		"traefik/traefik")
 
 	req, err = http.NewRequest(http.MethodGet, "http://walkthrough.docker.localhost/basic-auth/weather", nil)
@@ -149,6 +150,7 @@ func (s *WalkthroughTestSuite) TestWalkthrough() {
 
 	// STEP 3
 	testhelpers.LaunchHelmCommand(s.T(), "upgrade", "traefik", "-n", "traefik", "--wait",
+		"--version", "v29.0.1",
 		"--reuse-values",
 		"--set", "hub.apimanagement.enabled=true",
 		"traefik/traefik")
