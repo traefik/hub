@@ -125,7 +125,7 @@ func (s *WalkthroughTestSuite) TestWalkthrough() {
 		"--set", "hub.token=traefik-hub-license",
 		"--set", "image.registry=ghcr.io",
 		"--set", "image.repository=traefik/traefik-hub",
-		"--set", "image.tag=v3.3.0",
+		"--set", "image.tag=v3.3.1",
 		"traefik/traefik")
 
 	req, err = http.NewRequest(http.MethodGet, "http://walkthrough.docker.localhost/basic-auth/weather", nil)
