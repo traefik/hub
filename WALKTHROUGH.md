@@ -71,7 +71,7 @@ helm repo add --force-update traefik https://traefik.github.io/charts
 kubectl create namespace traefik
 # Install the Helm chart
 helm install traefik -n traefik --wait \
-  --version v29.0.1 \
+  --version v30.0.2 \
   --set ingressClass.enabled=false \
   --set ingressRoute.dashboard.enabled=true \
   --set ingressRoute.dashboard.matchRule='Host(`dashboard.docker.localhost`)' \
@@ -138,7 +138,7 @@ ingressroute.traefik.io/walkthrough-weather-api created
 This API can be accessed using curl:
 
 ```shell
-curl http://walkthrough.docker.localhost/no-auth/weather
+curl -s http://walkthrough.docker.localhost/no-auth/weather | jq
 ```
 
 ```json
@@ -231,7 +231,7 @@ And now, we can confirm it's secured using BASIC Authentication :
 # This call is not authorized => 401
 curl -i http://walkthrough.docker.localhost/basic-auth/weather
 # This call is allowed => 200
-curl -i -u foo:bar http://walkthrough.docker.localhost/basic-auth/weather
+curl -su foo:bar http://walkthrough.docker.localhost/basic-auth/weather | jq
 ```
 
 [Basic Authentication](https://datatracker.ietf.org/doc/html/rfc7617) worked and was widely used in the early days of the web. However, it also has a security risk:
@@ -262,7 +262,7 @@ Then, upgrade Traefik Proxy to Traefik Hub using the same Helm chart:
 
 ```shell
 helm upgrade traefik -n traefik --wait \
-  --version v29.0.1 \
+  --version v30.0.2 \
   --reuse-values \
   --set hub.token=traefik-hub-license \
   --set image.registry=ghcr.io \
@@ -283,7 +283,7 @@ And also confirm _Basic Auth_ is still here:
 # This call is not authorized => 401
 curl -i http://walkthrough.docker.localhost/basic-auth/weather
 # This call is allowed => 200
-curl -i -u foo:bar http://walkthrough.docker.localhost/basic-auth/weather
+curl -su foo:bar http://walkthrough.docker.localhost/basic-auth/weather | jq
 ```
 
 Let's secure the weather API with an API Key.
@@ -377,7 +377,7 @@ curl -i http://walkthrough.docker.localhost/api-key/weather
 # Let's set the token
 export API_KEY=$(echo -n "Let's use API Key with Traefik Hub" | base64)
 # This call with the token is allowed => 200
-curl -i -H "Authorization: Bearer $API_KEY" http://walkthrough.docker.localhost/api-key/weather
+curl -s -H "Authorization: Bearer $API_KEY" http://walkthrough.docker.localhost/api-key/weather | jq
 ```
 
 The API is now secured.
@@ -392,7 +392,7 @@ First, we enable API Management on Traefik Traefik Hub using the same Helm chart
 
 ```shell
 helm upgrade traefik -n traefik --wait \
-  --version v29.0.1 \
+  --version v30.0.2 \
   --reuse-values \
   --set hub.apimanagement.enabled=true \
    traefik/traefik
@@ -410,7 +410,7 @@ And also confirm that the API is still secured using an API Key:
 # This call is not authorized => 401
 curl -i http://walkthrough.docker.localhost/api-key/weather
 # This call with the token is allowed => 200
-curl -i -H "Authorization: Bearer $API_KEY" http://walkthrough.docker.localhost/api-key/weather
+curl -s -H "Authorization: Bearer $API_KEY" http://walkthrough.docker.localhost/api-key/weather | jq
 ```
 
 Now, let's try to manage it with Traefik Hub using `API` and `APIAccess` resources:
@@ -568,7 +568,7 @@ export ADMIN_TOKEN="XXX"
 Request the API with this token: :tada:
 
 ```shell
-curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.walkthrough.docker.localhost/weather
+curl -s -H "Authorization: Bearer $ADMIN_TOKEN" http://api.walkthrough.docker.localhost/weather | jq
 ```
 
 ```json
@@ -602,6 +602,7 @@ spec: {}
 The other resources are built on the same model, as we can see in [the complete file](https://github.com/traefik/hub/blob/main/api-management/1-getting-started/manifests/forecast.yaml). Let's apply it:
 
 ```shell
+kubectl apply -f src/manifests/weather-app-forecast.yaml
 kubectl apply -f src/manifests/walkthrough/forecast.yaml
 ```
 
@@ -609,6 +610,12 @@ kubectl apply -f src/manifests/walkthrough/forecast.yaml
 api.hub.traefik.io/walkthrough-weather-api-forecast created
 apiaccess.hub.traefik.io/walkthrough-weather-api-forecast created
 ingressroute.traefik.io/walkthrough-weather-api-forecast created
+```
+
+Request the API with the token:
+
+```shell
+curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.walkthrough.docker.localhost/forecast/weather
 ```
 
 And that's it! This time, we have documentation built from the OpenAPI specification, and we can also interactively try the API with the Try Out functionality.
