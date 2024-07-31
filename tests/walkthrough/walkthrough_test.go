@@ -120,7 +120,7 @@ func (s *WalkthroughTestSuite) TestWalkthrough() {
 	// STEP 2
 	testhelpers.CreateSecretForTraefikHub(s.ctx, s.T(), s.k8s)
 	testhelpers.LaunchHelmCommand(s.T(), "upgrade", "traefik", "-n", "traefik", "--wait",
-		"--version", "v29.0.1",
+		"--version", "v30.0.2",
 		"--reuse-values",
 		"--set", "hub.token=traefik-hub-license",
 		"--set", "image.registry=ghcr.io",
@@ -150,7 +150,7 @@ func (s *WalkthroughTestSuite) TestWalkthrough() {
 
 	// STEP 3
 	testhelpers.LaunchHelmCommand(s.T(), "upgrade", "traefik", "-n", "traefik", "--wait",
-		"--version", "v29.0.1",
+		"--version", "v30.0.2",
 		"--reuse-values",
 		"--set", "hub.apimanagement.enabled=true",
 		"traefik/traefik")
@@ -179,6 +179,16 @@ func (s *WalkthroughTestSuite) TestWalkthrough() {
 	s.Assert().NoError(err)
 
 	req, err = http.NewRequest(http.MethodGet, "http://api.walkthrough.docker.localhost/weather", nil)
+	s.Require().NoError(err)
+	req.Header.Add("Authorization", "Bearer "+os.Getenv("ADMIN_TOKEN"))
+
+	err = try.RequestWithTransport(req, 90*time.Second, s.tr, try.StatusCodeIs(http.StatusOK))
+	s.Assert().NoError(err)
+
+	s.apply("src/manifests/weather-app-forecast.yaml")
+	s.apply("src/manifests/walkthrough/forecast.yaml")
+
+	req, err = http.NewRequest(http.MethodGet, "http://api.walkthrough.docker.localhost/forecast/weather", nil)
 	s.Require().NoError(err)
 	req.Header.Add("Authorization", "Bearer "+os.Getenv("ADMIN_TOKEN"))
 
