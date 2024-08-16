@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.9
 
 # golang builder
-FROM golang:1.22 AS builder
+FROM golang:1.23 AS builder
 WORKDIR /usr/local/src/
 COPY . /usr/local/src/
 RUN make build
