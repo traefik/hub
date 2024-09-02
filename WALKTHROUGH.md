@@ -267,7 +267,7 @@ helm upgrade traefik -n traefik --wait \
   --set hub.token=traefik-hub-license \
   --set image.registry=ghcr.io \
   --set image.repository=traefik/traefik-hub \
-  --set image.tag=v3.3.1 \
+  --set image.tag=v3.4.0 \
    traefik/traefik
 ```
 
