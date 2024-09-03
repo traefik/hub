@@ -82,7 +82,7 @@ Now, install Traefik Hub with Helm:
 helm repo add --force-update traefik https://traefik.github.io/charts
 # Install the Helm chart
 helm install traefik -n traefik --wait \
-  --version v30.1.0 \
+  --version v31.0.0 \
   --set hub.token=traefik-hub-license \
   --set hub.apimanagement.enabled=true \
   --set ingressClass.enabled=false \
