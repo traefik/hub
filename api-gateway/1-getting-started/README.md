@@ -89,7 +89,7 @@ Install Traefik Hub API Gateway using Helm:
 helm repo add --force-update traefik https://traefik.github.io/charts
 # Install the Helm chart
 helm install traefik -n traefik --wait \
-  --version v30.1.0 \
+  --version v31.0.0 \
   --set hub.token=traefik-hub-license \
   --set ingressClass.enabled=false \
   --set ingressRoute.dashboard.enabled=true \
