@@ -237,14 +237,14 @@ func (s *APIManagementTestSuite) TestAPILifeCycleManagement() {
 	req, err = http.NewRequest(http.MethodGet, "http://api.lifecycle.apimanagement.docker.localhost/weather-multi-versions/weather", nil)
 	s.Require().NoError(err)
 	req.Header.Add("Authorization", "Bearer "+adminToken)
-	err = try.RequestWithTransport(req, 10*time.Second, s.tr, try.BodyContains("GopherCity"))
+	err = try.RequestWithTransport(req, 10*time.Second, s.tr, try.BodyContains("GopherRocks"))
 	s.Assert().NoError(err)
 
 	req, err = http.NewRequest(http.MethodGet, "http://api.lifecycle.apimanagement.docker.localhost/weather-multi-versions/weather", nil)
 	s.Require().NoError(err)
 	req.Header.Add("X-Version", "preview")
 	req.Header.Add("Authorization", "Bearer "+adminToken)
-	err = try.RequestWithTransport(req, 10*time.Second, s.tr, try.BodyContains("GopherRocks"))
+	err = try.RequestWithTransport(req, 10*time.Second, s.tr, try.BodyContains("GopherCentral"))
 	s.Assert().NoError(err)
 
 	// Try the new version with a part of the traffic
@@ -257,7 +257,7 @@ func (s *APIManagementTestSuite) TestAPILifeCycleManagement() {
 	req.Header.Add("Authorization", "Bearer "+adminToken)
 	err = try.RequestWithTransport(req, 10*time.Second, s.tr, try.BodyContains("GopherRocks"))
 	s.Assert().NoError(err)
-	err = try.RequestWithTransport(req, 10*time.Second, s.tr, try.BodyContains("GopherCity"))
+	err = try.RequestWithTransport(req, 10*time.Second, s.tr, try.BodyContains("GopherCentral"))
 	s.Assert().NoError(err)
 
 }

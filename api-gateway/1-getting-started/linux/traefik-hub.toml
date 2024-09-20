@@ -10,7 +10,6 @@
 ################################################################
 [hub]
   token = "PASTE_YOUR_TOKEN_HERE"
-  platformUrl = "https://platform-preview.hub.traefik.io/agent"
 
 ################################################################
 # Entrypoints configuration

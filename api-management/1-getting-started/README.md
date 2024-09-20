@@ -82,7 +82,7 @@ Now, install Traefik Hub with Helm:
 helm repo add --force-update traefik https://traefik.github.io/charts
 # Install the Helm chart
 helm install traefik -n traefik --wait \
-  --version v31.0.0 \
+  --version v31.1.1 \
   --set hub.token=traefik-hub-license \
   --set hub.apimanagement.enabled=true \
   --set ingressClass.enabled=false \
@@ -91,7 +91,7 @@ helm install traefik -n traefik --wait \
   --set ingressRoute.dashboard.entryPoints={web} \
   --set image.registry=ghcr.io \
   --set image.repository=traefik/traefik-hub \
-  --set image.tag=v3.4.0 \
+  --set image.tag=v3.4.1 \
   --set ports.web.nodePort=30000 \
   --set ports.websecure.nodePort=30001 \
    traefik/traefik
@@ -114,7 +114,7 @@ helm upgrade traefik -n traefik --wait \
   --set ingressRoute.dashboard.entryPoints={web} \
   --set image.registry=ghcr.io \
   --set image.repository=traefik/traefik-hub \
-  --set image.tag=v3.4.0 \
+  --set image.tag=v3.4.1 \
   --set ports.web.nodePort=30000 \
   --set ports.websecure.nodePort=30001 \
    traefik/traefik
@@ -177,7 +177,7 @@ ingressroute.traefik.io/getting-started-apimanagement created
 At this moment, this API is exposed. It's possible to reach it using `curl` command:
 
 ```shell
-curl http://getting-started.apimanagement.docker.localhost/weather
+curl -s http://getting-started.apimanagement.docker.localhost/weather | jq
 ```
 
 ```json
@@ -343,7 +343,7 @@ export ADMIN_TOKEN=
 The weather API is reachable with this token set as header :tada: :
 
 ```shell
-curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.getting-started.apimanagement.docker.localhost/weather
+curl -s -H "Authorization: Bearer $ADMIN_TOKEN" http://api.getting-started.apimanagement.docker.localhost/weather | jq
 ```
 
 ```json
