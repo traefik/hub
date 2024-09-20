@@ -34,7 +34,7 @@ export ADMIN_TOKEN=
 # This call is not allowed
 curl -i http://api.lifecycle.apimanagement.docker.localhost/weather
 # This call is allowed
-curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.lifecycle.apimanagement.docker.localhost/weather
+curl -s -H "Authorization: Bearer $ADMIN_TOKEN" http://api.lifecycle.apimanagement.docker.localhost/weather | jq
 ```
 
 ## Publish the first API Version
@@ -132,7 +132,7 @@ And confirm it's still working:
 # This call is not allowed
 curl -i http://api.lifecycle.apimanagement.docker.localhost/weather-v1/weather
 # This call is allowed
-curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.lifecycle.apimanagement.docker.localhost/weather-v1/weather
+curl -s -H "Authorization: Bearer $ADMIN_TOKEN" http://api.lifecycle.apimanagement.docker.localhost/weather-v1/weather | jq
 ```
 
 ## Publish a second API Version
@@ -258,9 +258,9 @@ Now, we can test if it works:
 # Even with preview X-Version header, it should return 401 without token
 curl -i  -H "X-Version: preview" http://api.lifecycle.apimanagement.docker.localhost/weather-multi-versions/weather
 # Regular access => returns weather data
-curl  -H "Authorization: Bearer $ADMIN_TOKEN" http://api.lifecycle.apimanagement.docker.localhost/weather-multi-versions/weather
+curl -s -H "Authorization: Bearer $ADMIN_TOKEN" http://api.lifecycle.apimanagement.docker.localhost/weather-multi-versions/weather | jq
 # Preview access, with special header => returns forecast data
-curl -H "X-Version: preview"  -H "Authorization: Bearer $ADMIN_TOKEN" http://api.lifecycle.apimanagement.docker.localhost/weather-multi-versions/weather
+curl -s -H "X-Version: preview"  -H "Authorization: Bearer $ADMIN_TOKEN" http://api.lifecycle.apimanagement.docker.localhost/weather-multi-versions/weather | jq
 ```
 
 To go further, one can use this pattern with other Traefik Middlewares to route versions based on many parameters: path, query, content type, clientIP, basicAuth, forwardAuth, and many others!
@@ -385,10 +385,10 @@ ingressroute.traefik.io/weather-api created
 A simple test should confirm that it works:
 
 ```shell
-curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.lifecycle.apimanagement.docker.localhost/weather-v1-wrr/weather
-curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.lifecycle.apimanagement.docker.localhost/weather-v1-wrr/weather
-curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.lifecycle.apimanagement.docker.localhost/weather-v1-wrr/weather
-curl -H "Authorization: Bearer $ADMIN_TOKEN" http://api.lifecycle.apimanagement.docker.localhost/weather-v1-wrr/weather
+curl -s -H "Authorization: Bearer $ADMIN_TOKEN" http://api.lifecycle.apimanagement.docker.localhost/weather-v1-wrr/weather | jq
+curl -s -H "Authorization: Bearer $ADMIN_TOKEN" http://api.lifecycle.apimanagement.docker.localhost/weather-v1-wrr/weather | jq
+curl -s -H "Authorization: Bearer $ADMIN_TOKEN" http://api.lifecycle.apimanagement.docker.localhost/weather-v1-wrr/weather | jq
+curl -s -H "Authorization: Bearer $ADMIN_TOKEN" http://api.lifecycle.apimanagement.docker.localhost/weather-v1-wrr/weather | jq
 ```
 
 To go further, it's also possible to mirror production traffic to a new version and/or to use a sticky session.
