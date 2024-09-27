@@ -89,7 +89,7 @@ Install Traefik Hub API Gateway using Helm:
 helm repo add --force-update traefik https://traefik.github.io/charts
 # Install the Helm chart
 helm install traefik -n traefik --wait \
-  --version v31.1.1 \
+  --version v32.0.0-rc1 --devel \
   --set hub.token=traefik-hub-license \
   --set ingressClass.enabled=false \
   --set ingressRoute.dashboard.enabled=true \
@@ -97,7 +97,7 @@ helm install traefik -n traefik --wait \
   --set ingressRoute.dashboard.entryPoints={web} \
   --set image.registry=ghcr.io \
   --set image.repository=traefik/traefik-hub \
-  --set image.tag=v3.4.1 \
+  --set image.tag=v3.5.0 \
   --set ports.web.nodePort=30000 \
   --set ports.websecure.nodePort=30001 \
    traefik/traefik
@@ -119,7 +119,7 @@ helm upgrade traefik -n traefik --wait \
   --set ingressRoute.dashboard.entryPoints={web} \
   --set image.registry=ghcr.io \
   --set image.repository=traefik/traefik-hub \
-  --set image.tag=v3.4.1 \
+  --set image.tag=v3.5.0 \
   --set ports.web.nodePort=30000 \
   --set ports.websecure.nodePort=30001 \
    traefik/traefik
@@ -553,7 +553,7 @@ sudo usermod -aG docker traefik-hub
 sudo systemctl restart traefik-hub.service
 ```
 
-Now we can test the service with a simple [docker compose](linux/docker-compose.yaml) file:
+Now we can test the service with a [docker compose](linux/docker-compose.yaml) file:
 
 ```shell
 sudo docker-compose -f $(pwd)/api-gateway/1-getting-started/linux/docker-compose.yaml up -d

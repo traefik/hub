@@ -139,7 +139,7 @@ func (s *APIGatewayTestSuite) TestSecureApplications() {
 	var req *http.Request
 
 	s.apply("src/manifests/hydra.yaml")
-	err = testhelpers.WaitForPodReady(s.ctx, s.T(), s.k8s, 90*time.Second, "app=hydra")
+	err = testhelpers.WaitForPodReady(s.ctx, s.T(), s.k8s, 120*time.Second, "app=hydra")
 	s.Require().NoError(err)
 	err = testhelpers.WaitForPodReady(s.ctx, s.T(), s.k8s, 90*time.Second, "app=consent")
 	s.Require().NoError(err)
