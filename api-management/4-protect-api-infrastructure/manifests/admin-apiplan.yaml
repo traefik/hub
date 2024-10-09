@@ -1,0 +1,11 @@
+apiVersion: hub.traefik.io/v1alpha1
+kind: APIPlan
+metadata:
+  name: admin
+  namespace: admin
+spec:
+  title: "Admin Protection"
+  description: "Admin API should not take more than one request per second."
+  rateLimit:
+    limit: 1
+    period: 1s
