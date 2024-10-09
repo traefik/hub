@@ -1,0 +1,12 @@
+apiVersion: hub.traefik.io/v1alpha1
+kind: APIAccess
+metadata:
+  name: protect-api-infrastructure-apimanagement-weather-quota
+  namespace: apps
+spec:
+  groups:
+    - external
+  apis:
+   - name: protect-api-infrastructure-apimanagement-weather
+  apiPlan:
+    name: external

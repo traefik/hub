@@ -1,0 +1,11 @@
+apiVersion: hub.traefik.io/v1alpha1
+kind: APIPlan
+metadata:
+  name: external-premium
+  namespace: apps
+spec:
+  title: "Premium Weather API Plan for external users"
+  description: "Weather API should not take more than 500 requests in 24 hours"
+  quota:
+    limit: 500
+    period: 24h

@@ -1,0 +1,6 @@
+apiVersion: hub.traefik.io/v1alpha1
+kind: API
+metadata:
+  name: protect-api-infrastructure-apimanagement-admin
+  namespace: admin
+spec: {}

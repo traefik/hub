@@ -1,0 +1,18 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: protect-api-infrastructure-apimanagement-admin
+  namespace: admin
+  annotations:
+    hub.traefik.io/api: protect-api-infrastructure-apimanagement-admin
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`api.protect-infrastructure.apimanagement.docker.localhost`) && PathPrefix(`/admin`)
+    kind: Rule
+    services:
+    - name: admin-app
+      port: 3000
+    middlewares:
+      - name: stripprefix-admin
