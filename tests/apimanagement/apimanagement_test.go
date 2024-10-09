@@ -9,10 +9,14 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
 
+	corev1 "k8s.io/api/core/v1"
+
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/k3s"
@@ -259,7 +263,130 @@ func (s *APIManagementTestSuite) TestAPILifeCycleManagement() {
 	s.Assert().NoError(err)
 	err = try.RequestWithTransport(req, 10*time.Second, s.tr, try.BodyContains("GopherCentral"))
 	s.Assert().NoError(err)
+}
 
+func (s *APIManagementTestSuite) TestProtectAPIInfrastructure() {
+	var err error
+	var req *http.Request
+	externalToken, adminToken := os.Getenv("EXTERNAL_TOKEN"), os.Getenv("ADMIN_TOKEN")
+
+	// Step 1: Deploy `weather` and `admin` app
+	err = s.apply("src/manifests/apps-namespace.yaml")
+	s.Require().NoError(err)
+	err = s.apply("src/manifests/weather-app.yaml")
+	s.Require().NoError(err)
+	err = s.apply("src/manifests/admin-app.yaml")
+	s.Require().NoError(err)
+
+	time.Sleep(1 * time.Second)
+	err = testhelpers.WaitForPodReady(s.ctx, s.T(), s.k8s, 90*time.Second, "app=weather-app")
+	s.Require().NoError(err)
+	err = testhelpers.WaitForPodReady(s.ctx, s.T(), s.k8s, 90*time.Second, "app=admin-app")
+	s.Require().NoError(err)
+
+	// Step 1: Deploy weather and admin APIs
+	err = s.apply("api-management/4-protect-api-infrastructure/manifests/admin-api.yaml")
+	s.Require().NoError(err)
+	err = s.apply("api-management/4-protect-api-infrastructure/manifests/admin-apiaccess.yaml")
+	s.Require().NoError(err)
+	err = s.apply("api-management/4-protect-api-infrastructure/manifests/admin-ingressroute.yaml")
+	s.Require().NoError(err)
+	err = s.apply("api-management/4-protect-api-infrastructure/manifests/weather-api.yaml")
+	s.Require().NoError(err)
+	err = s.apply("api-management/4-protect-api-infrastructure/manifests/weather-apiaccess.yaml")
+	s.Require().NoError(err)
+	err = s.apply("api-management/4-protect-api-infrastructure/manifests/weather-ingressroute.yaml")
+	s.Require().NoError(err)
+
+	// Protect from Excessive usage: step 1: set up redis
+	testhelpers.LaunchHelmCommand(s.T(), "install", "redis", "oci://registry-1.docker.io/bitnamicharts/redis", "-n", "traefik", "--wait")
+
+	sec := &corev1.Secret{}
+	err = s.k8s.Get(s.ctx, client.ObjectKey{Namespace: "traefik", Name: "redis"}, sec)
+	assert.NoError(s.T(), err)
+	redisPassword := string(sec.Data["redis-password"])
+
+	testcontainers.Logger.Printf("🔐 Found this redis password: %s\n", redisPassword)
+
+	testhelpers.LaunchHelmCommand(s.T(), "upgrade", "traefik", "-n", "traefik", "--wait",
+		"--reuse-values",
+		"--set", "hub.redis.endpoints=redis-master.traefik.svc.cluster.local:6379",
+		"--set", "hub.redis.password="+redisPassword,
+		"traefik/traefik",
+	)
+
+	// wait for account to be sync'd
+	err = s.checkWithBearer(http.MethodGet, "http://api.protect-infrastructure.apimanagement.docker.localhost/admin", http.NoBody, adminToken, 90*time.Second, http.StatusOK)
+	s.Assert().NoError(err)
+	err = s.checkWithBearer(http.MethodGet, "http://api.protect-infrastructure.apimanagement.docker.localhost/weather", http.NoBody, externalToken, 90*time.Second, http.StatusOK)
+	s.Assert().NoError(err)
+
+	// RateLimit on Admin
+	err = s.apply("api-management/4-protect-api-infrastructure/manifests/admin-apiplan.yaml")
+	s.Require().NoError(err)
+	err = s.apply("api-management/4-protect-api-infrastructure/manifests/admin-apiaccess-ratelimit.yaml")
+	s.Require().NoError(err)
+
+	err = s.checkWithBearer(http.MethodGet, "http://api.protect-infrastructure.apimanagement.docker.localhost/admin", http.NoBody, adminToken, 5*time.Second, http.StatusOK)
+	s.Assert().NoError(err)
+
+	err = testhelpers.Delete(s.ctx, s.k8s, "APIAccess", "protect-api-infrastructure-apimanagement-admin", "admin", "hub.traefik.io", "v1alpha1")
+	s.Require().NoError(err)
+
+	time.Sleep(1 * time.Second)
+	req, err = http.NewRequest(http.MethodGet, "http://api.protect-infrastructure.apimanagement.docker.localhost/admin", nil)
+	s.Require().NoError(err)
+	req.Header.Add("Authorization", "Bearer "+adminToken)
+	err = try.RequestWithTransport(req, 500*time.Millisecond, s.tr,
+		try.StatusCodeIs(http.StatusOK),
+		try.HasHeaderValue("X-Ratelimit-Remaining", "0", true),
+	)
+	s.Require().NoError(err)
+
+	err = s.checkWithBearer(http.MethodGet, "http://api.protect-infrastructure.apimanagement.docker.localhost/admin", http.NoBody, adminToken, 500*time.Millisecond, http.StatusTooManyRequests)
+	s.Assert().NoError(err)
+
+	// Quota on external API
+	err = s.apply("api-management/4-protect-api-infrastructure/manifests/weather-apiplan.yaml")
+	s.Require().NoError(err)
+	err = s.apply("api-management/4-protect-api-infrastructure/manifests/weather-apiaccess-quota.yaml")
+	s.Require().NoError(err)
+
+	err = s.checkWithBearer(http.MethodGet, "http://api.protect-infrastructure.apimanagement.docker.localhost/weather", http.NoBody, externalToken, 5*time.Second, http.StatusOK)
+	s.Assert().NoError(err)
+
+	err = testhelpers.Delete(s.ctx, s.k8s, "APIAccess", "protect-api-infrastructure-apimanagement-weather", "apps", "hub.traefik.io", "v1alpha1")
+	s.Require().NoError(err)
+
+	time.Sleep(1 * time.Second)
+	for i := 0; i < 5; i++ {
+		req, err = http.NewRequest(http.MethodGet, "http://api.protect-infrastructure.apimanagement.docker.localhost/weather", nil)
+		s.Require().NoError(err)
+		req.Header.Add("Authorization", "Bearer "+externalToken)
+		err = try.RequestWithTransport(req, 500*time.Millisecond, s.tr,
+			try.StatusCodeIs(http.StatusOK),
+			try.HasHeaderValue("X-Quota-Remaining", strconv.Itoa(4-i), true),
+		)
+		s.Require().NoError(err)
+	}
+
+	err = s.checkWithBearer(http.MethodGet, "http://api.protect-infrastructure.apimanagement.docker.localhost/weather", http.NoBody, externalToken, 5*time.Second, http.StatusTooManyRequests)
+	s.Assert().NoError(err)
+
+	// Premium plan with higher quota
+	err = s.apply("api-management/4-protect-api-infrastructure/manifests/weather-apiplan-premium.yaml")
+	s.Require().NoError(err)
+	err = s.apply("api-management/4-protect-api-infrastructure/manifests/weather-apiaccess-quota-premium.yaml")
+	s.Require().NoError(err)
+
+	req, err = http.NewRequest(http.MethodGet, "http://api.protect-infrastructure.apimanagement.docker.localhost/weather", nil)
+	s.Require().NoError(err)
+	req.Header.Add("Authorization", "Bearer "+externalToken)
+	err = try.RequestWithTransport(req, 2*time.Second, s.tr,
+		try.StatusCodeIs(http.StatusOK),
+		try.HasHeaderValue("X-Quota-Remaining", "494", true),
+	)
+	s.Require().NoError(err)
 }
 
 func TestAPIManagementTestSuite(t *testing.T) {
