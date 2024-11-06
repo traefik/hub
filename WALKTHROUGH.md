@@ -71,7 +71,7 @@ helm repo add --force-update traefik https://traefik.github.io/charts
 kubectl create namespace traefik
 # Install the Helm chart
 helm install traefik -n traefik --wait \
-  --version v32.1.0 \
+  --version v33.0.0 \
   --set ingressClass.enabled=false \
   --set ingressRoute.dashboard.enabled=true \
   --set ingressRoute.dashboard.matchRule='Host(`dashboard.docker.localhost`)' \
@@ -238,9 +238,12 @@ curl -su foo:bar http://walkthrough.docker.localhost/basic-auth/weather | jq
 credentials can be visible to any observer when using HTTP. It uses hard-coded credentials, potentially giving more authorization
 than required for a specific use case.
 
-Nowadays, those issues are addressed when using [JSON Web Tokens (JWT)](https://datatracker.ietf.org/doc/html/rfc7519). A JWT can be cryptographically verified,
-detach authentication from user credentials, and has an issue and expiration date. JWT can be used with Traefik Hub API
-Gateway, so let's upgrade our setup to Traefik Hub
+API keys are a convenient and more secure way to protect endpoints. The API Key can be required in an HTTP header, cookie, or query parameter.
+
+For more advanced use cases, [JSON Web Tokens (JWT)](https://datatracker.ietf.org/doc/html/rfc7519) can be used. A JWT can be cryptographically verified,
+it detaches authentication from user credentials and has an issue and expiration date.
+
+API Key and JWT can be used with Traefik Hub API Gateway, so let's upgrade our setup to Traefik Hub.
 
 ## Step 2: Upgrade Traefik Proxy to Traefik Hub API Gateway
 
@@ -262,12 +265,12 @@ Then, upgrade Traefik Proxy to Traefik Hub using the same Helm chart:
 
 ```shell
 helm upgrade traefik -n traefik --wait \
-  --version v32.1.0 \
+  --version v33.0.0 \
   --reuse-values \
   --set hub.token=traefik-hub-license \
   --set image.registry=ghcr.io \
   --set image.repository=traefik/traefik-hub \
-  --set image.tag=v3.5.1 \
+  --set image.tag=v3.6.0 \
    traefik/traefik
 ```
 
@@ -392,7 +395,7 @@ First, we enable API Management on Traefik Traefik Hub using the same Helm chart
 
 ```shell
 helm upgrade traefik -n traefik --wait \
-  --version v32.1.0 \
+  --version v33.0.0 \
   --reuse-values \
   --set hub.apimanagement.enabled=true \
    traefik/traefik

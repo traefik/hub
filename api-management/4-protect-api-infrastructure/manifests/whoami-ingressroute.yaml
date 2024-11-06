@@ -1,0 +1,16 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: protect-api-infrastructure-apimanagement-whoami
+  namespace: apps
+  annotations:
+    hub.traefik.io/api: protect-api-infrastructure-apimanagement-whoami
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`api.protect-infrastructure.apimanagement.docker.localhost`) && PathPrefix(`/whoami`)
+    kind: Rule
+    services:
+    - name: whoami
+      port: 80

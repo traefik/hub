@@ -32,7 +32,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: ghcr.io/traefik/api-server:v1.0.0
+          image: ghcr.io/traefik/api-server:v1.1.0
           args: ["-data", "/api/api.json", "-errorrate", "2"]
           imagePullPolicy: IfNotPresent
           volumeMounts:

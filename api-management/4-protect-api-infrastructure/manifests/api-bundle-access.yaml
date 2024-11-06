@@ -1,0 +1,13 @@
+apiVersion: hub.traefik.io/v1alpha1
+kind: APIAccess
+metadata:
+  name: protect-api-infrastructure-apimanagement-external-bundle
+  namespace: apps
+spec:
+  groups:
+    - external
+  apiBundles:
+    - name: protect-api-infrastructure-apimanagement-bundle
+  apiPlan:
+    name: plan-for-bundle
+  weight: 1  # Higher weight to prioritize this plan over previous APIAccess resources

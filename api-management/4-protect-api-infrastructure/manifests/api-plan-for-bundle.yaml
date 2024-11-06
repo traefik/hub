@@ -1,0 +1,14 @@
+apiVersion: hub.traefik.io/v1alpha1
+kind: APIPlan
+metadata:
+  name: plan-for-bundle
+  namespace: apps
+spec:
+  title: "Weather & whoami Bundle Plan"
+  description: "Enforces rate limits and quotas for both the Weather and Whoami APIs"
+  rateLimit:
+    limit: 1
+    period: 1s
+  quota:
+    limit: 500
+    period: 24h
