@@ -4,7 +4,13 @@ on:
   pull_request:
     branches:
       - main
-
+    paths:
+      - 'src/manifests/**.yaml'
+      - 'api-management/**.md'
+      - 'api-management/**.yaml'
+      - 'api-gateway/**.md'
+      - 'api-gateway/**.yaml'
+      - 'WALKTHROUGH.md'
 jobs:
   embed-code:
     runs-on: buildjet-2vcpu-ubuntu-2204
