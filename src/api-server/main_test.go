@@ -130,6 +130,26 @@ func Test_handleOpenAPISpec(t *testing.T) {
 	assert.Contains(t, string(body), "openapi: 3.0.0")
 }
 
+func Test_handleGetOpenAPISpecWithoutSpec(t *testing.T) {
+	a := api{}
+
+	srv := httptest.NewServer(a.getRouter())
+
+	req, err := http.NewRequest(http.MethodGet, srv.URL+"/openapi.yaml", http.NoBody)
+	require.NoError(t, err)
+	resp, err := http.DefaultClient.Do(req)
+	require.NoError(t, err)
+	defer func() { _ = resp.Body.Close() }()
+
+	assert.Equal(t, http.StatusNotImplemented, resp.StatusCode)
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Log(err)
+	}
+	require.NoError(t, err)
+	assert.Contains(t, string(body), "No OpenAPISpec available")
+}
+
 func Test_handleGetAll(t *testing.T) {
 	a := api{}
 
