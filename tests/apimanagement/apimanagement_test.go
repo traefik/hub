@@ -387,6 +387,51 @@ func (s *APIManagementTestSuite) TestProtectAPIInfrastructure() {
 		try.HasHeaderValue("X-Quota-Remaining", "494", true),
 	)
 	s.Require().NoError(err)
+
+	// API Bundle
+	err = s.apply("src/manifests/whoami-app.yaml")
+	s.Require().NoError(err)
+	time.Sleep(1 * time.Second)
+
+	err = s.apply("api-management/4-protect-api-infrastructure/manifests/whoami-ingressroute.yaml")
+	s.Require().NoError(err)
+	err = s.apply("api-management/4-protect-api-infrastructure/manifests/whoami-api.yaml")
+	s.Require().NoError(err)
+	err = s.apply("api-management/4-protect-api-infrastructure/manifests/whoami-apiaccess.yaml")
+	s.Require().NoError(err)
+	time.Sleep(1 * time.Second)
+	err = testhelpers.WaitForPodReady(s.ctx, s.T(), s.k8s, 90*time.Second, "app=whoami")
+
+	err = s.checkWithBearer(http.MethodGet, "http://api.protect-infrastructure.apimanagement.docker.localhost/whoami", http.NoBody, externalToken, 5*time.Second, http.StatusOK)
+	s.Assert().NoError(err)
+
+	err = s.apply("api-management/4-protect-api-infrastructure/manifests/api-bundle.yaml")
+	s.Require().NoError(err)
+	err = s.apply("api-management/4-protect-api-infrastructure/manifests/api-plan-for-bundle.yaml")
+	s.Require().NoError(err)
+	err = s.apply("api-management/4-protect-api-infrastructure/manifests/api-bundle-access.yaml")
+	s.Require().NoError(err)
+	time.Sleep(1 * time.Second)
+
+	req, err = http.NewRequest(http.MethodGet, "http://api.protect-infrastructure.apimanagement.docker.localhost/whoami", nil)
+	s.Require().NoError(err)
+	req.Header.Add("Authorization", "Bearer "+externalToken)
+	err = try.RequestWithTransport(req, 500*time.Millisecond, s.tr,
+		try.StatusCodeIs(http.StatusOK),
+		try.HasHeaderValue("X-Quota-Remaining", "499", true),
+		try.HasHeaderValue("X-Ratelimit-Remaining", "0", true),
+	)
+	s.Require().NoError(err)
+
+	req, err = http.NewRequest(http.MethodGet, "http://api.protect-infrastructure.apimanagement.docker.localhost/weather", nil)
+	s.Require().NoError(err)
+	req.Header.Add("Authorization", "Bearer "+externalToken)
+	err = try.RequestWithTransport(req, 500*time.Millisecond, s.tr,
+		try.StatusCodeIs(http.StatusOK),
+		try.HasHeaderValue("X-Quota-Remaining", "498", true),
+		try.HasHeaderValue("X-Ratelimit-Remaining", "0", true),
+	)
+	s.Require().NoError(err)
 }
 
 func TestAPIManagementTestSuite(t *testing.T) {

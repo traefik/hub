@@ -394,7 +394,7 @@ We can see the HTTP header `X-Quota-Remaining: 494` is present, so our new API P
 Also, If you haven't yet noticed, despite having 500 requests in our new quota, the header says the quota remaining is `494`.
 This means that when we applied the new API plan, the system took account of our previously exhausted 5 requests.
 
-### Viewing your API plan in Traefik Hub online dashboard
+### Viewing your API plan in the Traefik Hub online dashboard
 
 With our API plans and API Accesses created, if we navigate to the [Traefik Hub Online Dashboard](https://hub.traefik.io/plans), we should see the new API plans listed.
 
@@ -408,7 +408,153 @@ If you click on **Multiple plans applied**, you should see all the plans we have
 
 !["Multiple plans applied"](./images/multiple-plans-applied.png)
 
+## Utilize API bundles to manage multiple APIs
+
+In this section, We’ll create an [API Bundle](https://doc.traefik.io/traefik-hub/api-management/api-bundle) that includes the weather API and a new API called `whoami`.
+This bundle will allow us to apply API Plans collectively to the APIs, facilitating easier management.
+
+First, we need to deploy all the resources needed for the `whoami` app:
+
+```sh
+kubectl apply -f src/manifests/whoami-app.yaml
+kubectl apply -f api-management/4-protect-api-infrastructure/manifests/whoami-ingressroute.yaml
+kubectl apply -f api-management/4-protect-api-infrastructure/manifests/whoami-api.yaml
+kubectl apply -f api-management/4-protect-api-infrastructure/manifests/whoami-apiaccess.yaml
+```
+
+After this has been deployed, if we make a request to `whoami` using the external token, we should get a response:
+
+```sh
+curl -sIXGET -H "Authorization: Bearer $EXTERNAL_TOKEN" "http://api.protect-infrastructure.apimanagement.docker.localhost/whoami"
+```
+
+```sh
+HTTP/1.1 200 OK
+Content-Length: 691
+Content-Type: text/plain; charset=utf-8
+```
+
+Now, let's create an API Bundle in the apps namespace for both APIs:
+
+```yaml :manifests/api-bundle.yaml
+apiVersion: hub.traefik.io/v1alpha1
+kind: APIBundle
+metadata:
+  name: protect-api-infrastructure-apimanagement-bundle
+  namespace: apps
+spec:
+  apis:
+    - name: protect-api-infrastructure-apimanagement-admin
+    - name: protect-api-infrastructure-apimanagement-whoami
+```
+
+And apply it:
+
+```sh
+kubectl apply -f api-management/4-protect-api-infrastructure/manifests/api-bundle.yaml
+```
+
+>[!NOTE]
+> API Bundles cannot include other API Bundles to maintain clear and manageable hierarchies.
+
+Let's create an API plan for the bundle:
+
+```yaml :manifests/apiplan-for-bundle.yaml
+apiVersion: hub.traefik.io/v1alpha1
+kind: APIPlan
+metadata:
+  name: plan-for-bundle
+  namespace: apps
+spec:
+  title: "Weather & Whoami Bundle Plan"
+  description: "Enforces rate limits and quotas for both the Weather and Whoami APIs"
+  rateLimit:
+    limit: 1
+    period: 1s
+  quota:
+    limit: 500
+    period: 24h
+```
+
+```sh
+kubectl apply -f api-management/4-protect-api-infrastructure/manifests/api-plan-for-bundle.yaml
+```
+
+Now, let's link it with an API Access that allows only the `external` group to have access to both APIs:
+
+```yaml :manifests/api-bundle-access.yaml
+apiVersion: hub.traefik.io/v1alpha1
+kind: APIAccess
+metadata:
+  name: protect-api-infrastructure-apimanagement-external-bundle
+  namespace: apps
+spec:
+  groups:
+    - external
+  apiBundles:
+    - name: protect-api-infrastructure-apimanagement-bundle
+  apiPlan:
+    name: plan-for-bundle
+  weight: 5  # Higher weight to prioritize this plan over previous APIAccess resources
+```
+
+Apply the new API access:
+
+```sh
+kubectl apply -f api-management/4-protect-api-infrastructure/manifests/api-bundle-access.yaml
+```
+
+Now, Let's test the bundle.
+
+If we make a request to the whoami API, we should get a response:
+
+```sh
+curl -sIXGET -H "Authorization: Bearer $EXTERNAL_TOKEN" "http://api.protect-infrastructure.apimanagement.docker.localhost/whoami"
+```
+
+```sh
+HTTP/1.1 200 OK
+Content-Length: 691
+Content-Type: text/plain; charset=utf-8
+Date: Thu, 17 Oct 2024 07:01:35 GMT
+X-Quota-Remaining: 499
+X-Ratelimit-Remaining: 0
+```
+
+As you can see, we get both the `X-Quota-Remaining` and `X-Ratelimit-remaining` headers because of our API plan for the bundle.
+
+Now, if we make a request to the weather API:
+
+```sh
+curl -sIXGET -H "Authorization: Bearer $EXTERNAL_TOKEN" "http://api.protect-infrastructure.apimanagement.docker.localhost/weather"
+```
+
+We should also get a response from the API:
+
+```sh
+HTTP/1.1 200 OK
+Content-Length: 163
+Content-Type: text/plain; charset=utf-8
+Date: Thu, 17 Oct 2024 07:18:02 GMT
+X-Quota-Remaining: 498
+X-Ratelimit-Remaining: 0
+```
+
+If you haven't noticed, the APIs' rate limit and quota are handled as one because they are referenced in the same API Access as part of a bundle.So this means, if we exhaust the quota on the weather API,
+it will also affect the whoami API.
+
+### Viewing your API bundle in the Traefik Hub online dashboard
+
+With our API bundle created, if we navigate to the [Traefik Hub Online Dashboard](https://hub.traefik.io/bundles), we should see the new API bundle and all the APIs in the bundle listed.
+
+!["API bundle page in Traefik Hub Online Dashboard"](./images/api-bundle.png)
+
+Also, if we navigate to the Apps API Portal we deployed earlier in the [getting started tutorial](../1-getting-started/README.md#step-5-deploy-the-api-portal), we should see the APIs listed as part of a bundle.
+
+!["API page in the Apps API portal"](./images/api-portal-bundle.png)
+
 And that's it! In this tutorial, we've:
 
 - Secured access to our exposed APIs by defining access policies using `APIAccess` resources.
 - Protected our APIs from excessive usage by implementing rate limits and quotas through `APIPlan` resources.
+- Utilized `APIBundle` to manage multiple APIs collectively and apply API Plans efficiently.

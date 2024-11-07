@@ -1,0 +1,9 @@
+apiVersion: hub.traefik.io/v1alpha1
+kind: APIBundle
+metadata:
+  name: protect-api-infrastructure-apimanagement-bundle
+  namespace: apps
+spec:
+  apis:
+    - name: protect-api-infrastructure-apimanagement-weather
+    - name: protect-api-infrastructure-apimanagement-whoami

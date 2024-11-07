@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.10
+# syntax=docker/dockerfile:1.11
 
 # golang builder
 FROM golang:1.23 AS builder

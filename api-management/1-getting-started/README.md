@@ -82,7 +82,7 @@ Now, install Traefik Hub with Helm:
 helm repo add --force-update traefik https://traefik.github.io/charts
 # Install the Helm chart
 helm install traefik -n traefik --wait \
-  --version v32.1.0 \
+  --version v33.0.0 \
   --set hub.token=traefik-hub-license \
   --set hub.apimanagement.enabled=true \
   --set ingressClass.enabled=false \
@@ -91,7 +91,7 @@ helm install traefik -n traefik --wait \
   --set ingressRoute.dashboard.entryPoints={web} \
   --set image.registry=ghcr.io \
   --set image.repository=traefik/traefik-hub \
-  --set image.tag=v3.5.1 \
+  --set image.tag=v3.6.0 \
   --set ports.web.nodePort=30000 \
   --set ports.websecure.nodePort=30001 \
    traefik/traefik
@@ -106,7 +106,7 @@ kubectl apply --server-side --force-conflicts -k https://github.com/traefik/trae
 helm repo add --force-update traefik https://traefik.github.io/charts
 # Upgrade the Helm chart
 helm upgrade traefik -n traefik --wait \
-  --version v32.1.0 \
+  --version v33.0.0 \
   --set hub.token=traefik-hub-license \
   --set hub.apimanagement.enabled=true \
   --set ingressClass.enabled=false \
@@ -115,7 +115,7 @@ helm upgrade traefik -n traefik --wait \
   --set ingressRoute.dashboard.entryPoints={web} \
   --set image.registry=ghcr.io \
   --set image.repository=traefik/traefik-hub \
-  --set image.tag=v3.5.1 \
+  --set image.tag=v3.6.0 \
   --set ports.web.nodePort=30000 \
   --set ports.websecure.nodePort=30001 \
    traefik/traefik
