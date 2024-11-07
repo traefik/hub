@@ -143,6 +143,11 @@ func (a *api) errorRateMiddleWare() func(http.Handler) http.Handler {
 
 func (a *api) handleOpenAPISpec(rw http.ResponseWriter, req *http.Request) {
 	var jsonObj interface{}
+	if a.openAPISpec == nil {
+		JSONError(rw, http.StatusNotImplemented, "No OpenAPISpec available")
+		return
+	}
+
 	err := yaml.Unmarshal(a.openAPISpec.Raw(), &jsonObj)
 	if err != nil {
 		JSONError(rw, http.StatusInternalServerError, err.Error())
