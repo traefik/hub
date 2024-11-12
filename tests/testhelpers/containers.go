@@ -124,7 +124,7 @@ func InstallTraefikHubAPIGW(ctx context.Context, t *testing.T, k8s client.Client
 		"--set", "ingressRoute.dashboard.entryPoints={web}",
 		"--set", "image.registry=ghcr.io",
 		"--set", "image.repository=traefik/traefik-hub",
-		"--set", "image.tag=v3.6.0",
+		"--set", "image.tag=v3.7.0",
 		"--set", "ports.web.nodePort=30000",
 		"--set", "ports.websecure.nodePort=30001",
 		"traefik/traefik")
@@ -153,7 +153,7 @@ func InstallTraefikHubAPIM(ctx context.Context, t *testing.T, k8s client.Client)
 		"--set", "ingressRoute.dashboard.entryPoints={web}",
 		"--set", "image.registry=ghcr.io",
 		"--set", "image.repository=traefik/traefik-hub",
-		"--set", "image.tag=v3.6.0",
+		"--set", "image.tag=v3.7.0",
 		"--set", "ports.web.nodePort=30000",
 		"--set", "ports.websecure.nodePort=30001",
 		"traefik/traefik")
