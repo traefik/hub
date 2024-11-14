@@ -1,0 +1,11 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: graphql
+  namespace: apps
+spec:
+  type: ExternalName
+  externalName: countries.trevorblades.com
+  ports:
+    - port: 443

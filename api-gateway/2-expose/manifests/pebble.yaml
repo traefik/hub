@@ -1,0 +1,83 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+  namespace: pebble
+
+data:
+  config.json: |
+    {
+      "pebble": {
+        "listenAddress": "0.0.0.0:14000",
+        "managementListenAddress": "0.0.0.0:15000",
+        "certificate": "/certs/tls.crt",
+        "privateKey": "/certs/tls.key",
+        "httpPort": 80,
+        "tlsPort": 443,
+        "ocspResponderURL": "",
+        "externalAccountBindingRequired": false
+      }
+    }
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pebble
+  namespace: pebble
+spec:
+  selector:
+    matchLabels:
+      app: pebble
+  template:
+    metadata:
+      labels:
+        app: pebble
+    spec:
+      containers:
+        - name: pebble
+          image: letsencrypt/pebble
+          env:
+            - name: PEBBLE_VA_NOSLEEP
+              value: "1"
+          command:
+            - pebble
+            - -config
+            - /config/config.json
+          ports:
+            - name: dir
+              containerPort: 14000
+            - name: mgt
+              containerPort: 15000
+          volumeMounts:
+            - mountPath: /config
+              name: config
+            - mountPath: /certs
+              name: certs
+
+      volumes:
+        - name: certs
+          secret:
+            secretName: pebble
+        - name: config
+          configMap:
+            name: config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pebble
+  namespace: pebble
+spec:
+  type: ClusterIP
+  selector:
+    app: pebble
+  ports:
+    - port: 14000
+      targetPort: dir
+      name: dir
+    - port: 15000
+      targetPort: mgt
+      name: mgt

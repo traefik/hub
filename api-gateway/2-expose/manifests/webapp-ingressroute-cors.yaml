@@ -1,0 +1,57 @@
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: compress
+  namespace: apps
+spec:
+  compress:
+    includedContentTypes:
+      - application/json
+      - application/xml
+      - text/css
+      - text/csv
+      - text/html
+      - text/javascript
+      - text/plain
+      - text/xml
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: security-headers
+  namespace: apps
+spec:
+  headers:
+    frameDeny: true
+    browserXssFilter: true
+    contentTypeNosniff: true
+    # HSTS
+    stsIncludeSubdomains: true
+    stsPreload: true
+    stsSeconds: 31536000
+    # CORS
+    accessControlAllowMethods: [ "GET", "OPTIONS" ]
+    accessControlAllowHeaders: [ "*" ]
+    accessControlAllowOriginList: [ "http://test.com" ]
+    accessControlMaxAge: 100
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: expose-apigateway-webapp
+  namespace: apps
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`expose.apigateway.docker.localhost`)
+    kind: Rule
+    middlewares:
+      - name: compress
+      - name: security-headers
+    services:
+    - name: web
+      port: 80

@@ -1,0 +1,41 @@
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: stripprefix
+  namespace: pebble
+spec:
+  stripPrefix:
+    prefixes:
+      - /pebble
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: ServersTransport
+metadata:
+  name: pebble
+  namespace: pebble
+spec:
+  serverName: pebble.pebble.svc
+  rootCAsSecrets:
+    - minica
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: expose-apigateway-pebble-strip
+  namespace: pebble
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`expose.apigateway.docker.localhost`) && PathPrefix(`/pebble`)
+    kind: Rule
+    middlewares:
+    - name: stripprefix
+    services:
+    - name: pebble
+      port: mgt
+      scheme: https
+      serversTransport: pebble
