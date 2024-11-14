@@ -1,0 +1,36 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: error-page
+  namespace: apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: error-page
+  template:
+    metadata:
+      labels:
+        app: error-page
+    spec:
+      containers:
+        - name: error-page
+          image: ghcr.io/tarampampam/error-pages
+          ports:
+            - name: http
+              containerPort: 8080
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: error-page
+  namespace: apps
+spec:
+  selector:
+    app: error-page
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http

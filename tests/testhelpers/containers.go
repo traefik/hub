@@ -21,6 +21,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/k3s"
+	"github.com/traefik/traefik/v3/integration/try"
+	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -75,6 +77,13 @@ func LaunchHelmCommand(t *testing.T, arg ...string) {
 	output, err := cmd.CombinedOutput()
 	logger.Printf("⚙️ %s\n%s", cmd.String(), strings.TrimSpace(string(output)))
 	require.NoError(t, err)
+}
+
+// LaunchHelmUpgradeCommand execute `helm` CLI with arg and display stdout+stder with testcontainer logger
+func LaunchHelmUpgradeCommand(t *testing.T, arg ...string) {
+	upgradeArgs := []string{"upgrade", "traefik", "-n", traefikNamespace, "--wait", "--version", "v33.0.0", "--reuse-values", "traefik/traefik"}
+	upgradeArgs = append(upgradeArgs, arg...)
+	LaunchHelmCommand(t, upgradeArgs...)
 }
 
 // LaunchKubectl execute `kubectl` CLI with arg and return stdout+stderr in a single string
@@ -178,22 +187,23 @@ func CreateSecretForTraefikHub(ctx context.Context, t *testing.T, k8s client.Cli
 	require.NoError(t, err)
 }
 
-func WaitForPodReady(ctx context.Context, t *testing.T, k8s client.Client, interval time.Duration, labelSelector string) error {
+func WaitForPodsReady(ctx context.Context, t *testing.T, k8s client.Client, interval time.Duration, labelSelector string) error {
 	ctx, cancelFunc := context.WithTimeout(ctx, interval)
 
 	return wait.PollUntilContextCancel(ctx, time.Second, true, func(ctx context.Context) (bool, error) {
-		state := getPodState(ctx, t, k8s, labelSelector)
-		if state.Terminated != nil {
-			cancelFunc()
-			return false, fmt.Errorf("pod with label %s terminated: %v", labelSelector, state.Terminated)
+		states := getPodsState(ctx, t, k8s, labelSelector)
+		for id, state := range states {
+			if state.Terminated != nil {
+				cancelFunc()
+				return false, fmt.Errorf("pod %s with label %s terminated: %v", id, labelSelector, state.Terminated)
+			}
+
+			if state.Waiting != nil {
+				return false, nil
+			}
 		}
 
-		if state.Running != nil {
-			cancelFunc()
-			return true, nil
-		}
-
-		return false, nil
+		return true, nil
 	})
 }
 
@@ -229,7 +239,19 @@ func Delete(ctx context.Context, k8s client.Client, kind, name, ns, group, versi
 	return k8s.Delete(ctx, u)
 }
 
-func getPodState(ctx context.Context, t *testing.T, k8s client.Client, labelSelector string) corev1.ContainerState {
+func RestartDeployment(ctx context.Context, t *testing.T, k8s client.Client, name, ns string) error {
+	deploy := &appsv1.Deployment{}
+	err := k8s.Get(ctx, client.ObjectKey{Namespace: ns, Name: name}, deploy)
+	assert.NoError(t, err)
+
+	if deploy.Spec.Template.ObjectMeta.Annotations == nil {
+		deploy.Spec.Template.ObjectMeta.Annotations = make(map[string]string)
+	}
+	deploy.Spec.Template.ObjectMeta.Annotations["kubectl.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
+	return k8s.Update(ctx, deploy)
+}
+
+func getPodsState(ctx context.Context, t *testing.T, k8s client.Client, labelSelector string) map[string]corev1.ContainerState {
 	podList := &corev1.PodList{}
 
 	selector, err := labels.Parse(labelSelector)
@@ -237,15 +259,16 @@ func getPodState(ctx context.Context, t *testing.T, k8s client.Client, labelSele
 	err = k8s.List(ctx, podList, &client.ListOptions{LabelSelector: selector})
 	require.NoError(t, err)
 
-	if len(podList.Items) != 1 {
-		log.Fatalf("There should be only one pod with label %s, found %d\n", labelSelector, len(podList.Items))
-	}
-	status := podList.Items[0].Status
-	if len(status.ContainerStatuses) != 1 {
-		log.Fatalf("There should be only one container on pod labeled %s, found %d\n", labelSelector, len(status.ContainerStatuses))
+	states := map[string]corev1.ContainerState{}
+	for _, pod := range podList.Items {
+		s := pod.Status
+		for _, status := range s.ContainerStatuses {
+			id := fmt.Sprintf("%s/%s/%s", pod.Namespace, pod.Name, status.Name)
+			states[id] = status.State
+		}
 	}
 
-	return status.ContainerStatuses[0].State
+	return states
 }
 
 func getJobState(ctx context.Context, t *testing.T, k8s client.Client, labelSelector string) batchv1.JobStatus {
@@ -369,4 +392,13 @@ func prepareResources(decoder *yaml.YAMLOrJSONDecoder) ([]unstructured.Unstructu
 	}
 
 	return resources, nil
+}
+
+func HasNotHeader(header string) try.ResponseCondition {
+	return func(res *http.Response) error {
+		if _, ok := res.Header[header]; ok {
+			return fmt.Errorf(`response should not contains this header: "%s"`, header)
+		}
+		return nil
+	}
 }

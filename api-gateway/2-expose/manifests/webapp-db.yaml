@@ -1,0 +1,109 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+  namespace: apps
+  labels:
+    app: db
+spec:
+  ports:
+    - port: 5432
+      targetPort: 5432
+      name: db
+  selector:
+    app: db
+  clusterIP: None
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db
+  namespace: apps
+  labels:
+    app: db
+spec:
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+        - name: db
+          image: postgres:10.0-alpine
+          ports:
+            - containerPort: 5432
+              name: db
+          volumeMounts:
+            - name: db-schema
+              mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: db-schema
+          configMap:
+            name: db-schema
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-schema
+  namespace: apps
+data:
+  words.sql: |
+    CREATE TABLE nouns (word TEXT NOT NULL);
+    CREATE TABLE verbs (word TEXT NOT NULL);
+    CREATE TABLE adjectives (word TEXT NOT NULL);
+
+    INSERT INTO nouns(word) VALUES
+      ('cloud'),
+      ('elephant'),
+      ('gø language'),
+      ('laptøp'),
+      ('cøntainer'),
+      ('micrø-service'),
+      ('turtle'),
+      ('whale'),
+      ('gøpher'),
+      ('møby døck'),
+      ('server'),
+      ('bicycle'),
+      ('viking'),
+      ('mermaid'),
+      ('fjørd'),
+      ('legø'),
+      ('flødebolle'),
+      ('smørrebrød');
+
+    INSERT INTO verbs(word) VALUES
+      ('will drink'),
+      ('smashes'),
+      ('smøkes'),
+      ('eats'),
+      ('walks tøwards'),
+      ('løves'),
+      ('helps'),
+      ('pushes'),
+      ('debugs'),
+      ('invites'),
+      ('hides'),
+      ('will ship');
+
+    INSERT INTO adjectives(word) VALUES
+      ('the exquisite'),
+      ('a pink'),
+      ('the røtten'),
+      ('a red'),
+      ('the serverless'),
+      ('a brøken'),
+      ('a shiny'),
+      ('the pretty'),
+      ('the impressive'),
+      ('an awesøme'),
+      ('the famøus'),
+      ('a gigantic'),
+      ('the gløriøus'),
+      ('the nørdic'),
+      ('the welcøming'),
+      ('the deliciøus');

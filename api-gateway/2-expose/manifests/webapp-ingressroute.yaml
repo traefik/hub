@@ -1,0 +1,15 @@
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: expose-apigateway-webapp
+  namespace: apps
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`expose.apigateway.docker.localhost`)
+    kind: Rule
+    services:
+    - name: web
+      port: 80

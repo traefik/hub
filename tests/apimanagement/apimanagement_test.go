@@ -107,7 +107,7 @@ func (s *APIManagementTestSuite) TestGettingStarted() {
 	err = s.apply("src/manifests/weather-app.yaml")
 	s.Require().NoError(err)
 	time.Sleep(1 * time.Second)
-	err = testhelpers.WaitForPodReady(s.ctx, s.T(), s.k8s, 90*time.Second, "app=weather-app")
+	err = testhelpers.WaitForPodsReady(s.ctx, s.T(), s.k8s, 90*time.Second, "app=weather-app")
 	s.Require().NoError(err)
 
 	err = s.apply("api-management/1-getting-started/manifests/weather-app-ingressroute.yaml")
@@ -141,9 +141,9 @@ func (s *APIManagementTestSuite) TestAccessControl() {
 	err = s.apply("src/manifests/admin-app.yaml")
 	s.Require().NoError(err)
 	time.Sleep(1 * time.Second)
-	err = testhelpers.WaitForPodReady(s.ctx, s.T(), s.k8s, 90*time.Second, "app=weather-app")
+	err = testhelpers.WaitForPodsReady(s.ctx, s.T(), s.k8s, 90*time.Second, "app=weather-app")
 	s.Require().NoError(err)
-	err = testhelpers.WaitForPodReady(s.ctx, s.T(), s.k8s, 90*time.Second, "app=admin-app")
+	err = testhelpers.WaitForPodsReady(s.ctx, s.T(), s.k8s, 90*time.Second, "app=admin-app")
 	s.Require().NoError(err)
 
 	err = s.apply("api-management/2-access-control/manifests/simple-admin-api.yaml")
@@ -204,7 +204,7 @@ func (s *APIManagementTestSuite) TestAPILifeCycleManagement() {
 	s.Require().NoError(err)
 
 	time.Sleep(1 * time.Second)
-	err = testhelpers.WaitForPodReady(s.ctx, s.T(), s.k8s, 90*time.Second, "app=weather-app")
+	err = testhelpers.WaitForPodsReady(s.ctx, s.T(), s.k8s, 90*time.Second, "app=weather-app")
 	s.Require().NoError(err)
 
 	err = s.check(http.MethodGet, "http://api.lifecycle.apimanagement.docker.localhost/weather", 5*time.Second, http.StatusUnauthorized)
@@ -228,7 +228,7 @@ func (s *APIManagementTestSuite) TestAPILifeCycleManagement() {
 	s.Assert().NoError(err)
 
 	time.Sleep(1 * time.Second)
-	err = testhelpers.WaitForPodReady(s.ctx, s.T(), s.k8s, 90*time.Second, "app=weather-app-forecast")
+	err = testhelpers.WaitForPodsReady(s.ctx, s.T(), s.k8s, 90*time.Second, "app=weather-app-forecast")
 	s.Require().NoError(err)
 
 	var req *http.Request
@@ -279,9 +279,9 @@ func (s *APIManagementTestSuite) TestProtectAPIInfrastructure() {
 	s.Require().NoError(err)
 
 	time.Sleep(1 * time.Second)
-	err = testhelpers.WaitForPodReady(s.ctx, s.T(), s.k8s, 90*time.Second, "app=weather-app")
+	err = testhelpers.WaitForPodsReady(s.ctx, s.T(), s.k8s, 90*time.Second, "app=weather-app")
 	s.Require().NoError(err)
-	err = testhelpers.WaitForPodReady(s.ctx, s.T(), s.k8s, 90*time.Second, "app=admin-app")
+	err = testhelpers.WaitForPodsReady(s.ctx, s.T(), s.k8s, 90*time.Second, "app=admin-app")
 	s.Require().NoError(err)
 
 	// Step 1: Deploy weather and admin APIs
@@ -308,11 +308,9 @@ func (s *APIManagementTestSuite) TestProtectAPIInfrastructure() {
 
 	testcontainers.Logger.Printf("🔐 Found this redis password: %s\n", redisPassword)
 
-	testhelpers.LaunchHelmCommand(s.T(), "upgrade", "traefik", "-n", "traefik", "--wait",
-		"--reuse-values",
+	testhelpers.LaunchHelmUpgradeCommand(s.T(),
 		"--set", "hub.redis.endpoints=redis-master.traefik.svc.cluster.local:6379",
 		"--set", "hub.redis.password="+redisPassword,
-		"traefik/traefik",
 	)
 
 	// wait for account to be sync'd
@@ -400,7 +398,7 @@ func (s *APIManagementTestSuite) TestProtectAPIInfrastructure() {
 	err = s.apply("api-management/4-protect-api-infrastructure/manifests/whoami-apiaccess.yaml")
 	s.Require().NoError(err)
 	time.Sleep(1 * time.Second)
-	err = testhelpers.WaitForPodReady(s.ctx, s.T(), s.k8s, 90*time.Second, "app=whoami")
+	err = testhelpers.WaitForPodsReady(s.ctx, s.T(), s.k8s, 90*time.Second, "app=whoami")
 
 	err = s.checkWithBearer(http.MethodGet, "http://api.protect-infrastructure.apimanagement.docker.localhost/whoami", http.NoBody, externalToken, 5*time.Second, http.StatusOK)
 	s.Assert().NoError(err)

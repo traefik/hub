@@ -49,15 +49,23 @@ func Test_WaitForPodReady(t *testing.T) {
 	apply(t, ctx, k8s, "src/manifests/apps-namespace.yaml")
 	apply(t, ctx, k8s, "src/manifests/whoami-app.yaml")
 
-	// whoami takes around 30s to be deployed to it should be enough for WaitForPodReady to fail in the context of this test
+	// whoami takes around 30s to be deployed to it should be enough for WaitForPodsReady to fail in the context of this test
 	timeout := 90
 
 	go func() {
 		podRunning := false
 		for i := 0; i < timeout; i++ {
 			time.Sleep(time.Second)
-			state := getPodState(ctx, t, k8s, "app=whoami")
-			if state.Running != nil {
+			states := getPodsState(ctx, t, k8s, "app=whoami")
+			allContainersRunning := true
+			for _, state := range states {
+				if state.Waiting != nil || state.Terminated != nil {
+					allContainersRunning = false
+					break
+				}
+			}
+
+			if allContainersRunning {
 				podRunning = true
 				break
 			}
@@ -72,6 +80,6 @@ func Test_WaitForPodReady(t *testing.T) {
 
 	time.Sleep(1 * time.Second)
 
-	err = WaitForPodReady(ctx, t, k8s, time.Duration(timeout)*time.Second, "app=whoami")
+	err = WaitForPodsReady(ctx, t, k8s, time.Duration(timeout)*time.Second, "app=whoami")
 	require.NoError(t, err)
 }
