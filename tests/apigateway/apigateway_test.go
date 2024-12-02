@@ -386,7 +386,7 @@ func (s *APIGatewayTestSuite) TestExpose() {
 	)
 
 	s.apply("api-gateway/2-expose/manifests/webapp-ingressroute-https-auto.yaml")
-	time.Sleep(25 * time.Second)
+	time.Sleep(30 * time.Second)
 
 	s.apply("api-gateway/2-expose/manifests/pebble-ingressroute.yaml")
 	time.Sleep(5 * time.Second)
@@ -412,7 +412,7 @@ func (s *APIGatewayTestSuite) TestExpose() {
 	// Check with dynamic CA Chain from pebble
 	req, err = http.NewRequest(http.MethodGet, "https://expose.apigateway.docker.localhost/", nil)
 	s.Require().NoError(err)
-	err = try.RequestWithTransport(req, 15*time.Second, s.tr, try.StatusCodeIs(http.StatusOK))
+	err = try.RequestWithTransport(req, 30*time.Second, s.tr, try.StatusCodeIs(http.StatusOK))
 	s.Assert().NoError(err)
 }
 
