@@ -82,7 +82,7 @@ Now, install Traefik Hub with Helm:
 helm repo add --force-update traefik https://traefik.github.io/charts
 # Install the Helm chart
 helm install traefik -n traefik --wait \
-  --version v33.2.0 \
+  --version v33.2.1 \
   --set hub.token=traefik-hub-license \
   --set hub.apimanagement.enabled=true \
   --set ingressClass.enabled=false \
@@ -106,7 +106,7 @@ kubectl apply --server-side --force-conflicts -k https://github.com/traefik/trae
 helm repo add --force-update traefik https://traefik.github.io/charts
 # Upgrade the Helm chart
 helm upgrade traefik -n traefik --wait \
-  --version v33.2.0 \
+  --version v33.2.1 \
   --set hub.token=traefik-hub-license \
   --set hub.apimanagement.enabled=true \
   --set ingressClass.enabled=false \

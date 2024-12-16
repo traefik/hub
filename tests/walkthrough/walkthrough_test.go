@@ -120,7 +120,7 @@ func (s *WalkthroughTestSuite) TestWalkthrough() {
 	// STEP 2
 	testhelpers.CreateSecretForTraefikHub(s.ctx, s.T(), s.k8s)
 	testhelpers.LaunchHelmCommand(s.T(), "upgrade", "traefik", "-n", "traefik", "--wait",
-		"--version", "v33.2.0",
+		"--version", "v33.2.1",
 		"--reuse-values",
 		"--set", "hub.token=traefik-hub-license",
 		"--set", "image.registry=ghcr.io",
@@ -150,7 +150,7 @@ func (s *WalkthroughTestSuite) TestWalkthrough() {
 
 	// STEP 3
 	testhelpers.LaunchHelmCommand(s.T(), "upgrade", "traefik", "-n", "traefik", "--wait",
-		"--version", "v33.2.0",
+		"--version", "v33.2.1",
 		"--reuse-values",
 		"--set", "hub.apimanagement.enabled=true",
 		"traefik/traefik")

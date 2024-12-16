@@ -4,7 +4,7 @@ go 1.23
 
 require (
 	github.com/evanphx/json-patch v0.5.2
-	github.com/go-chi/chi/v5 v5.1.0
+	github.com/go-chi/chi/v5 v5.2.0
 	github.com/go-openapi/loads v0.22.0
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.10.0

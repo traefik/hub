@@ -139,7 +139,7 @@ We can enable it using helm:
 
 ```sh
 helm upgrade traefik -n traefik --wait \
-  --version v33.2.0 \
+  --version v33.2.1 \
   --reuse-values \
   --set providers.kubernetesCRD.allowExternalNameServices=true \
   traefik/traefik
@@ -820,7 +820,7 @@ And configure Traefik Hub API Gateway to use it, with Kubernetes storage and Peb
 
 ```sh
 helm upgrade traefik -n traefik --wait \
-  --version v33.2.0 \
+  --version v33.2.1 \
   --reuse-values \
   --set certificatesResolvers.pebble.distributedAcme.caServer=https://pebble.pebble.svc:14000/dir \
   --set certificatesResolvers.pebble.distributedAcme.email=test@example.com \

@@ -81,7 +81,7 @@ func LaunchHelmCommand(t *testing.T, arg ...string) {
 
 // LaunchHelmUpgradeCommand execute `helm` CLI with arg and display stdout+stder with testcontainer logger
 func LaunchHelmUpgradeCommand(t *testing.T, arg ...string) {
-	upgradeArgs := []string{"upgrade", "traefik", "-n", traefikNamespace, "--wait", "--version", "v33.2.0", "--reuse-values", "traefik/traefik"}
+	upgradeArgs := []string{"upgrade", "traefik", "-n", traefikNamespace, "--wait", "--version", "v33.2.1", "--reuse-values", "traefik/traefik"}
 	upgradeArgs = append(upgradeArgs, arg...)
 	LaunchHelmCommand(t, upgradeArgs...)
 }
@@ -101,7 +101,7 @@ func InstallTraefikProxy(ctx context.Context, t *testing.T, k8s client.Client) (
 	assert.NoError(t, err)
 
 	LaunchHelmCommand(t, "install", "traefik", "-n", traefikNamespace, "--wait",
-		"--version", "v33.2.0",
+		"--version", "v33.2.1",
 		"--set", "ingressClass.enabled=false",
 		"--set", "ingressRoute.dashboard.enabled=true",
 		"--set", "ingressRoute.dashboard.matchRule='Host(`dashboard.docker.localhost`)'",
@@ -125,7 +125,7 @@ func InstallTraefikHubAPIGW(ctx context.Context, t *testing.T, k8s client.Client
 
 	CreateSecretForTraefikHub(ctx, t, k8s)
 	LaunchHelmCommand(t, "install", "traefik", "-n", traefikNamespace, "--wait",
-		"--version", "v33.2.0",
+		"--version", "v33.2.1",
 		"--set", "hub.token=traefik-hub-license",
 		"--set", "ingressClass.enabled=false",
 		"--set", "ingressRoute.dashboard.enabled=true",
@@ -153,7 +153,7 @@ func InstallTraefikHubAPIM(ctx context.Context, t *testing.T, k8s client.Client)
 
 	CreateSecretForTraefikHub(ctx, t, k8s)
 	LaunchHelmCommand(t, "install", "traefik", "-n", traefikNamespace, "--wait",
-		"--version", "v33.2.0",
+		"--version", "v33.2.1",
 		"--set", "hub.token=traefik-hub-license",
 		"--set", "hub.apimanagement.enabled=true",
 		"--set", "ingressClass.enabled=false",
