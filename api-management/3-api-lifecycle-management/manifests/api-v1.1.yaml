@@ -6,11 +6,6 @@ metadata:
   namespace: apps
 spec:
   release: v1.1.0
-  openApiSpec:
-    path: /openapi.yaml
-    override:
-      servers:
-        - url: http://api.lifecycle.apimanagement.docker.localhost/weather-multi-versions
 
 ---
 apiVersion: hub.traefik.io/v1alpha1

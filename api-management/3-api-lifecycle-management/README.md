@@ -149,7 +149,7 @@ So, for this second API Version, we'll need to:
 ```diff :../../hack/diff.sh -r -a "manifests/api-v1.yaml manifests/api-v1.1.yaml"
 --- manifests/api-v1.yaml
 +++ manifests/api-v1.1.yaml
-@@ -2,42 +2,43 @@
+@@ -2,42 +2,38 @@
  apiVersion: hub.traefik.io/v1alpha1
  kind: APIVersion
  metadata:
@@ -158,13 +158,12 @@ So, for this second API Version, we'll need to:
    namespace: apps
  spec:
 -  release: v1.0.0
-+  release: v1.1.0
-   openApiSpec:
-     path: /openapi.yaml
-     override:
-       servers:
+-  openApiSpec:
+-    path: /openapi.yaml
+-    override:
+-      servers:
 -        - url: http://api.lifecycle.apimanagement.docker.localhost/weather-v1
-+        - url: http://api.lifecycle.apimanagement.docker.localhost/weather-multi-versions
++  release: v1.1.0
  
  ---
  apiVersion: hub.traefik.io/v1alpha1
@@ -200,7 +199,7 @@ So, for this second API Version, we'll need to:
    namespace: apps
    annotations:
      hub.traefik.io/api-version: api-lifecycle-apimanagement-weather-api-v1
-@@ -45,10 +46,30 @@
+@@ -45,10 +41,30 @@
    entryPoints:
    - web
    routes:
@@ -280,7 +279,7 @@ Since the last step, the diff is looking like this:
 ```diff :../../hack/diff.sh -r -a "manifests/api-v1.1.yaml manifests/api-v1.1-weighted.yaml"
 --- manifests/api-v1.1.yaml
 +++ manifests/api-v1.1-weighted.yaml
-@@ -1,64 +1,24 @@
+@@ -1,59 +1,24 @@
  ---
 -apiVersion: hub.traefik.io/v1alpha1
 -kind: APIVersion
@@ -289,11 +288,6 @@ Since the last step, the diff is looking like this:
 -  namespace: apps
 -spec:
 -  release: v1.1.0
--  openApiSpec:
--    path: /openapi.yaml
--    override:
--      servers:
--        - url: http://api.lifecycle.apimanagement.docker.localhost/weather-multi-versions
 -
 ----
 -apiVersion: hub.traefik.io/v1alpha1
@@ -355,7 +349,7 @@ Since the last step, the diff is looking like this:
    namespace: apps
    annotations:
      hub.traefik.io/api-version: api-lifecycle-apimanagement-weather-api-v1-1
-@@ -66,10 +26,11 @@
+@@ -61,10 +26,11 @@
    entryPoints:
    - web
    routes:
