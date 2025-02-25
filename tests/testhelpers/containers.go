@@ -81,7 +81,7 @@ func LaunchHelmCommand(t *testing.T, arg ...string) {
 
 // LaunchHelmUpgradeCommand execute `helm` CLI with arg and display stdout+stder with testcontainer logger
 func LaunchHelmUpgradeCommand(t *testing.T, arg ...string) {
-	upgradeArgs := []string{"upgrade", "traefik", "-n", traefikNamespace, "--wait", "--version", "v34.3.0", "--reuse-values", "traefik/traefik"}
+	upgradeArgs := []string{"upgrade", "traefik", "-n", traefikNamespace, "--wait", "--version", "v34.4.0", "--reuse-values", "traefik/traefik"}
 	upgradeArgs = append(upgradeArgs, arg...)
 	LaunchHelmCommand(t, upgradeArgs...)
 }
@@ -101,7 +101,7 @@ func InstallTraefikProxy(ctx context.Context, t *testing.T, k8s client.Client) (
 	assert.NoError(t, err)
 
 	LaunchHelmCommand(t, "install", "traefik", "-n", traefikNamespace, "--wait",
-		"--version", "v34.3.0",
+		"--version", "v34.4.0",
 		"--set", "ingressClass.enabled=false",
 		"--set", "ingressRoute.dashboard.enabled=true",
 		"--set", "ingressRoute.dashboard.matchRule='Host(`dashboard.docker.localhost`)'",
@@ -125,7 +125,7 @@ func InstallTraefikHubAPIGW(ctx context.Context, t *testing.T, k8s client.Client
 
 	CreateSecretForTraefikHub(ctx, t, k8s)
 	LaunchHelmCommand(t, "install", "traefik", "-n", traefikNamespace, "--wait",
-		"--version", "v34.3.0",
+		"--version", "v34.4.0",
 		"--set", "hub.token=traefik-hub-license",
 		"--set", "ingressClass.enabled=false",
 		"--set", "ingressRoute.dashboard.enabled=true",
@@ -133,7 +133,7 @@ func InstallTraefikHubAPIGW(ctx context.Context, t *testing.T, k8s client.Client
 		"--set", "ingressRoute.dashboard.entryPoints={web}",
 		"--set", "image.registry=ghcr.io",
 		"--set", "image.repository=traefik/traefik-hub",
-		"--set", "image.tag=v3.13.0",
+		"--set", "image.tag=v3.14.1",
 		"--set", "ports.web.nodePort=30000",
 		"--set", "ports.websecure.nodePort=30001",
 		"traefik/traefik")
@@ -153,7 +153,7 @@ func InstallTraefikHubAPIM(ctx context.Context, t *testing.T, k8s client.Client)
 
 	CreateSecretForTraefikHub(ctx, t, k8s)
 	LaunchHelmCommand(t, "install", "traefik", "-n", traefikNamespace, "--wait",
-		"--version", "v34.3.0",
+		"--version", "v34.4.0",
 		"--set", "hub.token=traefik-hub-license",
 		"--set", "hub.apimanagement.enabled=true",
 		"--set", "ingressClass.enabled=false",
@@ -162,7 +162,7 @@ func InstallTraefikHubAPIM(ctx context.Context, t *testing.T, k8s client.Client)
 		"--set", "ingressRoute.dashboard.entryPoints={web}",
 		"--set", "image.registry=ghcr.io",
 		"--set", "image.repository=traefik/traefik-hub",
-		"--set", "image.tag=v3.13.0",
+		"--set", "image.tag=v3.14.1",
 		"--set", "ports.web.nodePort=30000",
 		"--set", "ports.websecure.nodePort=30001",
 		"traefik/traefik")
