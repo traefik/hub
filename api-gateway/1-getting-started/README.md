@@ -18,7 +18,7 @@ We can start:
 1. on [Kubernetes](#on-kubernetes)
 2. on [Linux](#on-linux)
 
-### Pre-requisites
+## Pre-requisites
 
 - A Traefik Hub account and [license](https://doc.traefik.io/traefik-hub/legal/licensing).
 - [Helm](https://helm.sh/) installed.
@@ -26,10 +26,12 @@ We can start:
 
 ## On Kubernetes
 
-For this tutorial, we deploy Traefik Hub API Gateway on a Kubernetes cluster using k3s. It's possible to use alternatives such as [kind](https://kind.sigs.k8s.io), [k3d](https://k3d.io/), [k3s](https://k3s.io/) cloud providers, and others.
+For this tutorial, we deploy Traefik Hub API Gateway on a Kubernetes cluster using k3s. It's possible to use alternatives such as [kind](https://kind.sigs.k8s.io), [k3d](https://k3d.io/),
+[k3s](https://k3s.io/) cloud providers, and others.
 
 :::warning
-It's important to disable the built-in Traefik ingress for k3d and k3s clusters to avoid possible conflicts. Refer to their documentation to see how to disable it.
+It's important to disable the built-in Traefik ingress for [k3d](https://k3d.io/v5.3.0/design/concepts/#example) and [k3s](https://docs.k3s.io/networking/networking-services#:~:text=To%20remove%20Traefik%20from%20your,Release%20Notes%20for%20your%20version.)
+clusters to avoid possible conflicts. Refer to their documentation to see how to disable it.
 :::
 
 First, clone the GitHub repository dedicated to tutorials:
@@ -44,6 +46,18 @@ cd hub
 ```shell
 curl -sfL https://get.k3s.io | K3S_KUBECONFIG_MODE="644" INSTALL_K3S_EXEC="--disable traefik" sh -
 ```
+
+:::info
+
+In the command above:
+
+- K3S_KUBECONFIG_MODE="644" lets non-root users run kubectl.
+- INSTALL_K3S_EXEC="--disable traefik" disables the built-in Traefik to avoid conflicts.
+
+Note: This configuration is intended for demonstration or development purposes only. It is not recommended for production environments.
+For more advanced configuration options, refer to the official K3s documentation: [K3s Configuration](https://docs.k3s.io/installation/configuration)
+
+:::
 
 ### Create a Kubernetes Cluster Using kind
 
@@ -80,15 +94,15 @@ kubectl wait --for=condition=ready nodes traefik-hub-control-plane
 
 ### Step 1: Install Traefik Hub API Gateway
 
-Log in to the [Traefik Hub Online Dashboard](https://hub.traefik.io), open the page 'Gateways' to [create a new gateway](https://hub.traefik.io/gateways/new?returnTo=%2Fgateways).
+Log in to the [Traefik Hub Online Dashboard](https://hub.traefik.io), navigate to the **Gateways** page to [create a new gateway](https://hub.traefik.io/gateways/new).
 
 Click on Quick getting started instruction and select Kubernetes option.
 
-Copy the content of 'Configuration' box
+Copy the content of 'Configuration' box.
 
 Open a terminal and run the copied commands to install Traefik Hub using Helm.
 
-Example:
+For example:
 
 ```shell
 # Add the Helm repository
@@ -104,7 +118,7 @@ helm upgrade --install --namespace traefik traefik traefik/traefik \
   --set image.tag=latest-v3
 ```
 
-It should deploy Traefik Hub on your cluster.
+The following will be displayed in your terminal  after running the commands:
 
 ```shell
 "traefik" has been added to your repositories
@@ -130,7 +144,8 @@ export TRAEFIK_HUB_TOKEN= <paste-token-here>
 ```shell
 kubectl create secret generic traefik-hub-license --namespace traefik --from-literal=token=$TRAEFIK_HUB_TOKEN
 ```
-Then, upgrade Traefik helm chart:
+
+Next, upgrade Traefik helm chart:
 
 ```shell
 # Upgrade CRDs
@@ -146,7 +161,6 @@ helm upgrade traefik -n traefik --wait traefik/traefik \
   --set image.repository=traefik/traefik-hub \
   --set image.tag=latest-v3 \
 ```
-
 
 ### Step 2: Deploy an API as an Ingress
 
@@ -221,7 +235,7 @@ curl http://localhost/weather | jq
 
 Let's secure the weather API with an API Key.
 
-Generate the hash of our password. It can be done with `htpasswd` :
+First, we need to generate a password hash before proceeding. This can be done with `htpasswd`. If it is not already installed, install it by running:
 
 ```shell
 sudo apt update
@@ -238,7 +252,7 @@ It should output a hash similar to this:
 {SHA}dhiZGvSW60OMQ+J6hPEyJ+jfUoU=
 ```
 
-Store this hash in a `Secret` for the API Key `Middleware` and create a new `IngressRoute`:
+Next, store this hash in a `Secret` for the API Key `Middleware` and create a new `IngressRoute`:
 
 ```yaml
 cat <<'EOF' | kubectl apply -f -
@@ -361,7 +375,7 @@ sudo touch /var/log/traefik-hub.log
 sudo chown traefik-hub:traefik-hub /var/log/traefik-hub.log
 ```
 
-Log in to the [Traefik Hub Online Dashboard](https://hub.traefik.io), open the page to [generate a new gateway](https://hub.traefik.io/gateways/new?returnTo=%2Fgateways).
+Log in to the [Traefik Hub Online Dashboard](https://hub.traefik.io), open the page to [generate a new gateway](https://hub.traefik.io/gateways/new).
 
 :::warning
 Do not install the gateway, but copy the token.
@@ -506,7 +520,7 @@ X-Real-Ip: 127.0.0.1
 
 Let's secure the access with an API Key.
 
-Generate hash of our password. It can be done with `htpasswd` :
+Next, we need to generate a password hash before proceeding. This can be done with `htpasswd`. If it is not already installed, install it by running:
 
 ```shell
 sudo apt update
