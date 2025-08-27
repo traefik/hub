@@ -30,7 +30,7 @@ For this tutorial, we deploy Traefik Hub API Gateway on a Kubernetes cluster usi
 [k3s](https://k3s.io/) cloud providers, and others.
 
 :::warning
-It's important to disable the built-in Traefik ingress for [k3d](https://k3d.io/v5.3.0/design/concepts/#example) and [k3s](https://docs.k3s.io/networking/networking-services#:~:text=To%20remove%20Traefik%20from%20your,Release%20Notes%20for%20your%20version.)
+It's important to disable the built-in Traefik ingress for [k3d](https://k3d.io/v5.3.0/design/concepts/#example) and [k3s](https://docs.k3s.io/networking/networking-services#traefik-ingress-controller)
 clusters to avoid possible conflicts. Refer to their documentation to see how to disable it.
 :::
 
@@ -43,23 +43,27 @@ cd hub
 
 ### Create a Kubernetes Cluster Using k3s
 
+Before you begin, ensure that any existing Kubernetes cluster is fully uninstalled to prevent potential conflicts during the K3s installation.
+
 ```shell
 curl -sfL https://get.k3s.io | K3S_KUBECONFIG_MODE="644" INSTALL_K3S_EXEC="--disable traefik" sh -
 ```
 
 :::info
 
-In the command above:
+In the command above, we deploy K3s using its official installation [script](https://get.k3s.io/) and pass configuration options through environment variables, which are applied to the
+K3s service configuration:
 
-- K3S_KUBECONFIG_MODE="644" lets non-root users run kubectl.
+- Additional utilities will be installed, including `kubectl`, `crictl`, `ctr`, `k3s-killall.sh`, and `k3s-uninstall.sh`.
+- K3S_KUBECONFIG_MODE="644" lets non-root users run kubectl. The kubeconfig file will be written in /etc/rancher/k3s/k3s.yaml. The installed kubectl will automatically use it.
 - INSTALL_K3S_EXEC="--disable traefik" disables the built-in Traefik to avoid conflicts.
 
-Note: This configuration is intended for demonstration or development purposes only. It is not recommended for production environments.
+Note: This configuration is intended for demonstration purposes only. It is not recommended for production environments.
 For more advanced configuration options, refer to the official K3s documentation: [K3s Configuration](https://docs.k3s.io/installation/configuration)
 
 :::
 
-### Create a Kubernetes Cluster Using kind
+### Alternative option: Create a Kubernetes Cluster Using kind
 
 kind requires some configuration to use an IngressController on localhost. See the following example:
 
@@ -235,12 +239,8 @@ curl http://localhost/weather | jq
 
 Let's secure the weather API with an API Key.
 
-First, we need to generate a password hash before proceeding. This can be done with `htpasswd`. If it is not already installed, install it by running:
-
-```shell
-sudo apt update
-sudo apt install apache2-utils -y
-```
+First, we need to generate a password hash before proceeding. This can be done with `htpasswd`. It's usually contained in the `apache2-utils` package on various systems (e.g., Ubuntu, Debian)
+if you don't have it already.
 
 ```shell
 htpasswd -nbs "" "Let's use API Key with Traefik Hub" | cut -c 2-
@@ -520,7 +520,8 @@ X-Real-Ip: 127.0.0.1
 
 Let's secure the access with an API Key.
 
-Next, we need to generate a password hash before proceeding. This can be done with `htpasswd`. If it is not already installed, install it by running:
+Next, we need to generate a password hash before proceeding. This can be done with `htpasswd`.  It's usually contained in the `apache2-utils` package on various systems (e.g., Ubuntu, Debian)
+if you don't have it already. Example in Debian:
 
 ```shell
 sudo apt update
@@ -550,7 +551,7 @@ http:
   middlewares:
     apikey-auth:
       plugin:
-        apikey:
+        apiKey:
           keySource:
             header: Authorization
             headerAuthScheme: Bearer
