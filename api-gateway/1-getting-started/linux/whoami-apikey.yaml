@@ -9,7 +9,7 @@ http:
   middlewares:
     apikey-auth:
       plugin:
-        apikey:
+        apiKey:
           keySource:
             header: Authorization
             headerAuthScheme: Bearer
