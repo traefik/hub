@@ -48,7 +48,7 @@ The journey can start [here](WALKTHROUGH.md) for a quickstart with a global over
 ```shell
 .
 ├── api-gateway                       # Traefik Hub API Gateway tutorials
-│   ├── 1-getting-started
+│   ├── 1-getting-started (API Gateway Quick Start Guide)
 │   ├── 2-expose
 │   ├── 3-secure-applications
 ├── api-management                    # Traefik Hub API Management tutorials
