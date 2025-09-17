@@ -49,12 +49,10 @@ The journey can start [here](WALKTHROUGH.md) for a quickstart with a global over
 .
 ├── api-gateway                       # Traefik Hub API Gateway tutorials
 │   ├── 1-getting-started
-│   ├── 2-secure-applications
+│   ├── 2-expose
+│   ├── 3-secure-applications
 ├── api-management                    # Traefik Hub API Management tutorials
-│   ├── 1-getting-started
-│   ├── 2-access-control
-│   ├── 3-api-lifecycle-management
-│   └── 4-protect-api-infrastructure (WIP)
+│   ├── 1-getting-started (API Management Quick Start Guide)
 └── src
     ├── api-server                    # API server source code
     └── manifests                     # Yaml to deploy all apps
