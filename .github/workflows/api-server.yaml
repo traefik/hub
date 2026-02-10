@@ -3,13 +3,13 @@ on:
   workflow_dispatch:
   pull_request:
     branches:
-      - master
+      - main
     paths:
       - '.github/workflows/api-server.yaml'
       - 'src/api-server/**'
   push:
     branches:
-      - master
+      - main
     paths:
       - '.github/workflows/api-server.yaml'
       - 'src/api-server/**'
