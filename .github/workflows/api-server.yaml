@@ -26,7 +26,7 @@ jobs:
       contents: read
       pull-requests: read
       packages: write
-    runs-on: buildjet-2vcpu-ubuntu-2204
+    runs-on: ubuntu-latest
     name: "${{ github.event_name == 'pull_request' && 'build ' || 'release' }} image"
     steps:
       - name: checkout
