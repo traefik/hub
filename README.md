@@ -2,7 +2,7 @@
 
 <div align="center" style="margin: 30px;">
 <a href="https://hub.traefik.io/">
-  <img src="https://doc.traefik.io/traefik-hub/img/ps-traefik-hub-logo-dark.svg" style="width:250px;" align="center" />
+  <img src="https://doc.traefik.io/traefik-hub/img/hub-logo-light.svg" style="width:250px;" align="center" />
 </a>
 <br />
 <br />
