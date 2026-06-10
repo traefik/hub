@@ -78,3 +78,5 @@ This repository primarily hosts the release artifacts for **[Traefik Hub](https:
 
 - [Overview](https://doc.traefik.io/traefik-hub/mcp-gateway/mcp)
 - [Getting Started](https://doc.traefik.io/traefik-hub/mcp-gateway/guides/getting-started)
+- [Understanding TBAC](https://doc.traefik.io/traefik-hub/mcp-gateway/guides/understanding-tbac)
+- [MCP Best Practices](https://doc.traefik.io/traefik-hub/mcp-gateway/guides/mcp-gateway-best-practices)
