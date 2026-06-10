@@ -51,6 +51,7 @@ This repository primarily hosts the release artifacts for **[Traefik Hub](https:
 - [External APIs](https://doc.traefik.io/traefik-hub/api-management/catalog-external-apis)
 - [Self-Service Subscriptions](https://doc.traefik.io/traefik-hub/api-management/self-service-subscription)
 - [User Management](https://doc.traefik.io/traefik-hub/api-management/users-and-groups)
+- [API Mocking](https://doc.traefik.io/traefik-hub/api-mocking/on-premises-setup)
 
 ### Cloud Providers
 
@@ -72,3 +73,8 @@ This repository primarily hosts the release artifacts for **[Traefik Hub](https:
 - [Content Guard](https://doc.traefik.io/traefik-hub/ai-gateway/middlewares/content-guard)
 - [LLM Guard](https://doc.traefik.io/traefik-hub/ai-gateway/middlewares/llm-guard)
 - [AI Gateway Failover](https://doc.traefik.io/traefik-hub/ai-gateway/guides/ai-gateway-failover)
+
+## MCP Gateway
+
+- [Overview](https://doc.traefik.io/traefik-hub/mcp-gateway/mcp)
+- [Getting Started](https://doc.traefik.io/traefik-hub/mcp-gateway/guides/getting-started)
