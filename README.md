@@ -22,7 +22,7 @@ This repository primarily hosts the release artifacts for [Traefik Hub](https://
 ## API Gateway
 
 - [Getting Started](https://doc.traefik.io/traefik-hub/api-gateway/getting-started)
-- [Installation](https://doc.traefik.io/traefik-hub/api-gateway/setup/kubernetes/installation)
+- [Kubernetes Installation](https://doc.traefik.io/traefik-hub/api-gateway/setup/kubernetes/installation)
 - [Traffic Management](https://doc.traefik.io/traefik-hub/api-gateway/expose/expose-overview)
 - [Expose APIs](https://doc.traefik.io/traefik-hub/api-gateway/expose/routers)
 - [Security Overview](https://doc.traefik.io/traefik-hub/api-gateway/secure/secure-overview)
