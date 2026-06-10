@@ -15,7 +15,7 @@
 
 <br />
 
-This repository primarily hosts the release artifacts for **Traefik Hub** and the **[Traefik Hub Static Analyzer](https://doc.traefik.io/traefik-hub/static-analyzer)**. Follow the guides below to start exploring Traefik Hub.
+This repository primarily hosts the release artifacts for [Traefik Hub](https://traefik.io/traefik-hub) and the **[Traefik Hub Static Analyzer](https://doc.traefik.io/traefik-hub/static-analyzer)**. Follow the guides below to start exploring Traefik Hub.
 
 ---
 
